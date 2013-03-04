@@ -4,7 +4,7 @@ namespace watoki\webco;
 use watoki\factory\Factory;
 use watoki\collections\Liste;
 
-abstract class ComponentController {
+abstract class Controller {
 
     public static $CLASS = __CLASS__;
 
@@ -131,7 +131,7 @@ abstract class ComponentController {
 
     /**
      * @param Request $request
-     * @return ComponentController|null
+     * @return Controller|null
      */
     protected function findController(Request $request) {
         $classReflection = new \ReflectionClass($this);
