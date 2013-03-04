@@ -1,0 +1,27 @@
+{
+    "name": "watoki/webco",
+    "description": "Composable web components",
+    "keywords": ["controller", "watoki"],
+    "homepage": "http://github.com/watoki/webco",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nikolas Martens",
+            "email": "Nikolas.M@rtens.org",
+            "homepage": "http://rtens.org"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.8",
+        "watoki/collections": "*",
+		"watoki/factory": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "watoki\\webco": "src/",
+            "spec\\watoki\\webco": ""
+        }
+    },
+    "minimum-stability": "dev"
+}
