@@ -37,6 +37,16 @@ class ModuleTest extends Test {
         $this->then->theResponseHeader_ShouldBe(Response::HEADER_CONTENT_TYPE, 'text/html');
     }
 
+    public function testComponent() {
+        $this->given->theFolder('test');
+        $this->given->theModule_In('test\ComponentModule', 'test');
+        $this->given->theComponent_In_WithTheMethod_ThatReturns('test\Index', 'test', 'doGet', '{"test":"me"}');
+
+        $this->when->iRequest_From('index.html', 'test\ComponentModule');
+
+        $this->then->theResponseBodyShouldBe('{"test":"me"}');
+    }
+
 }
 
 class ModuleTest_Given extends Step {
@@ -66,6 +76,23 @@ class ModuleTest_Given extends Step {
         $classFile = $shortName . '.php';
 
         $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Module {}";
+
+        $this->theFile_In_WithContent($classFile, $folder, $classDef);
+    }
+
+    public function theComponent_In_WithTheMethod_ThatReturns($className, $folder, $method, $returnJson) {
+        list($namespace, $shortName) = explode('\\', $className);
+        $classFile = $shortName . '.php';
+
+        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Component {
+            public function $method () {
+                return json_decode('$returnJson', true);
+            }
+
+            protected function doRender(\$model, \$template) {
+                return json_encode(\$model);
+            }
+        }";
 
         $this->theFile_In_WithContent($classFile, $folder, $classDef);
     }
@@ -101,7 +128,6 @@ class ModuleTest_When extends Step {
 }
 
 /**
- * @property ModuleTest test
  * @property ModuleTest test
  */
 class ModuleTest_Then extends Step {

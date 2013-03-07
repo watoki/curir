@@ -84,7 +84,7 @@ abstract class Module extends Controller {
             $nextRoute = $request->getResourcePath()->slice(0, -1);
             $request->setResourcePath(new Liste());
             return $this->factory->getInstance($controllerClass,
-                array($this->route . $nextRoute->join('/') . '/'));
+                array('route' => $this->route . $nextRoute->join('/') . '/'));
         }
 
         return null;
