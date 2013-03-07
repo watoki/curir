@@ -24,6 +24,19 @@ class ModuleTest extends Test {
         $this->then->theResponseBodyShouldBe('Some test file.');
     }
 
+    public function testResponseContentType() {
+        $this->given->theFolder('test');
+        $this->given->theModule_In('test\ContentType', 'test');
+        $this->given->theFile_In_WithContent('someStyle.css', 'test', '// CSS Stuff');
+        $this->given->theFile_In_WithContent('someHtml.html', 'test', '<!-- HTML stuff -->');
+
+        $this->when->iRequest_From('someStyle.css', 'test\ContentType');
+        $this->then->theResponseHeader_ShouldBe(Response::HEADER_CONTENT_TYPE, 'text/css');
+
+        $this->when->iRequest_From('someHtml.html', 'test\ContentType');
+        $this->then->theResponseHeader_ShouldBe(Response::HEADER_CONTENT_TYPE, 'text/html');
+    }
+
 }
 
 class ModuleTest_Given extends Step {
@@ -95,5 +108,9 @@ class ModuleTest_Then extends Step {
 
     public function theResponseBodyShouldBe($body) {
         $this->test->assertEquals($body, $this->test->when->response->getBody());
+    }
+
+    public function theResponseHeader_ShouldBe($field, $value) {
+        $this->test->assertEquals($value, $this->test->when->response->getHeaders()->get($field));
     }
 }
