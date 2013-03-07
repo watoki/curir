@@ -25,26 +25,59 @@ class ModuleTest extends Test {
     }
 
     public function testResponseContentType() {
-        $this->given->theFolder('test');
-        $this->given->theModule_In('test\ContentType', 'test');
-        $this->given->theFile_In_WithContent('someStyle.css', 'test', '// CSS Stuff');
-        $this->given->theFile_In_WithContent('someHtml.html', 'test', '<!-- HTML stuff -->');
+        $this->given->theFolder('contenttype');
+        $this->given->theModule_In('contenttype\ContentType', 'contenttype');
+        $this->given->theFile_In_WithContent('someStyle.css', 'contenttype', '// CSS Stuff');
+        $this->given->theFile_In_WithContent('someHtml.html', 'contenttype', '<!-- HTML stuff -->');
 
-        $this->when->iRequest_From('someStyle.css', 'test\ContentType');
+        $this->when->iRequest_From('someStyle.css', 'contenttype\ContentType');
         $this->then->theResponseHeader_ShouldBe(Response::HEADER_CONTENT_TYPE, 'text/css');
 
-        $this->when->iRequest_From('someHtml.html', 'test\ContentType');
+        $this->when->iRequest_From('someHtml.html', 'contenttype\ContentType');
         $this->then->theResponseHeader_ShouldBe(Response::HEADER_CONTENT_TYPE, 'text/html');
     }
 
     public function testComponent() {
-        $this->given->theFolder('test');
-        $this->given->theModule_In('test\ComponentModule', 'test');
-        $this->given->theComponent_In_WithTheMethod_ThatReturns('test\Index', 'test', 'doGet', '{"test":"me"}');
+        $this->given->theFolder('component');
+        $this->given->theModule_In('component\ComponentModule', 'component');
+        $this->given->theComponent_In_WithTheMethod_ThatReturns('component\Index', 'component', 'doGet', '{"test":"me"}');
 
-        $this->when->iRequest_From('index.html', 'test\ComponentModule');
+        $this->when->iRequest_From('index.html', 'component\ComponentModule');
 
         $this->then->theResponseBodyShouldBe('{"test":"me"}');
+    }
+
+    public function testComponentWithTemplate() {
+        $this->given->theFolder('templatetest');
+        $this->given->theModule_In('templatetest\TemplateModule', 'templatetest');
+        $this->given->theComponent_In_WithTheMethod_ThatReturns('templatetest\IndexWithTemplate', 'templatetest', 'doGet', '{"test":"World"}');
+        $this->given->theFile_In_WithContent('indexWithTemplate.html', 'templatetest', 'Hello %test%');
+
+        $this->when->iRequest_From('indexWithTemplate.html', 'templatetest\TemplateModule');
+
+        $this->then->theResponseBodyShouldBe('Hello World');
+    }
+
+    public function testComponentInFolder() {
+        $this->given->theFolder('outer');
+        $this->given->theFolder('outer/inner');
+        $this->given->theModule_In('outer\InnerModule', 'outer');
+        $this->given->theComponent_In_WithTheMethod_ThatReturns('outer\inner\InnerComponent', 'outer/inner', 'doGet', '{"inner":"found"}');
+
+        $this->when->iRequest_From('inner/InnerComponent.php', 'outer\InnerModule');
+
+        $this->then->theResponseBodyShouldBe('{"inner":"found"}');
+    }
+
+    public function testNonExistingComponent() {
+        $this->given->theFolder('wrongmodule');
+        $this->given->theModule_In('wrongmodule\EmptyModule', 'wrongmodule');
+
+        $this->when->iTryToRequest_From('notExist.php', 'wrongmodule\EmptyModule');
+        $this->then->anExceptionContaining_ShouldBeThrown('notExist.php');
+
+        $this->when->iTryToRequest_From('index.php', 'wrongmodule\EmptyModule');
+        $this->then->anExceptionContaining_ShouldBeThrown('index.php');
     }
 
 }
@@ -64,6 +97,9 @@ class ModuleTest_Given extends Step {
 
     public function theFolder($folder) {
         $fullFolder = __DIR__ . '/' . $folder;
+
+        $this->cleanDir($fullFolder);
+
         mkdir($fullFolder);
 
         $this->test->undos[] = function () use ($fullFolder) {
@@ -81,7 +117,9 @@ class ModuleTest_Given extends Step {
     }
 
     public function theComponent_In_WithTheMethod_ThatReturns($className, $folder, $method, $returnJson) {
-        list($namespace, $shortName) = explode('\\', $className);
+        $classPath = explode('\\', $className);
+        $shortName = array_pop($classPath);
+        $namespace = implode('\\', $classPath);
         $classFile = $shortName . '.php';
 
         $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Component {
@@ -90,7 +128,10 @@ class ModuleTest_Given extends Step {
             }
 
             protected function doRender(\$model, \$template) {
-                return json_encode(\$model);
+                foreach (\$model as \$key => \$value) {
+                    \$template = str_replace('%' . \$key . '%', \$value, \$template);
+                }
+                return \$template;
             }
         }";
 
@@ -101,9 +142,18 @@ class ModuleTest_Given extends Step {
         $file = __DIR__ . '/' . $folder . '/' . $fileName;
         file_put_contents($file, $content);
 
-        $this->test->undos[] = function () use ($file) {
-            unlink($file);
+        $test = $this->test;
+        $this->test->undos[] = function () use ($file, $test) {
+            if (!unlink($file)) {
+                $test->fail('Could not delete ' . $file);
+            }
         };
+    }
+
+    private function cleanDir($folder) {
+        foreach(glob(rtrim($folder, '/') . '/' . '*') as $item) {
+            is_dir($item) ? $this->cleanDir($item) : unlink($item);
+        }
     }
 }
 
@@ -114,9 +164,14 @@ class ModuleTest_When extends Step {
      */
     public $response;
 
+    /**
+     * @var null|\Exception
+     */
+    public $caught;
+
     public function iRequest_From($resource, $module) {
         $factory = new Factory();
-        $route = 'some/route';
+        $route = '/base/';
 
         $request = new Request(Request::METHOD_GET, $resource, new Map(), new Map());
 
@@ -124,6 +179,15 @@ class ModuleTest_When extends Step {
         $module = new $module($factory, $route);
 
         $this->response = $module->respond($request);
+    }
+
+    public function iTryToRequest_From($resource, $module) {
+        $this->caught = null;
+        try {
+            $this->iRequest_From($resource, $module);
+        } catch (\Exception $e) {
+            $this->caught = $e;
+        }
     }
 }
 
@@ -138,5 +202,10 @@ class ModuleTest_Then extends Step {
 
     public function theResponseHeader_ShouldBe($field, $value) {
         $this->test->assertEquals($value, $this->test->when->response->getHeaders()->get($field));
+    }
+
+    public function anExceptionContaining_ShouldBeThrown($message) {
+        $this->test->assertNotNull($this->test->when->caught);
+        $this->test->assertContains($message, $this->test->when->caught->getMessage());
     }
 }
