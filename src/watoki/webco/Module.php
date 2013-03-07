@@ -94,4 +94,14 @@ abstract class Module extends Controller {
         return ucfirst($name);
     }
 
+    protected function redirect(Url $url) {
+        $urlString = $url->toString();
+        if ($url->isRelative()) {
+            $urlString = $this->route . $urlString;
+        }
+        $response = $this->getResponse();
+        $response->getHeaders()->set(Response::HEADER_LOCATION, $urlString);
+        return null;
+    }
+
 }

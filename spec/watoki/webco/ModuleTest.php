@@ -80,6 +80,26 @@ class ModuleTest extends Test {
         $this->then->anExceptionContaining_ShouldBeThrown('index.php');
     }
 
+    public function testRedirectFromModule() {
+        $this->given->theFolder('redirectmodule');
+        $this->given->theModule_InThatRedirectsTo('redirectmodule\Module', 'redirectmodule', 'relative/path');
+
+        $this->when->iRequest_From('some/thing/else.html', 'redirectmodule\Module');
+
+        $this->then->theResponseHeader_ShouldBe(Response::HEADER_LOCATION, '/base/relative/path');
+    }
+
+    public function testRedirectFromComponent() {
+        $this->given->theFolder('redirectcomponent');
+        $this->given->theModule_In('redirectcomponent\Module', 'redirectcomponent');
+        $this->given->theFolder('redirectcomponent/inner');
+        $this->given->theComponent_In_ThatRedirectsTo('redirectcomponent\inner\Component', 'redirectcomponent/inner', 'some/path');
+
+        $this->when->iRequest_From('inner/component.html', 'redirectcomponent\Module');
+
+        $this->then->theResponseHeader_ShouldBe(Response::HEADER_LOCATION, '/base/inner/some/path');
+    }
+
 }
 
 class ModuleTest_Given extends Step {
@@ -108,10 +128,26 @@ class ModuleTest_Given extends Step {
     }
 
     public function theModule_In($moduleName, $folder) {
-        list($namespace, $shortName) = explode('\\', $moduleName);
+        $classPath = explode('\\', $moduleName);
+        $shortName = array_pop($classPath);
+        $namespace = implode('\\', $classPath);
         $classFile = $shortName . '.php';
 
         $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Module {}";
+
+        $this->theFile_In_WithContent($classFile, $folder, $classDef);
+    }
+
+    public function theModule_InThatRedirectsTo($moduleName, $folder, $target) {
+        list($namespace, $shortName) = explode('\\', $moduleName);
+        $classFile = $shortName . '.php';
+
+        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Module {
+            public function respond(\\watoki\\webco\\Request \$request) {
+                \$this->redirect(new \\watoki\\webco\\Url('$target'));
+                return \$this->getResponse();
+            }
+        }";
 
         $this->theFile_In_WithContent($classFile, $folder, $classDef);
     }
@@ -138,6 +174,24 @@ class ModuleTest_Given extends Step {
         $this->theFile_In_WithContent($classFile, $folder, $classDef);
     }
 
+    public function theComponent_In_ThatRedirectsTo($className, $folder, $target) {
+        $classPath = explode('\\', $className);
+        $shortName = array_pop($classPath);
+        $namespace = implode('\\', $classPath);
+        $classFile = $shortName . '.php';
+
+        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Component {
+            public function respond(\\watoki\\webco\\Request \$request) {
+                \$this->redirect(new \\watoki\\webco\\Url('$target'));
+                return \$this->getResponse();
+            }
+
+            protected function doRender(\$model, \$template) {}
+        }";
+
+        $this->theFile_In_WithContent($classFile, $folder, $classDef);
+    }
+
     public function theFile_In_WithContent($fileName, $folder, $content) {
         $file = __DIR__ . '/' . $folder . '/' . $fileName;
         file_put_contents($file, $content);
@@ -151,9 +205,14 @@ class ModuleTest_Given extends Step {
     }
 
     private function cleanDir($folder) {
+        if (!file_exists($folder)) {
+            return;
+        }
+
         foreach(glob(rtrim($folder, '/') . '/' . '*') as $item) {
             is_dir($item) ? $this->cleanDir($item) : unlink($item);
         }
+        rmdir($folder);
     }
 }
 
