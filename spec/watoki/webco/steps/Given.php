@@ -45,6 +45,10 @@ class Given extends Step {
         $this->requestResource = $resource;
     }
 
+    public function theRequestParameter_WithValue($key, $value) {
+        $this->requestParams[$key] = $value;
+    }
+
     public function theFile_In_WithContent($fileName, $folder, $content) {
         $file = __DIR__ . '/' . $folder . '/' . $fileName;
         file_put_contents($file, $content);
