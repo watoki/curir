@@ -1,17 +1,18 @@
 <?php
 namespace spec\watoki\webco;
 
-/**
- * @property ModuleTest_Given given
- * @property ModuleTest_When when
- * @property ModuleTest_Then then
- */
+use spec\watoki\webco\steps\Given;
+use spec\watoki\webco\steps\When;
 use watoki\collections\Map;
 use watoki\factory\Factory;
 use watoki\webco\Module;
 use watoki\webco\Request;
 use watoki\webco\Response;
 
+/**
+ * @property ModuleTest_Given given
+ * @property ModuleTest_When when
+ */
 class ModuleTest extends Test {
 
     public function testStaticFile() {
@@ -128,55 +129,19 @@ class ModuleTest_Given extends Given {
     }
 }
 
-class ModuleTest_When extends Step {
-
-    /**
-     * @var Response
-     */
-    public $response;
-
-    /**
-     * @var null|\Exception
-     */
-    public $caught;
+class ModuleTest_When extends When {
 
     public function iRequest_From($resource, $module) {
-        $factory = new Factory();
-        $route = '/base/';
+        $this->test->given->theRequestMethodIs(Request::METHOD_GET);
+        $this->test->given->theRequestResourceIs($resource);
 
-        $request = new Request(Request::METHOD_GET, $resource, new Map(), new Map());
-
-        /** @var $module Module */
-        $module = new $module($factory, $route);
-
-        $this->response = $module->respond($request);
+        $this->iSendTheRequestTo($module);
     }
 
     public function iTryToRequest_From($resource, $module) {
-        $this->caught = null;
-        try {
-            $this->iRequest_From($resource, $module);
-        } catch (\Exception $e) {
-            $this->caught = $e;
-        }
-    }
-}
+        $this->test->given->theRequestMethodIs(Request::METHOD_GET);
+        $this->test->given->theRequestResourceIs($resource);
 
-/**
- * @property ModuleTest test
- */
-class ModuleTest_Then extends Step {
-
-    public function theResponseBodyShouldBe($body) {
-        $this->test->assertEquals($body, $this->test->when->response->getBody());
-    }
-
-    public function theResponseHeader_ShouldBe($field, $value) {
-        $this->test->assertEquals($value, $this->test->when->response->getHeaders()->get($field));
-    }
-
-    public function anExceptionContaining_ShouldBeThrown($message) {
-        $this->test->assertNotNull($this->test->when->caught);
-        $this->test->assertContains($message, $this->test->when->caught->getMessage());
+        $this->iTryToSendTheRequestTo($module);
     }
 }

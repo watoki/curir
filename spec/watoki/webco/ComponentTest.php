@@ -1,6 +1,13 @@
 <?php
 namespace spec\watoki\webco;
 
+use spec\watoki\webco\steps\Given;
+use spec\watoki\webco\steps\When;
+use watoki\webco\Request;
+
+/**
+ * @property ComponentTest_Given given
+ */
 class ComponentTest extends Test {
 
     public function testGetMethod() {
@@ -21,16 +28,16 @@ class ComponentTest extends Test {
     public function testTemplate() {
     }
 
-//    public function testComponentWithTemplate() {
-//        $this->given->theFolder('templatetest');
-//        $this->given->theModule_In('templatetest\TemplateModule', 'templatetest');
-//        $this->given->theComponent_In('templatetest\IndexWithTemplate', 'templatetest', 'doGet', '{"test":"World"}');
-//        $this->given->theFile_In_WithContent('indexWithTemplate.html', 'templatetest', 'Hello %test%');
-//
-//        $this->when->iRequest_From('indexWithTemplate.html', 'templatetest\TemplateModule');
-//
-//        $this->then->theResponseBodyShouldBe('Hello World');
-//    }
+    public function testComponentWithTemplate() {
+        $this->given->theFolder('templatetest');
+        $this->given->theComponent_In_WithTheMethod_ThatReturns('templatetest\Template', 'templatetest', 'doGet', '{"test":"World"}');
+        $this->given->theFile_In_WithContent('template.html', 'templatetest', 'Hello %test%');
+
+        $this->given->theRequestMethodIs(Request::METHOD_GET);
+        $this->when->iSendTheRequestTo('templatetest\Template');
+
+        $this->then->theResponseBodyShouldBe('Hello World');
+    }
 
 }
 

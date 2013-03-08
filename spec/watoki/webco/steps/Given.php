@@ -1,7 +1,18 @@
 <?php
-namespace spec\watoki\webco;
+namespace spec\watoki\webco\steps;
  
-abstract class Given extends Step {
+use spec\watoki\webco\Step;
+use spec\watoki\webco\Test;
+
+class Given extends Step {
+
+    public $requestMethod;
+
+    public $requestResource;
+
+    public $requestParams = array();
+
+    public $requestHeaders = array();
 
     function __construct(Test $test) {
         parent::__construct($test);
@@ -24,6 +35,14 @@ abstract class Given extends Step {
         $this->test->undos[] = function () use ($fullFolder) {
             rmdir($fullFolder);
         };
+    }
+
+    public function theRequestMethodIs($method) {
+        $this->requestMethod = $method;
+    }
+
+    public function theRequestResourceIs($resource) {
+        $this->requestResource = $resource;
     }
 
     public function theFile_In_WithContent($fileName, $folder, $content) {

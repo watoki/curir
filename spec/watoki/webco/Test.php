@@ -1,6 +1,15 @@
 <?php
 namespace spec\watoki\webco;
- 
+
+use spec\watoki\webco\steps\Given;
+use spec\watoki\webco\steps\Then;
+use spec\watoki\webco\steps\When;
+
+/**
+ * @property Given given
+ * @property When when
+ * @property Then then
+ */
 abstract class Test extends \PHPUnit_Framework_TestCase {
 
     public $undos = array();
@@ -10,9 +19,10 @@ abstract class Test extends \PHPUnit_Framework_TestCase {
 
         foreach (array('given', 'when', 'then') as $step) {
             $class = get_class($this) . '_' . ucfirst($step);
-            if (class_exists($class)) {
-                $this->$step = new $class($this);
+            if (!class_exists($class)) {
+                $class = 'spec\watoki\webco\steps\\' . ucfirst($step);
             }
+            $this->$step = new $class($this);
         }
     }
 
