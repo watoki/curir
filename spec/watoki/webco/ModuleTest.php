@@ -40,33 +40,22 @@ class ModuleTest extends Test {
     public function testComponent() {
         $this->given->theFolder('component');
         $this->given->theModule_In('component\ComponentModule', 'component');
-        $this->given->theComponent_In_WithTheMethod_ThatReturns('component\Index', 'component', 'doGet', '{"test":"me"}');
+        $this->given->theComponent_In('component\Index', 'component');
 
         $this->when->iRequest_From('index.html', 'component\ComponentModule');
 
-        $this->then->theResponseBodyShouldBe('{"test":"me"}');
-    }
-
-    public function testComponentWithTemplate() {
-        $this->given->theFolder('templatetest');
-        $this->given->theModule_In('templatetest\TemplateModule', 'templatetest');
-        $this->given->theComponent_In_WithTheMethod_ThatReturns('templatetest\IndexWithTemplate', 'templatetest', 'doGet', '{"test":"World"}');
-        $this->given->theFile_In_WithContent('indexWithTemplate.html', 'templatetest', 'Hello %test%');
-
-        $this->when->iRequest_From('indexWithTemplate.html', 'templatetest\TemplateModule');
-
-        $this->then->theResponseBodyShouldBe('Hello World');
+        $this->then->theResponseBodyShouldBe('Found component\Index');
     }
 
     public function testComponentInFolder() {
         $this->given->theFolder('outer');
         $this->given->theFolder('outer/inner');
         $this->given->theModule_In('outer\InnerModule', 'outer');
-        $this->given->theComponent_In_WithTheMethod_ThatReturns('outer\inner\InnerComponent', 'outer/inner', 'doGet', '{"inner":"found"}');
+        $this->given->theComponent_In('outer\inner\InnerComponent', 'outer/inner');
 
         $this->when->iRequest_From('inner/InnerComponent.php', 'outer\InnerModule');
 
-        $this->then->theResponseBodyShouldBe('{"inner":"found"}');
+        $this->then->theResponseBodyShouldBe('Found outer\inner\InnerComponent');
     }
 
     public function testNonExistingComponent() {
@@ -117,18 +106,13 @@ class ModuleTest_Given extends Given {
         ");
     }
 
-    public function theComponent_In_WithTheMethod_ThatReturns($className, $folder, $method, $returnJson) {
+    public function theComponent_In($className, $folder) {
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
-            public function $method () {
-                return json_decode('$returnJson', true);
+            public function respond(\\watoki\\webco\\Request \$request) {
+                \$this->getResponse()->setBody('Found $className');
+                return \$this->getResponse();
             }
-
-            protected function doRender(\$model, \$template) {
-                foreach (\$model as \$key => \$value) {
-                    \$template = str_replace('%' . \$key . '%', \$value, \$template);
-                }
-                return \$template;
-            }
+            protected function doRender(\$model, \$template) {}
         ");
     }
 

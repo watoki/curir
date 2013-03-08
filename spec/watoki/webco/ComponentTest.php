@@ -21,17 +21,23 @@ class ComponentTest extends Test {
     public function testTemplate() {
     }
 
+//    public function testComponentWithTemplate() {
+//        $this->given->theFolder('templatetest');
+//        $this->given->theModule_In('templatetest\TemplateModule', 'templatetest');
+//        $this->given->theComponent_In('templatetest\IndexWithTemplate', 'templatetest', 'doGet', '{"test":"World"}');
+//        $this->given->theFile_In_WithContent('indexWithTemplate.html', 'templatetest', 'Hello %test%');
+//
+//        $this->when->iRequest_From('indexWithTemplate.html', 'templatetest\TemplateModule');
+//
+//        $this->then->theResponseBodyShouldBe('Hello World');
+//    }
+
 }
 
 class ComponentTest_Given extends Given {
 
     public function theComponent_In_WithTheMethod_ThatReturns($className, $folder, $method, $returnJson) {
-        $classPath = explode('\\', $className);
-        $shortName = array_pop($classPath);
-        $namespace = implode('\\', $classPath);
-        $classFile = $shortName . '.php';
-
-        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Component {
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
             public function $method () {
                 return json_decode('$returnJson', true);
             }
@@ -42,8 +48,6 @@ class ComponentTest_Given extends Given {
                 }
                 return \$template;
             }
-        }";
-
-        $this->theFile_In_WithContent($classFile, $folder, $classDef);
+        ");
     }
 }
