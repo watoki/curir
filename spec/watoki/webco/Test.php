@@ -10,7 +10,9 @@ abstract class Test extends \PHPUnit_Framework_TestCase {
 
         foreach (array('given', 'when', 'then') as $step) {
             $class = get_class($this) . '_' . ucfirst($step);
-            $this->$step = new $class($this);
+            if (class_exists($class)) {
+                $this->$step = new $class($this);
+            }
         }
     }
 

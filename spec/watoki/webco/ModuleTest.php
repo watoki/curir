@@ -102,63 +102,23 @@ class ModuleTest extends Test {
 
 }
 
-class ModuleTest_Given extends Step {
-
-    function __construct(Test $test) {
-        parent::__construct($test);
-
-        spl_autoload_register(function ($className) {
-            $classFile = __DIR__ . '/' . str_replace('\\', '/', $className) . '.php';
-            if (file_exists($classFile)) {
-                require_once $classFile;
-            }
-        });
-    }
-
-    public function theFolder($folder) {
-        $fullFolder = __DIR__ . '/' . $folder;
-
-        $this->cleanDir($fullFolder);
-
-        mkdir($fullFolder);
-
-        $this->test->undos[] = function () use ($fullFolder) {
-            rmdir($fullFolder);
-        };
-    }
+class ModuleTest_Given extends Given {
 
     public function theModule_In($moduleName, $folder) {
-        $classPath = explode('\\', $moduleName);
-        $shortName = array_pop($classPath);
-        $namespace = implode('\\', $classPath);
-        $classFile = $shortName . '.php';
-
-        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Module {}";
-
-        $this->theFile_In_WithContent($classFile, $folder, $classDef);
+        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\webco\Module', '');
     }
 
     public function theModule_InThatRedirectsTo($moduleName, $folder, $target) {
-        list($namespace, $shortName) = explode('\\', $moduleName);
-        $classFile = $shortName . '.php';
-
-        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Module {
+        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\webco\Module', "
             public function respond(\\watoki\\webco\\Request \$request) {
                 \$this->redirect(new \\watoki\\webco\\Url('$target'));
                 return \$this->getResponse();
             }
-        }";
-
-        $this->theFile_In_WithContent($classFile, $folder, $classDef);
+        ");
     }
 
     public function theComponent_In_WithTheMethod_ThatReturns($className, $folder, $method, $returnJson) {
-        $classPath = explode('\\', $className);
-        $shortName = array_pop($classPath);
-        $namespace = implode('\\', $classPath);
-        $classFile = $shortName . '.php';
-
-        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Component {
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
             public function $method () {
                 return json_decode('$returnJson', true);
             }
@@ -169,50 +129,18 @@ class ModuleTest_Given extends Step {
                 }
                 return \$template;
             }
-        }";
-
-        $this->theFile_In_WithContent($classFile, $folder, $classDef);
+        ");
     }
 
     public function theComponent_In_ThatRedirectsTo($className, $folder, $target) {
-        $classPath = explode('\\', $className);
-        $shortName = array_pop($classPath);
-        $namespace = implode('\\', $classPath);
-        $classFile = $shortName . '.php';
-
-        $classDef = "<?php namespace $namespace; class $shortName extends \\watoki\\webco\\Component {
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
             public function respond(\\watoki\\webco\\Request \$request) {
                 \$this->redirect(new \\watoki\\webco\\Url('$target'));
                 return \$this->getResponse();
             }
 
             protected function doRender(\$model, \$template) {}
-        }";
-
-        $this->theFile_In_WithContent($classFile, $folder, $classDef);
-    }
-
-    public function theFile_In_WithContent($fileName, $folder, $content) {
-        $file = __DIR__ . '/' . $folder . '/' . $fileName;
-        file_put_contents($file, $content);
-
-        $test = $this->test;
-        $this->test->undos[] = function () use ($file, $test) {
-            if (!unlink($file)) {
-                $test->fail('Could not delete ' . $file);
-            }
-        };
-    }
-
-    private function cleanDir($folder) {
-        if (!file_exists($folder)) {
-            return;
-        }
-
-        foreach(glob(rtrim($folder, '/') . '/' . '*') as $item) {
-            is_dir($item) ? $this->cleanDir($item) : unlink($item);
-        }
-        rmdir($folder);
+        ");
     }
 }
 
