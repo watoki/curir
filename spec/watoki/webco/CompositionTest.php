@@ -56,24 +56,24 @@ class CompositionTest extends Test {
     }
 
     function testAbsorbAssets() {
-        $this->given->theFolder_WithModule('document');
-        $this->given->theSubComponent_In_WithTemplate('document\Sub', 'document',
+        $this->given->theFolder_WithModule('assets');
+        $this->given->theSubComponent_In_WithTemplate('assets\Sub', 'assets',
             '<html>
                 <head>
                     <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
                 </head>
                 <body><i>%msg%</i></body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
+        $this->given->theComponent_In_WithTheBody('assets\Super', 'assets', '
         function doGet() {
             $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), Sub::$CLASS);
             return array(
                 "sub" => $this->sub->render()
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'document', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'assets', '<html><body>Hello %sub%</body></html>');
 
-        $this->when->iSendTheRequestTo('document\Module');
+        $this->when->iSendTheRequestTo('assets\Module');
 
         $this->then->theResponseBodyShouldBe(
             '<html>
