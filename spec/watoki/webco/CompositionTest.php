@@ -85,6 +85,42 @@ class CompositionTest extends Test {
     }
 
     function testRelativeUrls() {
+        $this->given->theFolder_WithModule('relative');
+        $this->given->theFolder_WithModule('relative/inner');
+        $this->given->theSubComponent_In_WithTemplate('relative\inner\Sub', 'relative/inner',
+            '<html>
+                <head>
+                    <link href="relative/path/file.css" rel="stylesheet">
+                </head>
+                <body>
+                    <p>%msg%</p>
+                    <img src="also/relative.png">
+                    <img src="/not/relative.png">
+                </body>
+            </html>');
+        $this->given->theComponent_In_WithTheBody('relative\Super', 'relative', '
+        function doGet() {
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), inner\Sub::$CLASS);
+            return array(
+                "sub" => $this->sub->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'relative', '<html><body>Hello %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('relative\Module');
+
+        $this->then->theResponseBodyShouldBe(
+            '<html>
+                <head>
+                    <link href="/base/inner/relative/path/file.css" rel="stylesheet">
+                </head>
+                <body>
+                    Hello <p>World</p>
+                    <img src="/base/inner/also/relative.png">
+                    <img src="/not/relative.png">
+                </body>
+            </html>'
+        );
     }
 
     function testDeepLinkReplacement() {

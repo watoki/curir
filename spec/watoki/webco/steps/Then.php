@@ -10,7 +10,7 @@ class Then extends Step {
     }
 
     private function clean($str) {
-        return str_replace(array(" ", "\n", "\r", "\t"), "", $str);
+        return str_replace(array("  ", "\n", "\r", "\t"), "", $str);
     }
 
     public function theResponseHeader_ShouldBe($field, $value) {

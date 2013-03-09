@@ -41,6 +41,13 @@ abstract class Controller {
      */
     abstract public function respond(Request $request);
 
+    /**
+     * @return string
+     */
+    public function getRoute() {
+        return $this->route;
+    }
+
     protected function getResponse() {
         if (!$this->response) {
             $this->response = new Response();
