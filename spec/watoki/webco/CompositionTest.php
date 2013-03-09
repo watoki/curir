@@ -2,6 +2,7 @@
 namespace spec\watoki\webco;
 
 use spec\watoki\webco\steps\Given;
+use watoki\collections\Liste;
 use watoki\webco\Request;
 
 /**
@@ -19,11 +20,7 @@ class CompositionTest extends Test {
     function testIncludeSnippet() {
         $this->given->theFolder('snippet');
         $this->given->theModule_In('snippet\Module', 'snippet');
-        $this->given->theComponent_In_WithTheBody('snippet\Sub', 'snippet', '
-        function doGet() {
-            return array("msg" => "World");
-        }');
-        $this->given->theFile_In_WithContent('sub.html', 'snippet', '%msg%!');
+        $this->given->theSubComponent_In_WithTemplate('snippet\Sub', 'snippet', '%msg%!');
         $this->given->theComponent_In_WithTheBody('snippet\Super', 'snippet', '
         function doGet() {
             $sub = new \watoki\webco\controller\sub\PlainSubComponent("sub", $this->getRoot(), Sub::$CLASS);
@@ -41,11 +38,8 @@ class CompositionTest extends Test {
     function testIncludeDocument() {
         $this->given->theFolder('document');
         $this->given->theModule_In('document\Module', 'document');
-        $this->given->theComponent_In_WithTheBody('document\Sub', 'document', '
-        function doGet() {
-            return array("msg" => "Moon");
-        }');
-        $this->given->theFile_In_WithContent('sub.html', 'document', '<html><body><b>%msg%</b></body></html>');
+
+        $this->given->theSubComponent_In_WithTemplate('document\Sub', 'document', '<html><body><b>%msg%</b></body></html>');
         $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
         function doGet() {
             $sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), Sub::$CLASS);
@@ -57,7 +51,7 @@ class CompositionTest extends Test {
 
         $this->when->iSendTheRequestTo('document\Module');
 
-        $this->then->theResponseBodyShouldBe('Hello <b>Moon</b>');
+        $this->then->theResponseBodyShouldBe('Hello <b>World</b>');
     }
 
     function testAbsorbAssets() {
@@ -72,21 +66,18 @@ class CompositionTest extends Test {
     function testDeepLinkTarget() {
     }
 
-    function testDeepLinkHandling() {
-    }
-
-    function testPrimaryAction() {
-    }
-
-    function testPrimaryActionFirst() {
-    }
-
-    function testDeepRedirect() {
-    }
-
 }
 
 class CompositionTest_Given extends Given {
+
+    public function theSubComponent_In_WithTemplate($className, $folder, $template) {
+        $shortClassName = Liste::split('\\', $className)->pop();
+        $this->theComponent_In_WithTheBody($className, $folder, '
+        function doGet() {
+            return array("msg" => "World");
+        }');
+        $this->theFile_In_WithContent(lcfirst($shortClassName) . '.html', $folder, $template);
+    }
 
     public function theComponent_In_WithTheBody($className, $folder, $body) {
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', "
