@@ -2,10 +2,12 @@
 namespace watoki\webco\controller;
  
 use watoki\collections\Map;
+use watoki\tempan\HtmlParser;
 use watoki\webco\Controller;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Url;
+use watoki\webco\controller\sub\HtmlSubComponent;
 
 abstract class Component extends Controller {
 
@@ -37,8 +39,8 @@ abstract class Component extends Controller {
      */
     protected function renderAction($action, $parameters) {
         $model = $this->invokeAction($action, $parameters);
-        $body = $model !== null ? $this->render($model) : null;
-        return $body;
+        $body = ($model !== null ? $this->render($model) : null);
+        return $this->mergeSubHeaders($body);
     }
 
     /**
@@ -123,6 +125,29 @@ abstract class Component extends Controller {
         $response = $this->getResponse();
         $response->getHeaders()->set(Response::HEADER_LOCATION, $urlString);
         return null;
+    }
+
+    private function mergeSubHeaders($body) {
+        $parser = new HtmlParser($body);
+
+        foreach ($this as $member) {
+            if ($member instanceof HtmlSubComponent) {
+                if (!isset($head)) {
+                    $head = $parser->getRoot()->firstChild;
+                    if ($head->nodeName != 'head') {
+                        $body = $head;
+                        $head = $parser->getDocument()->createElement('head');
+                        $parser->getRoot()->insertBefore($head, $body);
+                    }
+                }
+
+                foreach ($member->getHeadElements('link') as $element) {
+                    $head->appendChild($parser->getDocument()->importNode($element, true));
+                }
+            }
+        }
+
+        return isset($parser) ? $parser->toString() : $body;
     }
 
 }

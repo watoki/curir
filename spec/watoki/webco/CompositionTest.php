@@ -17,9 +17,8 @@ class CompositionTest extends Test {
         $this->given->theRequestResourceIs('super.html');
     }
 
-    function testIncludeSnippet() {
-        $this->given->theFolder('snippet');
-        $this->given->theModule_In('snippet\Module', 'snippet');
+    function testIncludePlain() {
+        $this->given->theFolder_WithModule('snippet');
         $this->given->theSubComponent_In_WithTemplate('snippet\Sub', 'snippet', '%msg%!');
         $this->given->theComponent_In_WithTheBody('snippet\Super', 'snippet', '
         function doGet() {
@@ -36,10 +35,12 @@ class CompositionTest extends Test {
     }
 
     function testIncludeDocument() {
-        $this->given->theFolder('document');
-        $this->given->theModule_In('document\Module', 'document');
-
-        $this->given->theSubComponent_In_WithTemplate('document\Sub', 'document', '<html><body><b>%msg%</b></body></html>');
+        $this->given->theFolder_WithModule('document');
+        $this->given->theSubComponent_In_WithTemplate('document\Sub', 'document',
+            '<html>
+                <head><title>Sub Component</title></head>
+                <body><b>%msg%</b></body>
+            </html>');
         $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
         function doGet() {
             $sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), Sub::$CLASS);
@@ -47,14 +48,40 @@ class CompositionTest extends Test {
                 "sub" => $sub->render()
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'document', 'Hello %sub%');
+        $this->given->theFile_In_WithContent('super.html', 'document', '<html><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('document\Module');
 
-        $this->then->theResponseBodyShouldBe('Hello <b>World</b>');
+        $this->then->theResponseBodyShouldBe('<html><body>Hello <b>World</b></body></html>');
     }
 
     function testAbsorbAssets() {
+        $this->given->theFolder_WithModule('document');
+        $this->given->theSubComponent_In_WithTemplate('document\Sub', 'document',
+            '<html>
+                <head>
+                    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+                </head>
+                <body><i>%msg%</i></body>
+            </html>');
+        $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
+        function doGet() {
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), Sub::$CLASS);
+            return array(
+                "sub" => $this->sub->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'document', '<html><body>Hello %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('document\Module');
+
+        $this->then->theResponseBodyShouldBe(
+            '<html>
+                <head>
+                    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+                </head>
+                <body>Hello <i>World</i></body>
+            </html>');
     }
 
     function testRelativeUrls() {
@@ -69,6 +96,11 @@ class CompositionTest extends Test {
 }
 
 class CompositionTest_Given extends Given {
+
+    public function theFolder_WithModule($folder) {
+        $this->theFolder($folder);
+        $this->theModule_In($folder . '\Module', $folder);
+    }
 
     public function theSubComponent_In_WithTemplate($className, $folder, $template) {
         $shortClassName = Liste::split('\\', $className)->pop();

@@ -6,7 +6,11 @@ use spec\watoki\webco\Step;
 class Then extends Step {
 
     public function theResponseBodyShouldBe($body) {
-        $this->test->assertEquals($body, $this->test->when->response->getBody());
+        $this->test->assertEquals($this->clean($body), $this->clean($this->test->when->response->getBody()));
+    }
+
+    private function clean($str) {
+        return str_replace(array(" ", "\n", "\r", "\t"), "", $str);
     }
 
     public function theResponseHeader_ShouldBe($field, $value) {
