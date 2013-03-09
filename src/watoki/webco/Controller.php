@@ -3,6 +3,7 @@ namespace watoki\webco;
  
 use watoki\factory\Factory;
 use watoki\collections\Liste;
+use watoki\webco\controller\Module;
 
 abstract class Controller {
 
@@ -48,14 +49,14 @@ abstract class Controller {
     }
 
     /**
-     * @return null|\watoki\webco\Module
+     * @return null|\watoki\webco\controller\Module
      */
     protected function getParent() {
         return $this->parent;
     }
 
     /**
-     * @return \watoki\webco\Module
+     * @return \watoki\webco\controller\Module
      */
     protected function getRoot() {
         if ($this->parent) {

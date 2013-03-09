@@ -82,10 +82,10 @@ class Request {
      * @param \watoki\collections\Map $headers
      * @param string $body
      */
-    function __construct($method, $resource, Map $parameters, Map $headers, $body = '') {
+    function __construct($method = Request::METHOD_GET, $resource = '', Map $parameters = null, Map $headers = null, $body = '') {
         $this->method = $method;
-        $this->parameters = $parameters;
-        $this->headers = $headers;
+        $this->parameters = $parameters ?: new Map();
+        $this->headers = $headers ?: new Map();
         $this->body = $body;
         $this->setResourcePath(Liste::split('/', $resource));
     }

@@ -5,7 +5,7 @@ use spec\watoki\webco\steps\Given;
 use spec\watoki\webco\steps\When;
 use watoki\collections\Map;
 use watoki\factory\Factory;
-use watoki\webco\Module;
+use \watoki\webco\controller\Module;
 use watoki\webco\Request;
 use watoki\webco\Response;
 
@@ -95,11 +95,11 @@ class ModuleTest extends Test {
 class ModuleTest_Given extends Given {
 
     public function theModule_In($moduleName, $folder) {
-        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\webco\Module', '');
+        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\webco\controller\Module', '');
     }
 
     public function theModule_InThatRedirectsTo($moduleName, $folder, $target) {
-        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\webco\Module', "
+        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\webco\controller\Module', "
             public function respond(\\watoki\\webco\\Request \$request) {
                 \$this->redirect(new \\watoki\\webco\\Url('$target'));
                 return \$this->getResponse();
@@ -108,7 +108,7 @@ class ModuleTest_Given extends Given {
     }
 
     public function theComponent_In($className, $folder) {
-        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', "
             public function respond(\\watoki\\webco\\Request \$request) {
                 \$this->getResponse()->setBody('Found $className');
                 return \$this->getResponse();
@@ -118,7 +118,7 @@ class ModuleTest_Given extends Given {
     }
 
     public function theComponent_In_ThatRedirectsTo($className, $folder, $target) {
-        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', "
             public function respond(\\watoki\\webco\\Request \$request) {
                 \$this->redirect(new \\watoki\\webco\\Url('$target'));
                 return \$this->getResponse();

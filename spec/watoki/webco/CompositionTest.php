@@ -26,7 +26,7 @@ class CompositionTest extends Test {
         $this->given->theFile_In_WithContent('sub.html', 'snippet', '%msg%!');
         $this->given->theComponent_In_WithTheBody('snippet\Super', 'snippet', '
         function doGet() {
-            $sub = new \watoki\webco\SubComponent("sub", $this->getRoot(), Sub::$CLASS);
+            $sub = new \watoki\webco\controller\sub\PlainSubComponent("sub", $this->getRoot(), Sub::$CLASS);
             return array(
                 "sub" => $sub->render()
             );
@@ -48,7 +48,7 @@ class CompositionTest extends Test {
         $this->given->theFile_In_WithContent('sub.html', 'document', '<html><body><b>%msg%</b></body></html>');
         $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
         function doGet() {
-            $sub = new \watoki\webco\SubComponent("sub", $this->getRoot(), Sub::$CLASS);
+            $sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), Sub::$CLASS);
             return array(
                 "sub" => $sub->render()
             );
@@ -89,7 +89,7 @@ class CompositionTest extends Test {
 class CompositionTest_Given extends Given {
 
     public function theComponent_In_WithTheBody($className, $folder, $body) {
-        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', "
             protected function doRender(\$model, \$template) {
                 foreach (\$model as \$key => \$value) {
                     \$template = str_replace('%' . \$key . '%', \$value, \$template);
@@ -102,6 +102,6 @@ class CompositionTest_Given extends Given {
     }
 
     public function theModule_In($moduleClass, $folder) {
-        $this->theClass_In_Extending_WithTheBody($moduleClass, $folder, '\watoki\webco\Module', '');
+        $this->theClass_In_Extending_WithTheBody($moduleClass, $folder, '\watoki\webco\controller\Module', '');
     }
 }

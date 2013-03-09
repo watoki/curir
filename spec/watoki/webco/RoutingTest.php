@@ -6,7 +6,7 @@ namespace spec\watoki\webco;
  * @property RoutingTest_Then then
  */
 use watoki\factory\Factory;
-use watoki\webco\Module;
+use \watoki\webco\controller\Module;
 
 class RoutingTest extends Test {
 
@@ -15,8 +15,8 @@ class RoutingTest extends Test {
 
     function testFindChild() {
         $this->given->theFolder('findchild');
-        $this->given->theClass_In_Extending_WithTheBody('findchild\ParentModule', 'findchild', '\watoki\webco\Module', '');
-        $this->given->theClass_In_Extending_WithTheBody('findchild\ChildModule', 'findchild', '\watoki\webco\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findchild\ParentModule', 'findchild', '\watoki\webco\controller\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findchild\ChildModule', 'findchild', '\watoki\webco\controller\Module', '');
 
         $this->when->iAsk_ToFind('findchild\ParentModule', 'findchild\ChildModule');
 
@@ -26,8 +26,8 @@ class RoutingTest extends Test {
     function testFindGrandChild() {
         $this->given->theFolder('findgrand');
         $this->given->theFolder('findgrand/grand');
-        $this->given->theClass_In_Extending_WithTheBody('findgrand\ParentModule', 'findgrand', '\watoki\webco\Module', '');
-        $this->given->theClass_In_Extending_WithTheBody('findgrand\grand\ChildModule', 'findgrand/grand', '\watoki\webco\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findgrand\ParentModule', 'findgrand', '\watoki\webco\controller\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findgrand\grand\ChildModule', 'findgrand/grand', '\watoki\webco\controller\Module', '');
 
         $this->when->iAsk_ToFind('findgrand\ParentModule', 'findgrand\grand\ChildModule');
 
@@ -36,7 +36,7 @@ class RoutingTest extends Test {
 
     function testNonExistingChild() {
         $this->given->theFolder('findnone');
-        $this->given->theClass_In_Extending_WithTheBody('findnone\ParentModule', 'findnone', '\watoki\webco\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findnone\ParentModule', 'findnone', '\watoki\webco\controller\Module', '');
 
         $this->when->iAsk_ToFind('findnone\ParentModule', 'findnone\grand\ChildModule');
 

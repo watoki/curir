@@ -98,7 +98,7 @@ class ComponentTest_Given extends Given {
     public function theComponent_In_WithTheMethod_WithParameters_ThatReturns($className, $folder, $method, $params, $returnJson) {
         $returnJson = str_replace('"', '\"', $returnJson);
 
-        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\Component', "
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', "
             public function $method ($params) {
                 return json_decode(\"$returnJson\", true);
             }

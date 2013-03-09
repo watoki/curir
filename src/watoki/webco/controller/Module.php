@@ -1,9 +1,14 @@
 <?php
-namespace watoki\webco;
+namespace watoki\webco\controller;
 
 use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\factory\Factory;
+use watoki\webco\Controller;
+use watoki\webco\MimeTypes;
+use watoki\webco\Request;
+use watoki\webco\Response;
+use watoki\webco\Url;
 
 abstract class Module extends Controller {
 

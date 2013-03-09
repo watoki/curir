@@ -1,7 +1,11 @@
 <?php
-namespace watoki\webco;
+namespace watoki\webco\controller;
  
 use watoki\collections\Map;
+use watoki\webco\Controller;
+use watoki\webco\Request;
+use watoki\webco\Response;
+use watoki\webco\Url;
 
 abstract class Component extends Controller {
 

@@ -4,7 +4,7 @@ namespace spec\watoki\webco\steps;
 use spec\watoki\webco\Step;
 use watoki\collections\Map;
 use watoki\factory\Factory;
-use watoki\webco\Module;
+use \watoki\webco\controller\Module;
 use watoki\webco\Request;
 use watoki\webco\Response;
 
@@ -29,7 +29,7 @@ class When extends Step {
             new Map($this->test->given->requestHeaders)
         );
 
-        /** @var $controllerClass Module */
+        /** @var $controllerClass \watoki\webco\controller\Module */
         $controllerClass = $factory->getInstance($controllerClass, array('route' => '/base/'));
 
         $this->response = $controllerClass->respond($request);
