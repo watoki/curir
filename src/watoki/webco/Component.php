@@ -8,20 +8,11 @@ abstract class Component extends Controller {
     public static $CLASS = __CLASS__;
 
     /**
-     * @var string Path to this controller in the current request
-     */
-    private $route;
-
-    /**
      * @param array|object $model
      * @param string $template
      * @return string The rendered template
      */
     abstract protected function doRender($model, $template);
-
-    function __construct($route) {
-        $this->route = $route;
-    }
 
     /**
      * @param Request $request
@@ -31,11 +22,19 @@ abstract class Component extends Controller {
     public function respond(Request $request) {
         $response = $this->getResponse();
         $action = $this->makeMethodName($this->getActionName($request));
-        $model = $this->invokeAction($action, $request->getParameters());
-        if ($model !== null) {
-            $response->setBody($this->render($model));
-        }
+        $response->setBody($this->renderAction($action, $request->getParameters()));
         return $response;
+    }
+
+    /**
+     * @param $action
+     * @param $parameters
+     * @return null|string
+     */
+    protected function renderAction($action, $parameters) {
+        $model = $this->invokeAction($action, $parameters);
+        $body = $model !== null ? $this->render($model) : null;
+        return $body;
     }
 
     /**

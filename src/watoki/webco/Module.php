@@ -2,6 +2,7 @@
 namespace watoki\webco;
 
 use watoki\collections\Liste;
+use watoki\collections\Map;
 use watoki\factory\Factory;
 
 abstract class Module extends Controller {
@@ -9,22 +10,12 @@ abstract class Module extends Controller {
     public static $CLASS = __CLASS__;
 
     /**
-     * @var \watoki\factory\Factory
-     */
-    protected $factory;
-
-    function __construct(Factory $factory, $route) {
-        $this->factory = $factory;
-        $this->route = $route;
-    }
-
-    /**
      * @param Request $request
      * @throws \Exception
      * @return Response
      */
     public function respond(Request $request) {
-        $controller = $this->findController($request);
+        $controller = $this->resolveController($request);
         if ($controller) {
             return $controller->respond($request);
         }
@@ -59,7 +50,7 @@ abstract class Module extends Controller {
      * @param Request $request
      * @return Controller|null
      */
-    protected function findController(Request $request) {
+    protected function resolveController(Request $request) {
         $classReflection = new \ReflectionClass($this);
         $classNamespace = $classReflection->getNamespaceName();
 
@@ -74,20 +65,66 @@ abstract class Module extends Controller {
             if (class_exists($controllerClass)) {
                 $nextRoute = $request->getResourcePath()->slice(0, $i);
                 $request->setResourcePath($request->getResourcePath()->slice($i));
-                return $this->factory->getInstance($controllerClass, array('route' => $this->route . $nextRoute->join('/') . '/'));
+                return $this->createController($controllerClass, $nextRoute);
             }
         }
 
-        $name = $request->getResourceName() ?: 'index';
+        $name = $request->getResourceName() ? : 'index';
         $controllerClass = $currentNamespace . '\\' . $this->makeControllerName($name);
         if (class_exists($controllerClass)) {
             $nextRoute = $request->getResourcePath()->slice(0, -1);
             $request->setResourcePath(new Liste());
-            return $this->factory->getInstance($controllerClass,
-                array('route' => $this->route . $nextRoute->join('/') . '/'));
+            return $this->createController($controllerClass, $nextRoute);
         }
 
         return null;
+    }
+
+    /**
+     * Searches all static routes for given Controller
+     *
+     * @param string $controllerClass
+     * @return Controller|null
+     */
+    public function findController($controllerClass) {
+        $commonNamespace = $this->findCommonNamespace($controllerClass, get_class($this));
+        if ($commonNamespace) {
+            $resource = substr(str_replace('\\', '/', $controllerClass), strlen($commonNamespace) + 1);
+            try {
+                return $this->resolveController(new Request('', $resource, new Map(), new Map()));
+            } catch (\Exception $e) {
+            }
+        }
+
+        return null;
+    }
+
+    private function findCommonNamespace($class1, $class2) {
+        $namespace1 = explode('\\', $class1);
+        $namespace2 = explode('\\', $class2);
+
+        $common = '';
+        for ($i = 1; $i <= count($namespace1); $i++) {
+            $nextCommon1 = implode('\\', array_slice($namespace1, 0, $i));
+            $nextCommon2 = implode('\\', array_slice($namespace2, 0, $i));
+            if ($nextCommon2 != $nextCommon1) {
+                break;
+            }
+            $common = $nextCommon1;
+        }
+        return $common;
+    }
+
+    /**
+     * @param $controllerClass
+     * @param $nextRoute
+     * @return mixed
+     */
+    private function createController($controllerClass, Liste $nextRoute) {
+        return $this->factory->getInstance($controllerClass, array(
+            'route' => $this->route . $nextRoute->join('/') . '/',
+            'parent' => $this
+        ));
     }
 
     protected function makeControllerName($name) {

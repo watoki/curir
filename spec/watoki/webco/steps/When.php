@@ -22,7 +22,6 @@ class When extends Step {
 
     public function iSendTheRequestTo($controllerClass) {
         $factory = new Factory();
-        $route = '/base/';
 
         $request = new Request($this->test->given->requestMethod,
             $this->test->given->requestResource,
@@ -31,7 +30,7 @@ class When extends Step {
         );
 
         /** @var $controllerClass Module */
-        $controllerClass = new $controllerClass($factory, $route);
+        $controllerClass = $factory->getInstance($controllerClass, array('route' => '/base/'));
 
         $this->response = $controllerClass->respond($request);
     }

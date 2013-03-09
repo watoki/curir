@@ -72,7 +72,7 @@ class Given extends Step {
         rmdir($folder);
     }
 
-    protected function theClass_In_Extending_WithTheBody($className, $folder, $baseClass, $body) {
+    public function theClass_In_Extending_WithTheBody($className, $folder, $baseClass, $body) {
         $classPath = explode('\\', $className);
         $shortName = array_pop($classPath);
         $namespace = implode('\\', $classPath);
@@ -82,6 +82,7 @@ class Given extends Step {
             namespace $namespace;
 
             class $shortName extends $baseClass {
+                static \$CLASS = __CLASS__;
             $body
             }
         ";

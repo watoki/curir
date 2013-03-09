@@ -9,6 +9,16 @@ abstract class Controller {
     public static $CLASS = __CLASS__;
 
     /**
+     * @var \watoki\factory\Factory
+     */
+    protected $factory;
+
+    /**
+     * @var string
+     */
+    protected $route;
+
+    /**
      * @var Module|null
      */
     private $parent;
@@ -18,8 +28,10 @@ abstract class Controller {
      */
     private $response;
 
-    function __construct(Module $parent) {
+    function __construct(Factory $factory, $route, Module $parent = null) {
         $this->parent = $parent;
+        $this->factory = $factory;
+        $this->route = $route;
     }
 
     /**
@@ -40,6 +52,16 @@ abstract class Controller {
      */
     protected function getParent() {
         return $this->parent;
+    }
+
+    /**
+     * @return \watoki\webco\Module
+     */
+    protected function getRoot() {
+        if ($this->parent) {
+            return $this->parent->getRoot();
+        }
+        return $this;
     }
 
     protected function getDirectory() {
