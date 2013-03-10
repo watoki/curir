@@ -50,7 +50,23 @@ class Url {
                         $key = $pair;
                         $value = null;
                     }
-                    $parameters->set($key, $value);
+                    if (preg_match('#\[.+\]#', $key)) {
+                        $paramsMap = $parameters;
+                        $mapKeys = explode('[', $key);
+                        foreach ($mapKeys as $mapKey) {
+                            if ($mapKey == end($mapKeys)) {
+                                $paramsMap->set(trim($mapKey, ']'), $value);
+                            } else {
+                                $mapKey = trim($mapKey, ']');
+                                if (!$paramsMap->has($mapKey)) {
+                                    $paramsMap->set($mapKey, new Map());
+                                }
+                                $paramsMap = $paramsMap->get($mapKey);
+                            }
+                        }
+                    } else {
+                        $parameters->set($key, $value);
+                    }
                 }
             }
         }
@@ -64,7 +80,7 @@ class Url {
 
     public function toString() {
         $queries = array();
-        foreach ($this->parameters as $key => $value) {
+        foreach ($this->flattenParams($this->parameters) as $key => $value) {
             $queries[] = urlencode($key) . '=' . urlencode($value);
         }
 
@@ -104,6 +120,21 @@ class Url {
 
     public function setFragment($fragment) {
         $this->fragment = $fragment;
+    }
+
+    private function flattenParams(Map $parameters, $i = 0) {
+        $flat = new Map();
+        foreach ($parameters as $key => $value) {
+            if ($value instanceof Map) {
+                foreach ($this->flattenParams($value, $i+1) as $subKey => $subValue) {
+                    $flatKey = $i ? "{$key}][{$subKey}" : "{$key}[{$subKey}]";
+                    $flat->set($flatKey, $subValue);
+                }
+            } else {
+                $flat->set($key, $value);
+            }
+        }
+        return $flat;
     }
 
 }

@@ -128,7 +128,7 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    <a href="some/link.html?param1=val1&amp;param2=val2">%msg%</a>
+                    <a href="some/link.html?param1[map][map2]=val1&amp;param2=val2">%msg%</a>
                 </body>
             </html>');
         $this->given->theComponent_In_WithTheBody('deeplink\Super', 'deeplink', '
@@ -146,7 +146,7 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    Hello <a href="/base/super.html?.[sub][.]=/base/some/link.html&.[sub][param1]=val1&.[sub][param2]=val2">World</a>
+                    Hello <a href="/base/super.html?.[sub][.]=/base/some/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
                 </body>
             </html>');
     }

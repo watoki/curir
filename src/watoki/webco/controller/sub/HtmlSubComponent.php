@@ -2,6 +2,7 @@
 namespace watoki\webco\controller\sub;
 
 use watoki\collections\Liste;
+use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Url;
 use watoki\webco\controller\Component;
@@ -128,10 +129,11 @@ class HtmlSubComponent extends PlainSubComponent {
                     $replace = new Url($route);
                     $replace->setFragment($url->getFragment());
 
-                    $replace->getParameters()->set(".[$subName][.]", $url->getResource());
+                    $subParams = new Map(array('.' => $url->getResource()));
                     foreach ($url->getParameters() as $key => $value) {
-                        $replace->getParameters()->set(".[$subName][$key]", $value);
+                        $subParams->set($key, $value);
                     }
+                    $replace->getParameters()->set('.', new Map(array($subName => $subParams)));
 
                     $element->setAttribute($name, $replace->toString());
                 }
