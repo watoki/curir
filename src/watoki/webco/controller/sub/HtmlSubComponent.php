@@ -4,6 +4,7 @@ namespace watoki\webco\controller\sub;
 use watoki\collections\Liste;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Url;
+use watoki\webco\controller\Component;
 use watoki\webco\controller\Module;
 
 class HtmlSubComponent extends PlainSubComponent {
@@ -13,13 +14,18 @@ class HtmlSubComponent extends PlainSubComponent {
         'link' => array('href')
     );
 
+    static $linkElements = array(
+        'form' => array('action'),
+        'a' => array('href')
+    );
+
     /**
      * @var Liste|\DOMElement[]
      */
     private $headElements;
 
-    function __construct($name, Module $root, $componentClass) {
-        parent::__construct($name, $root, $componentClass);
+    function __construct(Component $super, $componentClass) {
+        parent::__construct($super, $componentClass);
         $this->headElements = new Liste();
     }
 
@@ -83,27 +89,36 @@ class HtmlSubComponent extends PlainSubComponent {
     }
 
     private function replaceUrls(\DOMElement $element) {
-        $route = $this->getComponent()->getRoute();
         foreach ($element->childNodes as $child) {
             if (!$child instanceof \DOMElement) {
                 continue;
             }
 
-            /** @var $child \DOMElement */
             if (array_key_exists($child->nodeName, self::$assetElements)) {
-                foreach ($child->attributes as $name => $attributeNode) {
-                    if (in_array($name, self::$assetElements[$child->nodeName])) {
-                        $value = $attributeNode->value;
-                        $url = new Url($value);
-                        if ($url->isRelative()) {
-                            $child->setAttribute($name, $route . $value);
-                        }
-                    }
-                }
+                $this->replaceAssetUrl($child);
+            } else if (array_key_exists($child->nodeName, self::$linkElements)) {
+                $this->replaceLinkUrl($child);
             }
 
             $this->replaceUrls($child);
         }
+    }
+
+    private function replaceAssetUrl(\DOMElement $element) {
+        $route = $this->getComponent()->getBaseRoute();
+        foreach ($element->attributes as $name => $attributeNode) {
+            if (in_array($name, self::$assetElements[$element->nodeName])) {
+                $value = $attributeNode->value;
+                $url = new Url($value);
+                if ($url->isRelative()) {
+                    $element->setAttribute($name, $route . $value);
+                }
+            }
+        }
+    }
+
+    private function replaceLinkUrl(\DOMElement $element) {
+
     }
 
 }

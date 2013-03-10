@@ -7,18 +7,12 @@ use watoki\webco\controller\Module;
 abstract class SubComponent {
 
     /**
-     * @var \watoki\webco\controller\Module
+     * @var \watoki\webco\controller\Component
      */
-    protected $root;
+    protected $super;
 
-    /**
-     * @var string The local name of the SubComponent for its super
-     */
-    protected $name;
-
-    function __construct($name, Module $root) {
-        $this->name = $name;
-        $this->root = $root;
+    function __construct(Component $super) {
+        $this->super = $super;
     }
 
     /**

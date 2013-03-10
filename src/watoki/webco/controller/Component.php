@@ -117,14 +117,8 @@ abstract class Component extends Controller {
         return strtolower($classReflection->getShortName()) . '.html';
     }
 
-    protected function redirect(Url $url) {
-        $urlString = $url->toString();
-        if ($url->isRelative()) {
-            $urlString = $this->route . $urlString;
-        }
-        $response = $this->getResponse();
-        $response->getHeaders()->set(Response::HEADER_LOCATION, $urlString);
-        return null;
+    public function getBaseRoute() {
+        return substr($this->route, 0, strrpos($this->route, '/') + 1);
     }
 
     private function mergeSubHeaders($body) {
@@ -148,6 +142,19 @@ abstract class Component extends Controller {
         }
 
         return isset($parser) ? $parser->toString() : $body;
+    }
+
+    /**
+     * @return \watoki\collections\Map|SubComponent[]
+     */
+    public function getSubComponents() {
+        $subs = new Map();
+        foreach ($this as $name => $member) {
+            if ($member instanceof SubComponent) {
+                $subs->set($name, $member);
+            }
+        }
+        return $subs;
     }
 
 }

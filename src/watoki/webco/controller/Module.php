@@ -69,6 +69,7 @@ abstract class Module extends Controller {
 
             if (class_exists($controllerClass)) {
                 $nextRoute = $request->getResourcePath()->slice(0, $i);
+                $nextRoute->append('');
                 $request->setResourcePath($request->getResourcePath()->slice($i));
                 return $this->createController($controllerClass, $nextRoute);
             }
@@ -77,7 +78,7 @@ abstract class Module extends Controller {
         $name = $request->getResourceName() ? : 'index';
         $controllerClass = $currentNamespace . '\\' . $this->makeControllerName($name);
         if (class_exists($controllerClass)) {
-            $nextRoute = $request->getResourcePath()->slice(0, -1);
+            $nextRoute = $request->getResourcePath()->copy();
             $request->setResourcePath(new Liste());
             return $this->createController($controllerClass, $nextRoute);
         }
@@ -127,7 +128,7 @@ abstract class Module extends Controller {
      */
     private function createController($controllerClass, Liste $nextRoute) {
         return $this->factory->getInstance($controllerClass, array(
-            'route' => $this->route . $nextRoute->join('/') . '/',
+            'route' => $this->route . $nextRoute->join('/'),
             'parent' => $this
         ));
     }
@@ -136,14 +137,8 @@ abstract class Module extends Controller {
         return ucfirst($name);
     }
 
-    protected function redirect(Url $url) {
-        $urlString = $url->toString();
-        if ($url->isRelative()) {
-            $urlString = $this->route . $urlString;
-        }
-        $response = $this->getResponse();
-        $response->getHeaders()->set(Response::HEADER_LOCATION, $urlString);
-        return null;
+    protected function getBaseRoute() {
+        return $this->route;
     }
 
 }

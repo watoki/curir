@@ -118,14 +118,14 @@ class ModuleTest_Given extends Given {
     }
 
     public function theComponent_In_ThatRedirectsTo($className, $folder, $target) {
-        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', "
-            public function respond(\\watoki\\webco\\Request \$request) {
-                \$this->redirect(new \\watoki\\webco\\Url('$target'));
-                return \$this->getResponse();
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', '
+            public function respond(\watoki\webco\Request $request) {
+                $this->redirect(new \watoki\webco\Url("' . $target. '"));
+                return $this->getResponse();
             }
 
-            protected function doRender(\$model, \$template) {}
-        ");
+            protected function doRender($model, $template) {}
+        ');
     }
 }
 

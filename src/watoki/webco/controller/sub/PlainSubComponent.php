@@ -10,6 +10,11 @@ use watoki\webco\controller\SubComponent;
 class PlainSubComponent extends SubComponent {
 
     /**
+     * @var string|null
+     */
+    private $name;
+
+    /**
      * @var Component|null
      */
     private $component;
@@ -19,8 +24,8 @@ class PlainSubComponent extends SubComponent {
      */
     protected $componentClass;
 
-    function __construct($name, Module $root, $componentClass) {
-        parent::__construct($name, $root);
+    function __construct(Component $super, $componentClass) {
+        parent::__construct($super);
         $this->componentClass = $componentClass;
     }
 
@@ -31,13 +36,23 @@ class PlainSubComponent extends SubComponent {
     }
 
     /**
-     * @return null|\watoki\webco\controller\Component
+     * @throws \Exception If Component cannot be found
+     * @return \watoki\webco\controller\Component
      */
     protected function getComponent() {
         if (!$this->component) {
-            $this->component = $this->root->findController($this->componentClass);
+            $this->component = $this->super->getRoot()->findController($this->componentClass);
+            if (!$this->component) {
+                throw new \Exception('Could not find route to ' . $this->componentClass);
+            }
         }
         return $this->component;
+    }
+
+    protected function getName() {
+        if ($this->name) {
+            $this->name = $this->getComponent()->getSubComponents()->keyOf($this);
+        }
     }
 
 }

@@ -65,7 +65,7 @@ abstract class Controller {
     /**
      * @return \watoki\webco\controller\Module
      */
-    protected function getRoot() {
+    public function getRoot() {
         if ($this->parent) {
             return $this->parent->getRoot();
         }
@@ -77,4 +77,15 @@ abstract class Controller {
         return dirname($class->getFileName());
     }
 
+    protected function redirect(Url $url) {
+        $urlString = $url->toString();
+        if ($url->isRelative()) {
+            $urlString = $this->getBaseRoute() . $urlString;
+        }
+        $response = $this->getResponse();
+        $response->getHeaders()->set(Response::HEADER_LOCATION, $urlString);
+        return null;
+    }
+
+    abstract protected function getBaseRoute();
 }

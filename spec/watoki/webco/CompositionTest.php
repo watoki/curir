@@ -22,7 +22,7 @@ class CompositionTest extends Test {
         $this->given->theSubComponent_In_WithTemplate('snippet\Sub', 'snippet', '%msg%!');
         $this->given->theComponent_In_WithTheBody('snippet\Super', 'snippet', '
         function doGet() {
-            $sub = new \watoki\webco\controller\sub\PlainSubComponent("sub", $this->getRoot(), Sub::$CLASS);
+            $sub = new \watoki\webco\controller\sub\PlainSubComponent($this, Sub::$CLASS);
             return array(
                 "sub" => $sub->render()
             );
@@ -43,7 +43,7 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
         function doGet() {
-            $sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), Sub::$CLASS);
+            $sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
                 "sub" => $sub->render()
             );
@@ -66,7 +66,7 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('assets\Super', 'assets', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), Sub::$CLASS);
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
                 "sub" => $this->sub->render()
             );
@@ -100,7 +100,7 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('relative\Super', 'relative', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent("sub", $this->getRoot(), inner\Sub::$CLASS);
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, inner\Sub::$CLASS);
             return array(
                 "sub" => $this->sub->render()
             );
@@ -119,11 +119,35 @@ class CompositionTest extends Test {
                     <img src="/base/inner/also/relative.png">
                     <img src="/not/relative.png">
                 </body>
-            </html>'
-        );
+            </html>');
     }
 
     function testDeepLinkReplacement() {
+        $this->given->theFolder_WithModule('deeplink');
+        $this->given->theSubComponent_In_WithTemplate('deeplink\Sub', 'deeplink',
+            '<html>
+                <head></head>
+                <body>
+                    <a href="test.html?param1=val1&amp;param2=val2">%msg%</a>
+                </body>
+            </html>');
+        $this->given->theComponent_In_WithTheBody('deeplink\Super', 'deeplink', '
+        function doGet() {
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
+            return array(
+                "sub" => $this->sub->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'deeplink', '<html><body>Hello %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('deeplink\Module');
+
+        $this->then->theResponseBodyShouldBe(
+            '<html>
+                <body>
+                    Hello <a href="/base/super.html?.[sub][.]=/base/some/link.html&amp;.[sub][param1]=val1&amp;.[sub][param2]=val2">%msg%</a>
+                </body>
+            </html>');
     }
 
     function testDeepLinkTarget() {
