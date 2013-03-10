@@ -50,9 +50,10 @@ class PlainSubComponent extends SubComponent {
     }
 
     protected function getName() {
-        if ($this->name) {
-            $this->name = $this->getComponent()->getSubComponents()->keyOf($this);
+        if (!$this->name) {
+            $this->name = $this->super->getSubComponents()->keyOf($this);
         }
+        return $this->name;
     }
 
 }

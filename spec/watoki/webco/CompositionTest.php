@@ -128,7 +128,7 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    <a href="test.html?param1=val1&amp;param2=val2">%msg%</a>
+                    <a href="some/link.html?param1=val1&amp;param2=val2">%msg%</a>
                 </body>
             </html>');
         $this->given->theComponent_In_WithTheBody('deeplink\Super', 'deeplink', '
@@ -142,12 +142,17 @@ class CompositionTest extends Test {
 
         $this->when->iSendTheRequestTo('deeplink\Module');
 
-        $this->then->theResponseBodyShouldBe(
+        $this->then->theHtmlResponseBodyShouldBe(
             '<html>
+                <head></head>
                 <body>
-                    Hello <a href="/base/super.html?.[sub][.]=/base/some/link.html&amp;.[sub][param1]=val1&amp;.[sub][param2]=val2">%msg%</a>
+                    Hello <a href="/base/super.html?.[sub][.]=/base/some/link.html&.[sub][param1]=val1&.[sub][param2]=val2">World</a>
                 </body>
             </html>');
+    }
+
+    public function testCollectState() {
+
     }
 
     function testDeepLinkTarget() {

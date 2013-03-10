@@ -6,7 +6,13 @@ use spec\watoki\webco\Step;
 class Then extends Step {
 
     public function theResponseBodyShouldBe($body) {
-        $this->test->assertEquals($this->clean($body), $this->clean($this->test->when->response->getBody()));
+        $this->test->assertEquals($this->clean($body),
+            $this->clean($this->test->when->response->getBody()));
+    }
+
+    public function theHtmlResponseBodyShouldBe($expected) {
+        $this->test->assertEquals(urldecode(html_entity_decode($this->clean($expected))),
+            urldecode(html_entity_decode($this->clean($this->test->when->response->getBody()))));
     }
 
     private function clean($str) {

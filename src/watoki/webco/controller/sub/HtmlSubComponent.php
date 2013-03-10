@@ -58,7 +58,7 @@ class HtmlSubComponent extends PlainSubComponent {
         }
 
         while (!$body || $body->nodeName != 'body') {
-            throw new \Exception('Cannot find body element while parsing sub component [' . $this->name . ']');
+            throw new \Exception('Cannot find body element while parsing sub component [' . $this->getName() . ']');
         }
 
         $this->replaceUrls($body);
@@ -95,21 +95,22 @@ class HtmlSubComponent extends PlainSubComponent {
             }
 
             if (array_key_exists($child->nodeName, self::$assetElements)) {
-                $this->replaceAssetUrl($child);
+                $this->replaceRelativeUrl($child, self::$assetElements);
             } else if (array_key_exists($child->nodeName, self::$linkElements)) {
-                $this->replaceLinkUrl($child);
+                $this->replaceRelativeUrl($child, self::$linkElements);
+                $this->replaceLinkUrl($child, self::$linkElements);
             }
 
             $this->replaceUrls($child);
         }
     }
 
-    private function replaceAssetUrl(\DOMElement $element) {
+    private function replaceRelativeUrl(\DOMElement $element, $elements) {
         $route = $this->getComponent()->getBaseRoute();
         foreach ($element->attributes as $name => $attributeNode) {
-            if (in_array($name, self::$assetElements[$element->nodeName])) {
+            if (in_array($name, $elements[$element->nodeName])) {
                 $value = $attributeNode->value;
-                $url = new Url($value);
+                $url = Url::parse($value);
                 if ($url->isRelative()) {
                     $element->setAttribute($name, $route . $value);
                 }
@@ -117,8 +118,25 @@ class HtmlSubComponent extends PlainSubComponent {
         }
     }
 
-    private function replaceLinkUrl(\DOMElement $element) {
+    private function replaceLinkUrl(\DOMElement $element, $elements) {
+        $subName = $this->getName();
+        $route = $this->super->getRoute();
+        foreach ($element->attributes as $name => $attributeNode) {
+            if (in_array($name, $elements[$element->nodeName])) {
+                $url = Url::parse($attributeNode->value);
+                if ($url->isSameHost()) {
+                    $replace = new Url($route);
+                    $replace->setFragment($url->getFragment());
 
+                    $replace->getParameters()->set(".[$subName][.]", $url->getResource());
+                    foreach ($url->getParameters() as $key => $value) {
+                        $replace->getParameters()->set(".[$subName][$key]", $value);
+                    }
+
+                    $element->setAttribute($name, $replace->toString());
+                }
+            }
+        }
     }
 
 }
