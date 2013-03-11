@@ -138,7 +138,8 @@ class HtmlSubComponent extends PlainSubComponent {
                         $subParams->set($key, $value);
                     }
 
-                    $state = $this->super->getState();
+                    $state = new Map(array('.' => $subName));
+                    $state->merge($this->super->getState());
                     $state->set($subName, $subParams);
                     $replace->getParameters()->set('.', $state);
 
