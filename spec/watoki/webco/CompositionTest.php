@@ -151,8 +151,76 @@ class CompositionTest extends Test {
             </html>');
     }
 
-    public function testCollectState() {
+    function testDefaultRoute() {
+        $this->given->theFolder_WithModule('defroute');
+        $this->given->theSubComponent_In_WithTemplate('defroute\Sub', 'defroute',
+            '<html>
+                <head></head>
+                <body>
+                    <a href="sub.html?param1=val1">%msg%</a>
+                </body>
+            </html>');
+        $this->given->theComponent_In_WithTheBody('defroute\Super', 'defroute', '
+        function doGet() {
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
+            return array(
+                "sub" => $this->sub->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'defroute', '<html><body>Hello %sub%</body></html>');
 
+        $this->when->iSendTheRequestTo('defroute\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html>
+                <head></head>
+                <body>
+                    Hello <a href="/base/super.html?.[sub][param1]=val1">World</a>
+                </body>
+            </html>');
+    }
+
+    function testCollectState() {
+
+    }
+
+    function testDefaultStateByConstructor() {
+//        $this->given->theFolder_WithModule('defaultbyc');
+//        $this->given->theFolder_WithModule('defaultbyc');
+//        $this->given->theComponent_In_WithTheBody('defaultbyc\Sub', 'defaultbyc', '
+//        function doGet($arg1) {
+//            return array("msg" => $arg1);
+//        }');
+//        $this->given->theFile_In_WithContent('sub.html', 'defaultbyc',
+//            '<html><head></head><body><a href="my/link.html">%msg%</a></body></html>');
+//
+//        $this->given->theComponent_In_WithTheBody('defaultbyc\Super', 'defaultbyc', '
+//        function doGet() {
+//            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS, array("World"));
+//            return array(
+//                "sub" => $this->sub->render()
+//            );
+//        }');
+//        $this->given->theFile_In_WithContent('super.html', 'defaultbyc', '<html><body>Hello %sub%</body></html>');
+//
+//        $this->when->iSendTheRequestTo('defaultbyc\Module');
+//
+//        $this->then->theHtmlResponseBodyShouldBe(
+//            '<html>
+//                <head></head>
+//                <body>
+//                    Hello <a href="/base/super.html?.[sub][.]=/base/my/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
+//                </body>
+//            </html>');
+    }
+
+    function testDefaultStateByAction() {
+        $this->given->theFolder_WithModule('defaultargs');
+        $this->given->theComponent_In_WithTheBody('defaultargs\Sub', 'defaultargs', '
+        function doGet($arg1, $arg2 = "default") {
+            return array("msg" => $arg1 . $arg2);
+        }');
+        $this->given->theFile_In_WithContent('sub.html', 'defaultargs', '<html><head></head><body>%msg%</body></html>');
     }
 
     function testDeepLinkTarget() {

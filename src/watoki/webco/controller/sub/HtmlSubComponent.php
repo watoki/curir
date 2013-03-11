@@ -6,7 +6,6 @@ use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Url;
 use watoki\webco\controller\Component;
-use watoki\webco\controller\Module;
 
 class HtmlSubComponent extends PlainSubComponent {
 
@@ -121,6 +120,7 @@ class HtmlSubComponent extends PlainSubComponent {
 
     private function replaceLinkUrl(\DOMElement $element, $elements) {
         $subName = $this->getName();
+        $subRoute = strtolower($this->getComponent()->getRoute());
         $route = $this->super->getRoute();
         foreach ($element->attributes as $name => $attributeNode) {
             if (in_array($name, $elements[$element->nodeName])) {
@@ -129,7 +129,10 @@ class HtmlSubComponent extends PlainSubComponent {
                     $replace = new Url($route);
                     $replace->setFragment($url->getFragment());
 
-                    $subParams = new Map(array('.' => $url->getResource()));
+                    $subParams = new Map();
+                    if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
+                        $subParams->set('.', $url->getResource());
+                    }
                     foreach ($url->getParameters() as $key => $value) {
                         $subParams->set($key, $value);
                     }

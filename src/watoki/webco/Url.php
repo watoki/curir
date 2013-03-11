@@ -104,6 +104,32 @@ class Url {
         return $this->resource;
     }
 
+    public function getResourceDir() {
+        return dirname($this->resource) . '/';
+    }
+
+    public function getResourceBase() {
+        return basename($this->resource);
+    }
+
+    public function getResourceBaseName() {
+        $base = $this->getResourceBase();
+        $dotPos = strrpos($base, '.');
+        if ($dotPos === false || $dotPos == 0) {
+            return $base;
+        }
+        return substr($base, 0, $dotPos);
+    }
+
+    public function getResourceBaseExtension() {
+        $base = $this->getResourceBase();
+        $dotPos = strrpos($base, '.');
+        if ($dotPos === false || strlen($base) == $dotPos + 1) {
+            return $base;
+        }
+        return substr($base, $dotPos + 1);
+    }
+
     /**
      * @return \watoki\collections\Map
      */
