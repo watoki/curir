@@ -24,8 +24,8 @@ class HtmlSubComponent extends PlainSubComponent {
      */
     private $headElements;
 
-    function __construct(Component $super, $componentClass) {
-        parent::__construct($super, $componentClass);
+    function __construct(Component $super, $componentClass, Map $defaultParameters = null) {
+        parent::__construct($super, $componentClass, $defaultParameters);
         $this->headElements = new Liste();
     }
 
@@ -118,6 +118,7 @@ class HtmlSubComponent extends PlainSubComponent {
         }
     }
 
+    // TODO This whole strtolower logic should be somewhere central
     private function replaceLinkUrl(\DOMElement $element, $elements) {
         $subName = $this->getName();
         $subRoute = strtolower($this->getComponent()->getRoute());
@@ -136,7 +137,10 @@ class HtmlSubComponent extends PlainSubComponent {
                     foreach ($url->getParameters() as $key => $value) {
                         $subParams->set($key, $value);
                     }
-                    $replace->getParameters()->set('.', new Map(array($subName => $subParams)));
+
+                    $state = $this->super->getState();
+                    $state->set($subName, $subParams);
+                    $replace->getParameters()->set('.', $state);
 
                     $element->setAttribute($name, $replace->toString());
                 }

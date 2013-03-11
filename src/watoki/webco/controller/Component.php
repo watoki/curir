@@ -157,4 +157,12 @@ abstract class Component extends Controller {
         return $subs;
     }
 
+    public function getState() {
+        $params = new Map();
+        foreach ($this->getSubComponents() as $name => $sub) {
+            $params->set($name, $sub->getNonDefaultParameters());
+        }
+        return $params;
+    }
+
 }

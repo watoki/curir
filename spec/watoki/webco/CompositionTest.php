@@ -181,37 +181,62 @@ class CompositionTest extends Test {
     }
 
     function testCollectState() {
+        $this->given->theFolder_WithModule('colstate');
+        $this->given->theSubComponent_In_WithTemplate('colstate\Sub1', 'colstate',
+            '<html><head></head><body>Sub1:%msg%</body></html>');
+        $this->given->theSubComponent_In_WithTemplate('colstate\Sub2', 'colstate',
+            '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
+        $this->given->theComponent_In_WithTheBody('colstate\Super', 'colstate', '
+        function doGet() {
+            $this->sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
+            $this->sub1->getParameters()->set("param1", "val1");
 
+            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+            return array(
+                "sub1" => $this->sub1->render(),
+                "sub2" => $this->sub2->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'colstate', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
+
+        $this->when->iSendTheRequestTo('colstate\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html><head></head><body>
+                Hello Sub1:World,
+                hello <a href="/base/super.html?.[sub1][param1]=val1">Sub2</a>:World
+            </body></html>');
     }
 
     function testDefaultStateByConstructor() {
-//        $this->given->theFolder_WithModule('defaultbyc');
-//        $this->given->theFolder_WithModule('defaultbyc');
-//        $this->given->theComponent_In_WithTheBody('defaultbyc\Sub', 'defaultbyc', '
-//        function doGet($arg1) {
-//            return array("msg" => $arg1);
-//        }');
-//        $this->given->theFile_In_WithContent('sub.html', 'defaultbyc',
-//            '<html><head></head><body><a href="my/link.html">%msg%</a></body></html>');
-//
-//        $this->given->theComponent_In_WithTheBody('defaultbyc\Super', 'defaultbyc', '
-//        function doGet() {
-//            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS, array("World"));
-//            return array(
-//                "sub" => $this->sub->render()
-//            );
-//        }');
-//        $this->given->theFile_In_WithContent('super.html', 'defaultbyc', '<html><body>Hello %sub%</body></html>');
-//
-//        $this->when->iSendTheRequestTo('defaultbyc\Module');
-//
-//        $this->then->theHtmlResponseBodyShouldBe(
-//            '<html>
-//                <head></head>
-//                <body>
-//                    Hello <a href="/base/super.html?.[sub][.]=/base/my/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
-//                </body>
-//            </html>');
+        $this->given->theFolder_WithModule('defbyconstr');
+        $this->given->theSubComponent_In_WithTemplate('defbyconstr\Sub1', 'defbyconstr',
+            '<html><head></head><body>Sub1:%msg%</body></html>');
+        $this->given->theSubComponent_In_WithTemplate('defbyconstr\Sub2', 'defbyconstr',
+            '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
+        $this->given->theComponent_In_WithTheBody('defbyconstr\Super', 'defbyconstr', '
+        function doGet() {
+            $this->sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
+                new \watoki\collections\Map(array("param1" => "val1", "param2" => "val2", "param3" => "val3")));
+            $this->sub1->getParameters()->set("param1", "val1");
+            $this->sub1->getParameters()->set("param2", "other");
+            $this->sub1->getParameters()->set("param4", "new");
+
+            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+            return array(
+                "sub1" => $this->sub1->render(),
+                "sub2" => $this->sub2->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'defbyconstr', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
+
+        $this->when->iSendTheRequestTo('defbyconstr\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html><head></head><body>
+                Hello Sub1:World,
+                hello <a href="/base/super.html?.[sub1][param2]=other&.[sub1][param4]=new">Sub2</a>:World
+            </body></html>');
     }
 
     function testDefaultStateByAction() {
@@ -223,7 +248,7 @@ class CompositionTest extends Test {
         $this->given->theFile_In_WithContent('sub.html', 'defaultargs', '<html><head></head><body>%msg%</body></html>');
     }
 
-    function testDeepLinkTarget() {
+    function testPrimaryAction() {
     }
 
 }

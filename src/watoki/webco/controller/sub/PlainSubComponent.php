@@ -1,6 +1,7 @@
 <?php
 namespace watoki\webco\controller\sub;
 
+use watoki\collections\Map;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\controller\Component;
@@ -24,8 +25,8 @@ class PlainSubComponent extends SubComponent {
      */
     protected $componentClass;
 
-    function __construct(Component $super, $componentClass) {
-        parent::__construct($super);
+    function __construct(Component $super, $componentClass, Map $defaultParameters = null) {
+        parent::__construct($super, $defaultParameters);
         $this->componentClass = $componentClass;
     }
 
