@@ -241,11 +241,35 @@ class CompositionTest extends Test {
 
     function testDefaultStateByAction() {
         $this->given->theFolder_WithModule('defaultargs');
-        $this->given->theComponent_In_WithTheBody('defaultargs\Sub', 'defaultargs', '
-        function doGet($arg1, $arg2 = "default") {
-            return array("msg" => $arg1 . $arg2);
+        $this->given->theComponent_In_WithTheBody('defaultargs\Sub1', 'defaultargs', '
+        function doGet($param1, $param2 = "default") {
+            return array("msg" => $param1 . ":" . $param2);
         }');
-        $this->given->theFile_In_WithContent('sub.html', 'defaultargs', '<html><head></head><body>%msg%</body></html>');
+        $this->given->theFile_In_WithContent('sub1.html', 'defaultargs', '<html><head></head><body>Sub1:%msg%</body></html>');
+
+        $this->given->theSubComponent_In_WithTemplate('defaultargs\Sub2', 'defaultargs',
+            '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
+        $this->given->theComponent_In_WithTheBody('defaultargs\Super', 'defaultargs', '
+        function doGet() {
+            $this->sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
+                new \watoki\collections\Map(array("param1" => "World")));
+            $this->sub1->getParameters()->set("param2", "default");
+
+            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+            return array(
+                "sub1" => $this->sub1->render(),
+                "sub2" => $this->sub2->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'defaultargs', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
+
+        $this->when->iSendTheRequestTo('defaultargs\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html><head></head><body>
+                Hello Sub1:World:default,
+                hello <a href="/base/super.html">Sub2</a>:World
+            </body></html>');
     }
 
     function testPrimaryAction() {

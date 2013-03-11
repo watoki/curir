@@ -42,11 +42,15 @@ abstract class SubComponent {
     public function getNonDefaultParameters() {
         $nonDefault = new Map();
         foreach ($this->parameters as $key => $value) {
-            if (!($this->defaultParameters->has($key) && $this->defaultParameters->get($key) == $value)) {
+            if (!$this->isDefaultParameter($key, $value)) {
                 $nonDefault->set($key, $value);
             }
         }
         return $nonDefault;
+    }
+
+    protected function isDefaultParameter($key, $value) {
+        return $this->defaultParameters->has($key) && $this->defaultParameters->get($key) == $value;
     }
 
 }

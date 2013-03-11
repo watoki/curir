@@ -94,7 +94,7 @@ abstract class Component extends Controller {
      * @param $actionName
      * @return string
      */
-    protected function makeMethodName($actionName) {
+    public function makeMethodName($actionName) {
         return 'do' . ucfirst($actionName);
     }
 
