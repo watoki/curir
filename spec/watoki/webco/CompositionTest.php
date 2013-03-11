@@ -152,7 +152,41 @@ class CompositionTest extends Test {
     }
 
     function testReplaceFormFieldNames() {
-        $this->markTestIncomplete();
+        $this->given->theFolder_WithModule('formfields');
+        $this->given->theSubComponent_In_WithTemplate('formfields\Sub', 'formfields',
+            '<html>
+                <head></head>
+                <body>
+                    <form action="sub.html" method="post">
+                        <input name="field[1]">
+                        <textarea name="field[2]"></textarea>
+                        <select name="field[3]"></select>
+                    </form>
+                </body>
+            </html>');
+        $this->given->theComponent_In_WithTheBody('formfields\Super', 'formfields', '
+        function doGet() {
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
+            return array(
+                "sub" => $this->sub->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'formfields', '<html><body>Hello  %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('formfields\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html>
+                <head></head>
+                <body>
+                    Hello
+                    <form action="/base/super.html?.[.]=sub" method="post">
+                        <input name=".[sub][field][1]">
+                        <textarea name=".[sub][field][2]"></textarea>
+                        <select name=".[sub][field][3]"></select>
+                    </form>
+                </body>
+            </html>');
     }
 
     function testPrimaryAction() {

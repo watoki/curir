@@ -10,13 +10,23 @@ use watoki\webco\controller\Component;
 class HtmlSubComponent extends PlainSubComponent {
 
     static $assetElements = array(
-        'img' => array('src'),
-        'link' => array('href')
+        'img' => 'src',
+        'link' => 'href',
+        'input' => 'src',
+        'form' => 'action',
+        'a' => 'href'
     );
 
     static $linkElements = array(
-        'form' => array('action'),
-        'a' => array('href')
+        'form' => 'action',
+        'a' => 'href'
+    );
+
+    static $formElements = array(
+        'input' => 'name',
+        'textarea' => 'name',
+        'select' => 'name',
+        'button' => 'name'
     );
 
     /**
@@ -95,61 +105,81 @@ class HtmlSubComponent extends PlainSubComponent {
             }
 
             if (array_key_exists($child->nodeName, self::$assetElements)) {
-                $this->replaceRelativeUrl($child, self::$assetElements);
-            } else if (array_key_exists($child->nodeName, self::$linkElements)) {
-                $this->replaceRelativeUrl($child, self::$linkElements);
-                $this->replaceLinkUrl($child, self::$linkElements);
+                $this->replaceRelativeUrl($child, self::$assetElements[$child->nodeName]);
+            }
+
+            if (array_key_exists($child->nodeName, self::$linkElements)) {
+                $this->replaceLinkUrl($child, self::$linkElements[$child->nodeName]);
+            }
+
+            if (array_key_exists($child->nodeName, self::$formElements)) {
+                $this->replaceName($child, self::$formElements[$child->nodeName]);
             }
 
             $this->replaceUrls($child);
         }
     }
 
-    private function replaceRelativeUrl(\DOMElement $element, $elements) {
+    private function replaceRelativeUrl(\DOMElement $element, $attributeName) {
+        if (!$element->hasAttribute($attributeName)) {
+            return;
+        }
+
         $route = $this->getComponent()->getBaseRoute();
-        foreach ($element->attributes as $name => $attributeNode) {
-            if (in_array($name, $elements[$element->nodeName])) {
-                $value = $attributeNode->value;
-                $url = Url::parse($value);
-                if ($url->isRelative()) {
-                    $element->setAttribute($name, $route . $value);
-                }
-            }
+        $value = $element->getAttribute($attributeName);
+        $url = Url::parse($value);
+        if ($url->isRelative()) {
+            $element->setAttribute($attributeName, $route . $value);
         }
     }
 
     // TODO This whole strtolower logic should be somewhere central
-    private function replaceLinkUrl(\DOMElement $element, $elements) {
+    private function replaceLinkUrl(\DOMElement $element, $attributeName) {
+        if (!$element->hasAttribute($attributeName)) {
+            return;
+        }
+
         $subName = $this->getName();
         $subRoute = strtolower($this->getComponent()->getRoute());
         $route = $this->super->getRoute();
-        foreach ($element->attributes as $name => $attributeNode) {
-            if (in_array($name, $elements[$element->nodeName])) {
-                $url = Url::parse($attributeNode->value);
-                if ($url->isSameHost()) {
-                    $replace = new Url($route);
-                    $replace->setFragment($url->getFragment());
+        $url = Url::parse($element->getAttribute($attributeName));
 
-                    $subParams = new Map();
-                    if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
-                        $subParams->set('.', $url->getResource());
-                    }
-                    foreach ($url->getParameters() as $key => $value) {
-                        $subParams->set($key, $value);
-                    }
+        if ($url->isSameHost()) {
+            $replace = new Url($route);
+            $replace->setFragment($url->getFragment());
 
-                    $state = new Map();
-                    if ($this->getActionName($url, $element) != 'get') {
-                        $state->set('.', $subName);
-                    }
-                    $state->merge($this->super->getState());
-                    $state->set($subName, $subParams);
-                    $replace->getParameters()->set('.', $state);
-
-                    $element->setAttribute($name, $replace->toString());
-                }
+            $subParams = new Map();
+            if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
+                $subParams->set('.', $url->getResource());
             }
+            foreach ($url->getParameters() as $key => $value) {
+                $subParams->set($key, $value);
+            }
+
+            $state = new Map();
+            if ($this->getActionName($url, $element) != 'get') {
+                $state->set('.', $subName);
+            }
+            $state->merge($this->super->getState());
+            $state->set($subName, $subParams);
+            $replace->getParameters()->set('.', $state);
+
+            $element->setAttribute($attributeName, $replace->toString());
         }
+    }
+
+    private function replaceName(\DOMElement $child, $attributeName) {
+        if (!$child->hasAttribute($attributeName)) {
+            return;
+        }
+
+        $name = $this->getName();
+        $url = Url::parse('?' . $child->getAttribute($attributeName));
+        $replace = new Url('');
+        $replace->getParameters()->set('.', new Map(array($name => $url->getParameters())));
+
+        $replaceName = substr($replace->toString(), 1, -1);
+        $child->setAttribute($attributeName, $replaceName);
     }
 
     private function getActionName(Url $url, \DOMElement $element) {
