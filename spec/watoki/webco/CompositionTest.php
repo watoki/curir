@@ -146,9 +146,13 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    Hello <a href="/base/super.html?.[.]=sub&.[sub][.]=/base/some/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
+                    Hello <a href="/base/super.html?.[sub][.]=/base/some/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
                 </body>
             </html>');
+    }
+
+    function testReplaceFormFieldNames() {
+        $this->markTestIncomplete();
     }
 
     function testPrimaryAction() {
@@ -157,6 +161,7 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
+                    <form action="sub.html" method="post"></form>
                     <a href="sub.html?action=myAction">%msg%</a>
                 </body>
             </html>');
@@ -167,7 +172,7 @@ class CompositionTest extends Test {
                 "sub" => $this->sub->render()
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><body>Hello  %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('primaryaction\Module');
 
@@ -175,7 +180,41 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    Hello <a href="/base/super.html?.[.]=sub&.[sub][action]=myAction">World</a>
+                    Hello
+                    <form action="/base/super.html?.[.]=sub" method="post"></form>
+                    <a href="/base/super.html?.[.]=sub&.[sub][action]=myAction">World</a>
+                </body>
+            </html>');
+    }
+
+    function testOmitPrimaryRequest() {
+        $this->given->theFolder_WithModule('omitprimary');
+        $this->given->theSubComponent_In_WithTemplate('omitprimary\Sub', 'omitprimary',
+            '<html>
+                <head></head>
+                <body>
+                    <form action="sub.html" method="get"></form>
+                    <a href="sub.html">%msg%</a>
+                </body>
+            </html>');
+        $this->given->theComponent_In_WithTheBody('omitprimary\Super', 'omitprimary', '
+        function doGet() {
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
+            return array(
+                "sub" => $this->sub->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'omitprimary', '<html><body>Hello  %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('omitprimary\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html>
+                <head></head>
+                <body>
+                    Hello
+                    <form action="/base/super.html" method="get"></form>
+                    <a href="/base/super.html">World</a>
                 </body>
             </html>');
     }
@@ -204,7 +243,7 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    Hello <a href="/base/super.html?.[.]=sub&.[sub][param1]=val1">World</a>
+                    Hello <a href="/base/super.html?.[sub][param1]=val1">World</a>
                 </body>
             </html>');
     }
@@ -233,7 +272,7 @@ class CompositionTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><head></head><body>
                 Hello Sub1:World,
-                hello <a href="/base/super.html?.[.]=sub2&.[sub1][param1]=val1">Sub2</a>:World
+                hello <a href="/base/super.html?.[sub1][param1]=val1">Sub2</a>:World
             </body></html>');
     }
 
@@ -264,7 +303,7 @@ class CompositionTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><head></head><body>
                 Hello Sub1:World,
-                hello <a href="/base/super.html?.[.]=sub2&.[sub1][param2]=other&.[sub1][param4]=new">Sub2</a>:World
+                hello <a href="/base/super.html?.[sub1][param2]=other&.[sub1][param4]=new">Sub2</a>:World
             </body></html>');
     }
 
@@ -297,7 +336,7 @@ class CompositionTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><head></head><body>
                 Hello Sub1:World:default,
-                hello <a href="/base/super.html?.[.]=sub2">Sub2</a>:World
+                hello <a href="/base/super.html">Sub2</a>:World
             </body></html>');
     }
 

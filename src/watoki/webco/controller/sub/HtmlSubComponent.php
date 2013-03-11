@@ -138,7 +138,10 @@ class HtmlSubComponent extends PlainSubComponent {
                         $subParams->set($key, $value);
                     }
 
-                    $state = new Map(array('.' => $subName));
+                    $state = new Map();
+                    if ($this->getActionName($url, $element) != 'get') {
+                        $state->set('.', $subName);
+                    }
                     $state->merge($this->super->getState());
                     $state->set($subName, $subParams);
                     $replace->getParameters()->set('.', $state);
@@ -146,6 +149,16 @@ class HtmlSubComponent extends PlainSubComponent {
                     $element->setAttribute($name, $replace->toString());
                 }
             }
+        }
+    }
+
+    private function getActionName(Url $url, \DOMElement $element) {
+        if ($url->getParameters()->has('action')) {
+            return $url->getParameters()->get('action');
+        } else if ($element->nodeName == 'form' && $element->hasAttribute('method')) {
+            return $element->getAttribute('method');
+        } else {
+            return 'get';
         }
     }
 
