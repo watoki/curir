@@ -27,6 +27,9 @@ abstract class Component extends Controller {
      */
     public function respond(Request $request) {
         $response = $this->getResponse();
+        if ($request->getParameters()->has('.')) {
+            $this->restoreState($request->getParameters()->get('.'));
+        }
         $action = $this->makeMethodName($this->getActionName($request));
         $response->setBody($this->renderAction($action, $request->getParameters()));
         return $response;
@@ -163,6 +166,15 @@ abstract class Component extends Controller {
             $params->set($name, $sub->getNonDefaultParameters());
         }
         return $params;
+    }
+
+    private function restoreState(Map $state) {
+        $subComponents = $this->getSubComponents();
+        foreach ($state as $name => $subState) {
+            /** @var $subComponent SubComponent */
+            $subComponent = $subComponents->get($name);
+            $subComponent->getParameters()->merge($subState);
+        }
     }
 
 }

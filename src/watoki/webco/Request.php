@@ -64,7 +64,7 @@ class Request {
     public static function build($resource) {
         $method = $_SERVER['REQUEST_METHOD'];
 
-        $params = new Map($_REQUEST);
+        $params = Map::toCollections($_REQUEST);
         $body = file_get_contents('php://input');
 
         $headers = new Map();
