@@ -195,11 +195,45 @@ class CompositeRequestTest extends Test {
         $this->when->iSendTheRequestTo('subredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super?param=Super&.[sub2][param]=x&.[sub2][~]=/base/not/here&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else#foo');
+            '/base/super?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else&.[sub2][param]=x&.[sub2][~]=/base/not/here#foo');
     }
 
     function testPrimaryRedirect() {
-        $this->markTestIncomplete();
+        $this->given->theFolder_WithModule('primaryredirect');
+        $this->given->theComponent_In_WithTheBody('primaryredirect\Sub', 'primaryredirect', '
+        function doGet() {
+            return $this->redirect(new \watoki\webco\Url("somewhere/else?param[1]=a&param[2]=b#bar"));
+        }');
+        $this->given->theComponent_In_WithTheBody('primaryredirect\Sub2', 'primaryredirect', '
+        function doGet() {
+            throw new \Exception("Shuold not be called");
+        }');
+
+        $this->given->theComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
+        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
+            parent::__construct($factory, $route, $parent);
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
+            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+        }
+
+        function doGet() {
+            return array(
+                "subling1" => $this->sub->render(),
+                "subling2" => $this->sub2->render(),
+            );
+        }');
+
+        $this->given->theRequestParameter_WithValue('param', 'Super');
+        $this->given->theRequestParameterHasTheState(new Map(array(
+            '.' => 'sub',
+            'sub' => new Map(array(
+                'param1' => 'hello'
+            ))
+        )));
+        $this->when->iSendTheRequestTo('primaryredirect\Module');
+
+        $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
+            '/base/super?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else#bar');
     }
 
 }

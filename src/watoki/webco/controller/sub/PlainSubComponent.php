@@ -104,7 +104,7 @@ class PlainSubComponent extends SubComponent {
         return $this->getComponent()->getRoute();
     }
 
-    protected function getName() {
+    public function getName() {
         if (!$this->name) {
             $this->name = $this->super->getSubComponents()->keyOf($this);
         }

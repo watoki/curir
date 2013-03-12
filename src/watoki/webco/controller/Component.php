@@ -36,24 +36,23 @@ abstract class Component extends Controller {
 
         if ($request->getParameters()->has(self::PARAMETER_STATE)) {
             /** @var $state Map */
-            $state = $request->getParameters()->get(self::PARAMETER_STATE);
+            $state = $request->getParameters()->remove(self::PARAMETER_STATE);
             $this->restoreState($state);
 
             if ($state->has(self::PARAMETER_PRIMARY_REQUEST)) {
                 $primarySubName = $state->remove(self::PARAMETER_PRIMARY_REQUEST);
-                $this->renderSubComponent($primarySubName, $request->getMethod());
-//                $state->remove($primarySubName);
+                $primarySub = $this->renderSubComponent($primarySubName, $request->getMethod());
+                if ($primarySub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
+                    return $this->bubbleUpRedirect($primarySubName, $primarySub->getResponse(), $response, $this->getState(), $request->getParameters()->copy());
+                }
                 $request->setMethod(Request::METHOD_GET);
             }
-            $request->getParameters()->remove(self::PARAMETER_STATE);
         }
 
         $action = $this->makeMethodName($this->getActionName($request));
         $response->setBody($this->renderAction($action, $request->getParameters()));
 
-        $response = $this->collectSubRedirects($response, $request);
-
-        return $response;
+        return $this->collectSubRedirects($response, $request->getParameters());
     }
 
     /**
@@ -189,11 +188,11 @@ abstract class Component extends Controller {
         $params = new Map();
         foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $sub) {
             /** @var $sub PlainSubComponent */
-            $params = $sub->getNonDefaultParameters();
+            $nonDefaultParams = $sub->getNonDefaultParameters();
             if ($sub->hasRouteChanged()) {
-                $params->set(self::PARAMETER_TARGET, $sub->getRoute());
+                $nonDefaultParams->set(self::PARAMETER_TARGET, $sub->getRoute());
             }
-            $params->set($name, $params);
+            $params->set($name, $nonDefaultParams);
         }
         return $params;
     }
@@ -212,38 +211,57 @@ abstract class Component extends Controller {
         }
     }
 
+    /**
+     * @param $subName
+     * @param $method
+     * @return PlainSubComponent
+     */
     private function renderSubComponent($subName, $method) {
         /** @var $sub PlainSubComponent */
         $sub = $this->getSubComponents(PlainSubComponent::$CLASS)->get($subName);
         $sub->setMethod($method);
         $this->$subName = new RenderedSubComponent($this, $sub->render());
+        return $sub;
     }
 
-    private function collectSubRedirects(Response $response, Request $request) {
+    private function collectSubRedirects(Response $response, Map $requestParams) {
         $state = $target = null;
 
-        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $sub) {
+        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $subName => $sub) {
             /** @var $sub PlainSubComponent */
             if ($sub->getResponse() && $sub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
                 if (!$target) {
-                    $target = new Url($this->getRoute(), $request->getParameters());
                     $state = $this->getState();
-                    $target->getParameters()->set(self::PARAMETER_STATE, $state);
+                    $target = $this->createRedirectTarget($requestParams, $state);
                 }
 
-                $subTarget = Url::parse($sub->getResponse()->getHeaders()->get(Response::HEADER_LOCATION));
-                $params = $subTarget->getParameters()->copy();
-                $params->set(self::PARAMETER_TARGET, $subTarget->getResource());
-                $target->setFragment($subTarget->getFragment());
-                $state->set($name, $params);
+                $this->bubbleUpRedirect($subName, $sub->getResponse(), $response, $state, $requestParams, $target);
             }
         }
 
-        if ($target) {
-            $response->getHeaders()->set(Response::HEADER_LOCATION, $target->toString());
+        return $response;
+    }
+
+    private function bubbleUpRedirect($subName, Response $subResponse, Response $response, Map $state, Map $requestParams, Url $target = null) {
+        if (!$target) {
+            $target = $this->createRedirectTarget($requestParams, $state);
         }
 
+        $subTarget = Url::parse($subResponse->getHeaders()->get(Response::HEADER_LOCATION));
+        $subParams = $subTarget->getParameters()->copy();
+        $subParams->set(self::PARAMETER_TARGET, $subTarget->getResource());
+        $target->setFragment($subTarget->getFragment());
+        $state->set($subName, $subParams);
+
+        $response->getHeaders()->set(Response::HEADER_LOCATION, $target->toString());
+
         return $response;
+    }
+
+    private function createRedirectTarget(Map $requestParams, Map $state) {
+        $target = new Url($this->getRoute(), $requestParams);
+        $target->getParameters()->set(self::PARAMETER_STATE, $state);
+        return $target;
     }
 
 }
