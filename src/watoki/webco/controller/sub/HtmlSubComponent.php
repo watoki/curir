@@ -47,6 +47,10 @@ class HtmlSubComponent extends PlainSubComponent {
     }
 
     private function postProcess($content) {
+        if (!$content) {
+            return $content;
+        }
+
         $parser = new HtmlParser($content);
         return $parser->toString($this->extractBody($parser->getRoot()));
     }

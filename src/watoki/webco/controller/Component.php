@@ -50,6 +50,9 @@ abstract class Component extends Controller {
 
         $action = $this->makeMethodName($this->getActionName($request));
         $response->setBody($this->renderAction($action, $request->getParameters()));
+
+        $response = $this->collectSubRedirects($response, $request);
+
         return $response;
     }
 
@@ -60,8 +63,10 @@ abstract class Component extends Controller {
      */
     protected function renderAction($action, $parameters) {
         $model = $this->invokeAction($action, $parameters);
-        $body = ($model !== null ? $this->render($model) : null);
-        return $this->mergeSubHeaders($body);
+        if ($model === null) {
+            return null;
+        }
+        return $this->mergeSubHeaders($this->render($model));
     }
 
     /**
@@ -204,6 +209,33 @@ abstract class Component extends Controller {
         $sub->getParameters()->merge($params);
         $sub->setMethod($method);
         $this->$subName = new RenderedSubComponent($this, $sub->render());
+    }
+
+    private function collectSubRedirects(Response $response, Request $request) {
+        $state = $target = null;
+
+        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $sub) {
+            /** @var $sub PlainSubComponent */
+            if ($sub->getResponse() && $sub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
+                if (!$target) {
+                    $target = new Url($this->getRoute(), $request->getParameters());
+                    $state = $this->getState();
+                    $target->getParameters()->set(self::PARAMETER_STATE, $state);
+                }
+
+                $subTarget = Url::parse($sub->getResponse()->getHeaders()->get(Response::HEADER_LOCATION));
+                $params = $subTarget->getParameters()->copy();
+                $params->set(self::PARAMETER_TARGET, $subTarget->getResource());
+                $target->setFragment($subTarget->getFragment());
+                $state->set($name, $params);
+            }
+        }
+
+        if ($target) {
+            $response->getHeaders()->set(Response::HEADER_LOCATION, $target->toString());
+        }
+
+        return $response;
     }
 
 }

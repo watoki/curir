@@ -1,13 +1,16 @@
 <?php
 namespace spec\watoki\webco;
 
+use spec\watoki\webco\steps\Then;
 use watoki\collections\Map;
 use watoki\webco\Request;
+use watoki\webco\Response;
 
 require_once 'CompositionTest.php';
 
 /**
  * @property CompositeRequestTest_Given given
+ * @property CompositeRequestTest_Then then
  */
 class CompositeRequestTest extends Test {
 
@@ -126,7 +129,48 @@ class CompositeRequestTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe('<html><head></head><body>Last:First: hello world 1</body></html>');
     }
 
-    function testDeepRedirect() {
+    function testSubTarget() {
+        $this->markTestIncomplete();
+    }
+
+    function testSubRedirect() {
+        $this->given->theFolder_WithModule('subredirect');
+        $this->given->theComponent_In_WithTheBody('subredirect\Sub', 'subredirect', '
+        function doGet() {
+            return $this->redirect(new \watoki\webco\Url("somewhere/else?param[1]=a&param[2]=b#bar"));
+        }');
+        $this->given->theComponent_In_WithTheBody('subredirect\Sub2', 'subredirect', '
+        function doGet() {
+            return $this->redirect(new \watoki\webco\Url("not/here?param=x#foo"));
+        }');
+
+        $this->given->theComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
+        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
+            parent::__construct($factory, $route, $parent);
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
+            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+        }
+
+        function doGet() {
+            return array(
+                "subling1" => $this->sub->render(),
+                "subling2" => $this->sub2->render(),
+            );
+        }');
+
+        $this->given->theRequestParameter_WithValue('param', 'Super');
+        $this->given->theRequestParameterHasTheState(new Map(array(
+            'sub' => new Map(array(
+                'param1' => 'hello'
+            ))
+        )));
+        $this->when->iSendTheRequestTo('subredirect\Module');
+
+        $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
+            '/base/super.html?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][.]=/base/somewhere/else&.[sub2][param]=x&.[sub2][.]=/base/not/here#foo');
+    }
+
+    function testPrimaryRedirect() {
         $this->markTestIncomplete();
     }
 
@@ -137,4 +181,12 @@ class CompositeRequestTest_Given extends CompositionTest_Given {
     public function theRequestParameterHasTheState($param) {
         $this->theRequestParameter_WithValue('.', $param);
     }
+}
+
+class CompositeRequestTest_Then extends Then {
+
+    public function theUrlDecodedResponseHeader_ShouldBe($header, $value) {
+        $this->test->assertEquals($value, urldecode($this->test->when->response->getHeaders()->get($header)));
+    }
+
 }

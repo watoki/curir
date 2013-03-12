@@ -12,6 +12,11 @@ class PlainSubComponent extends SubComponent {
     public static $CLASS = __CLASS__;
 
     /**
+     * @var null|Response
+     */
+    public $response;
+
+    /**
      * @var string|null
      */
     private $name;
@@ -49,9 +54,8 @@ class PlainSubComponent extends SubComponent {
     }
 
     public function render() {
-        /** @var $response Response */
-        $response = $this->getComponent()->respond(new Request($this->method, '', $this->getParameters()));
-        return $response->getBody();
+        $this->response = $this->getComponent()->respond(new Request($this->method, '', $this->getParameters()));
+        return $this->response->getBody();
     }
 
     /**
@@ -67,6 +71,13 @@ class PlainSubComponent extends SubComponent {
             }
         }
         return $this->component;
+    }
+
+    /**
+     * @return null|\watoki\webco\Response
+     */
+    public function getResponse() {
+        return $this->response;
     }
 
     protected function getName() {
