@@ -151,6 +151,35 @@ class CompositionTest extends Test {
             </html>');
     }
 
+    function testSubTarget() {
+        $this->given->theFolder_WithModule('subtarget');
+        $this->given->theSubComponent_In_WithTemplate('subtarget\Not', 'subtarget', '<html><head></head><body>NOT</body></html>');
+
+        $this->given->theFolder('subtarget/inner');
+        $this->given->theSubComponent_In_WithTemplate('subtarget\inner\Sub', 'subtarget/inner',
+            '<html><head></head><body>%msg%</body></html>');
+
+        $this->given->theComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
+        function doGet() {
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Not::$CLASS);
+            $this->sub->setRoute($this->getBaseRoute() . "inner/sub.html");
+            return array(
+                "sub" => $this->sub->render()
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'subtarget', '<html><body>Hello <a href="super.html">%sub%</a></body></html>');
+
+        $this->when->iSendTheRequestTo('subtarget\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html>
+                <head></head>
+                <body>
+                    Hello <a href="super.html?.[sub][.]=/base/subtarget/inner/sub.html">World</a>
+                </body>
+            </html>');
+    }
+
     function testReplaceFormFieldNames() {
         $this->given->theFolder_WithModule('formfields');
         $this->given->theSubComponent_In_WithTemplate('formfields\Sub', 'formfields',

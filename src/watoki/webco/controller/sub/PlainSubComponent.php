@@ -73,6 +73,10 @@ class PlainSubComponent extends SubComponent {
         return $this->component;
     }
 
+    public function setRoute($absoluteRoute) {
+        $this->component = $this->super->getRoot()->resolve($absoluteRoute);
+    }
+
     /**
      * @return null|\watoki\webco\Response
      */
