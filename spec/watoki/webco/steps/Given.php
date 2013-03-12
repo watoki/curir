@@ -14,6 +14,8 @@ class Given extends Step {
 
     public $requestHeaders = array();
 
+    public $moduleRoute = '/base/';
+
     function __construct(Test $test) {
         parent::__construct($test);
 
@@ -88,6 +90,10 @@ class Given extends Step {
         ";
 
         $this->theFile_In_WithContent($classFile, $folder, $classDef);
+    }
+
+    public function theModuleRouteIs($route) {
+        $this->moduleRoute = $route;
     }
 
 }

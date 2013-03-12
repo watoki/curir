@@ -130,7 +130,35 @@ class CompositeRequestTest extends Test {
     }
 
     function testSubTarget() {
-        $this->markTestIncomplete();
+        $this->given->theFolder_WithModule('subtarget');
+        $this->given->theSubComponent_In_WithTemplate('subtarget\Sub1', 'subtarget',
+            '<html><head></head><body>%msg% of Sub1</body></html>');
+        $this->given->theSubComponent_In_WithTemplate('subtarget\Sub2', 'subtarget',
+            '<html><head></head><body>%msg% of Sub2</body></html>');#
+
+
+        $this->given->theComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
+        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
+            parent::__construct($factory, $route, $parent);
+            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
+        }
+
+        function doGet() {
+            return array(
+                "msg" => "Hello",
+                "subling" => $this->sub->render(),
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'subtarget', '<html><head></head><body>%msg% %subling%</body></html>');
+
+        $this->given->theRequestParameterHasTheState(new Map(array('sub' => new Map(array(
+            '~' => '/base/subtarget/sub2'
+        )))));
+
+        $this->given->theModuleRouteIs('/base/subtarget/');
+        $this->when->iSendTheRequestTo('subtarget\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe('<html><head></head>Hello World of Sub2</html>');
     }
 
     function testSubRedirect() {
@@ -167,7 +195,7 @@ class CompositeRequestTest extends Test {
         $this->when->iSendTheRequestTo('subredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super?param=Super&.[sub2][param]=x&.[sub2][.]=/base/not/here&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][.]=/base/somewhere/else#foo');
+            '/base/super?param=Super&.[sub2][param]=x&.[sub2][~]=/base/not/here&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else#foo');
     }
 
     function testPrimaryRedirect() {

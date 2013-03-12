@@ -78,8 +78,11 @@ class PlainSubComponent extends SubComponent {
         return $this->component;
     }
 
-    public function setChangedRoute($absoluteRoute) {
+    public function setRoute($absoluteRoute) {
         $this->component = $this->super->getRoot()->resolve($absoluteRoute);
+        if (!$this->component) {
+            throw new \Exception("Could not set route. Can't resolve [$absoluteRoute].");
+        }
         $this->changedRoute = $absoluteRoute;
     }
 

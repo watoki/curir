@@ -17,7 +17,7 @@ abstract class Component extends Controller {
 
     const PARAMETER_PRIMARY_REQUEST = '.';
     const PARAMETER_STATE = '.';
-    const PARAMETER_TARGET = '.';
+    const PARAMETER_TARGET = '~';
 
     /**
      * @param array|object $model
@@ -37,14 +37,14 @@ abstract class Component extends Controller {
         if ($request->getParameters()->has(self::PARAMETER_STATE)) {
             /** @var $state Map */
             $state = $request->getParameters()->get(self::PARAMETER_STATE);
+            $this->restoreState($state);
+
             if ($state->has(self::PARAMETER_PRIMARY_REQUEST)) {
-                $primarySubName = $state->get(self::PARAMETER_PRIMARY_REQUEST);
-                $this->renderSubComponent($primarySubName, $state->get($primarySubName), $request->getMethod());
-                $state->remove(self::PARAMETER_PRIMARY_REQUEST);
-                $state->remove($primarySubName);
+                $primarySubName = $state->remove(self::PARAMETER_PRIMARY_REQUEST);
+                $this->renderSubComponent($primarySubName, $request->getMethod());
+//                $state->remove($primarySubName);
                 $request->setMethod(Request::METHOD_GET);
             }
-            $this->restoreState($state);
             $request->getParameters()->remove(self::PARAMETER_STATE);
         }
 
@@ -199,18 +199,22 @@ abstract class Component extends Controller {
     }
 
     private function restoreState(Map $state) {
-        $subComponents = $this->getSubComponents(PlainSubComponent::$CLASS);
-        foreach ($state as $name => $subState) {
+        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $subComponent) {
             /** @var $subComponent PlainSubComponent */
-            $subComponent = $subComponents->get($name);
-            $subComponent->getParameters()->merge($subState);
+            if ($state->has($name)) {
+                /** @var $subState Map */
+                $subState = $state->get($name);
+                if ($subState->has(self::PARAMETER_TARGET)) {
+                    $subComponent->setRoute($subState->remove(self::PARAMETER_TARGET));
+                }
+                $subComponent->getParameters()->merge($subState);
+            }
         }
     }
 
-    private function renderSubComponent($subName, Map $params, $method) {
+    private function renderSubComponent($subName, $method) {
         /** @var $sub PlainSubComponent */
         $sub = $this->getSubComponents(PlainSubComponent::$CLASS)->get($subName);
-        $sub->getParameters()->merge($params);
         $sub->setMethod($method);
         $this->$subName = new RenderedSubComponent($this, $sub->render());
     }

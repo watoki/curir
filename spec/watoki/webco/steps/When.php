@@ -30,7 +30,7 @@ class When extends Step {
         );
 
         /** @var $controllerClass \watoki\webco\controller\Module */
-        $controllerClass = $factory->getInstance($controllerClass, array('route' => '/base/'));
+        $controllerClass = $factory->getInstance($controllerClass, array('route' => $this->test->given->moduleRoute));
 
         $this->response = $controllerClass->respond($request);
     }

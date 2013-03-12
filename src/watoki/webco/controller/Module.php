@@ -115,7 +115,7 @@ abstract class Module extends Controller {
         if (substr($route, 0, $len) == $this->route) {
             $route = substr($route, $len);
         }
-        return $this->resolveController(new Request());
+        return $this->resolveController(Liste::split('/', $route));
     }
 
     /**
