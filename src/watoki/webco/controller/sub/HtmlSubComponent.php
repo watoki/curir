@@ -147,7 +147,6 @@ class HtmlSubComponent extends PlainSubComponent {
         }
 
         $subName = $this->getName();
-        $subRoute = strtolower($this->getComponent()->getRoute());
         $route = $this->super->getRoute();
         $url = Url::parse($element->getAttribute($attributeName));
 
@@ -155,13 +154,7 @@ class HtmlSubComponent extends PlainSubComponent {
             $replace = new Url($route);
             $replace->setFragment($url->getFragment());
 
-            $subParams = new Map();
-            if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
-                $subParams->set(Component::PARAMETER_TARGET, $url->getResource());
-            }
-            foreach ($url->getParameters() as $key => $value) {
-                $subParams->set($key, $value);
-            }
+            $subParams = $url->getParameters();
 
             $state = new Map();
             if ($this->getActionName($url, $element) != 'get') {

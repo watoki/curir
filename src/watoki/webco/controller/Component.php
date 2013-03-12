@@ -189,7 +189,11 @@ abstract class Component extends Controller {
         $params = new Map();
         foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $sub) {
             /** @var $sub PlainSubComponent */
-            $params->set($name, $sub->getNonDefaultParameters());
+            $params = $sub->getNonDefaultParameters();
+            if ($sub->hasRouteChanged()) {
+                $params->set(self::PARAMETER_TARGET, $sub->getRoute());
+            }
+            $params->set($name, $params);
         }
         return $params;
     }

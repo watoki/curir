@@ -167,7 +167,7 @@ class CompositeRequestTest extends Test {
         $this->when->iSendTheRequestTo('subredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][.]=/base/somewhere/else&.[sub2][param]=x&.[sub2][.]=/base/not/here#foo');
+            '/base/super?param=Super&.[sub2][param]=x&.[sub2][.]=/base/not/here&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][.]=/base/somewhere/else#foo');
     }
 
     function testPrimaryRedirect() {

@@ -17,6 +17,11 @@ class PlainSubComponent extends SubComponent {
     public $response;
 
     /**
+     * @var null|string
+     */
+    public $changedRoute;
+
+    /**
      * @var string|null
      */
     private $name;
@@ -73,8 +78,13 @@ class PlainSubComponent extends SubComponent {
         return $this->component;
     }
 
-    public function setRoute($absoluteRoute) {
+    public function setChangedRoute($absoluteRoute) {
         $this->component = $this->super->getRoot()->resolve($absoluteRoute);
+        $this->changedRoute = $absoluteRoute;
+    }
+
+    public function hasRouteChanged() {
+        return $this->changedRoute != null;
     }
 
     /**
@@ -82,6 +92,13 @@ class PlainSubComponent extends SubComponent {
      */
     public function getResponse() {
         return $this->response;
+    }
+
+    public function getRoute() {
+        if ($this->changedRoute) {
+            return $this->changedRoute;
+        }
+        return $this->getComponent()->getRoute();
     }
 
     protected function getName() {
