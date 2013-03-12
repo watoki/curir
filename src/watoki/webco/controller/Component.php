@@ -8,10 +8,16 @@ use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Url;
 use watoki\webco\controller\sub\HtmlSubComponent;
+use watoki\webco\controller\sub\PlainSubComponent;
+use watoki\webco\controller\sub\RenderedSubComponent;
 
 abstract class Component extends Controller {
 
     public static $CLASS = __CLASS__;
+
+    const PARAMETER_PRIMARY_REQUEST = '.';
+    const PARAMETER_STATE = '.';
+    const PARAMETER_TARGET = '.';
 
     /**
      * @param array|object $model
@@ -27,9 +33,21 @@ abstract class Component extends Controller {
      */
     public function respond(Request $request) {
         $response = $this->getResponse();
-        if ($request->getParameters()->has('.')) {
-            $this->restoreState($request->getParameters()->get('.'));
+
+        if ($request->getParameters()->has(self::PARAMETER_STATE)) {
+            /** @var $state Map */
+            $state = $request->getParameters()->get(self::PARAMETER_STATE);
+            if ($state->has(self::PARAMETER_PRIMARY_REQUEST)) {
+                $primarySubName = $state->get(self::PARAMETER_PRIMARY_REQUEST);
+                $this->renderSubComponent($primarySubName, $state->get($primarySubName), $request->getMethod());
+                $state->remove(self::PARAMETER_PRIMARY_REQUEST);
+                $state->remove($primarySubName);
+                $request->setMethod(Request::METHOD_GET);
+            }
+            $this->restoreState($state);
+            $request->getParameters()->remove(self::PARAMETER_STATE);
         }
+
         $action = $this->makeMethodName($this->getActionName($request));
         $response->setBody($this->renderAction($action, $request->getParameters()));
         return $response;
@@ -148,12 +166,14 @@ abstract class Component extends Controller {
     }
 
     /**
+     * @param string|null $class Filter by class
      * @return \watoki\collections\Map|SubComponent[]
      */
-    public function getSubComponents() {
+    public function getSubComponents($class = null) {
+        $class = $class ?: SubComponent::$CLASS;
         $subs = new Map();
         foreach ($this as $name => $member) {
-            if ($member instanceof SubComponent) {
+            if (is_a($member, $class)) {
                 $subs->set($name, $member);
             }
         }
@@ -162,19 +182,28 @@ abstract class Component extends Controller {
 
     public function getState() {
         $params = new Map();
-        foreach ($this->getSubComponents() as $name => $sub) {
+        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $sub) {
+            /** @var $sub PlainSubComponent */
             $params->set($name, $sub->getNonDefaultParameters());
         }
         return $params;
     }
 
     private function restoreState(Map $state) {
-        $subComponents = $this->getSubComponents();
+        $subComponents = $this->getSubComponents(PlainSubComponent::$CLASS);
         foreach ($state as $name => $subState) {
-            /** @var $subComponent SubComponent */
+            /** @var $subComponent PlainSubComponent */
             $subComponent = $subComponents->get($name);
             $subComponent->getParameters()->merge($subState);
         }
+    }
+
+    private function renderSubComponent($subName, Map $params, $method) {
+        /** @var $sub PlainSubComponent */
+        $sub = $this->getSubComponents(PlainSubComponent::$CLASS)->get($subName);
+        $sub->getParameters()->merge($params);
+        $sub->setMethod($method);
+        $this->$subName = new RenderedSubComponent($this, $sub->render());
     }
 
 }

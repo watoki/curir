@@ -4,10 +4,13 @@ namespace watoki\webco\controller\sub;
 use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
+use watoki\webco\Request;
 use watoki\webco\Url;
 use watoki\webco\controller\Component;
 
 class HtmlSubComponent extends PlainSubComponent {
+
+    public static $CLASS = __CLASS__;
 
     static $assetElements = array(
         'img' => 'src',
@@ -150,7 +153,7 @@ class HtmlSubComponent extends PlainSubComponent {
 
             $subParams = new Map();
             if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
-                $subParams->set('.', $url->getResource());
+                $subParams->set(Component::PARAMETER_TARGET, $url->getResource());
             }
             foreach ($url->getParameters() as $key => $value) {
                 $subParams->set($key, $value);
@@ -158,11 +161,11 @@ class HtmlSubComponent extends PlainSubComponent {
 
             $state = new Map();
             if ($this->getActionName($url, $element) != 'get') {
-                $state->set('.', $subName);
+                $state->set(Component::PARAMETER_PRIMARY_REQUEST, $subName);
             }
             $state->merge($this->super->getState());
             $state->set($subName, $subParams);
-            $replace->getParameters()->set('.', $state);
+            $replace->getParameters()->set(Component::PARAMETER_STATE, $state);
 
             $element->setAttribute($attributeName, $replace->toString());
         }
@@ -188,7 +191,7 @@ class HtmlSubComponent extends PlainSubComponent {
         } else if ($element->nodeName == 'form' && $element->hasAttribute('method')) {
             return $element->getAttribute('method');
         } else {
-            return 'get';
+            return Request::METHOD_GET;
         }
     }
 

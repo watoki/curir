@@ -5,10 +5,11 @@ use watoki\collections\Map;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\controller\Component;
-use watoki\webco\controller\Module;
 use watoki\webco\controller\SubComponent;
 
 class PlainSubComponent extends SubComponent {
+
+    public static $CLASS = __CLASS__;
 
     /**
      * @var string|null
@@ -26,25 +27,37 @@ class PlainSubComponent extends SubComponent {
     protected $componentClass;
 
     /**
+     * @var \watoki\collections\Map
+     */
+    private $parameters;
+
+    /**
+     * @var \watoki\collections\Map
+     */
+    private $defaultParameters;
+
+    /**
      * @var string
      */
-    private $action;
+    protected $method = Request::METHOD_GET;
 
     function __construct(Component $super, $componentClass, Map $defaultParameters = null) {
         parent::__construct($super, $defaultParameters);
         $this->componentClass = $componentClass;
-        $this->action = Request::METHOD_GET;
+        $this->parameters = $defaultParameters ?: new Map();
+        $this->defaultParameters = $defaultParameters ? $defaultParameters->copy() : new Map();
     }
 
     public function render() {
         /** @var $response Response */
-        $response = $this->getComponent()->respond(new Request($this->action, '', $this->getParameters()));
+        $response = $this->getComponent()->respond(new Request($this->method, '', $this->getParameters()));
         return $response->getBody();
     }
 
     /**
      * @throws \Exception If Component cannot be found
      * @return \watoki\webco\controller\Component
+     * @return null|\watoki\webco\Controller|\watoki\webco\controller\Component
      */
     protected function getComponent() {
         if (!$this->component) {
@@ -63,14 +76,10 @@ class PlainSubComponent extends SubComponent {
         return $this->name;
     }
 
-    protected function isDefaultParameter($key, $value) {
-        return parent::isDefaultParameter($key, $value) || $this->isDefaultMethodArgument($key, $value);
-    }
-
 
     private function isDefaultMethodArgument($key, $value) {
         $reflClass = new \ReflectionClass($this->getComponent());
-        $methodName = $this->getComponent()->makeMethodName($this->action);
+        $methodName = $this->getComponent()->makeMethodName($this->method);
         if (!$reflClass->hasMethod($methodName)) {
             return false;
         }
@@ -81,6 +90,35 @@ class PlainSubComponent extends SubComponent {
             }
         }
         return false;
+    }
+
+    /**
+     * @return \watoki\collections\Map
+     */
+    public function getParameters() {
+        return $this->parameters;
+    }
+
+    public function getNonDefaultParameters() {
+        $nonDefault = new Map();
+        foreach ($this->parameters as $key => $value) {
+            if (!$this->isDefaultParameter($key, $value)) {
+                $nonDefault->set($key, $value);
+            }
+        }
+        return $nonDefault;
+    }
+
+    protected function isDefaultParameter($key, $value) {
+        return $this->defaultParameters->has($key) && $this->defaultParameters->get($key) == $value
+                || $this->isDefaultMethodArgument($key, $value);
+    }
+
+    /**
+     * @param string $method
+     */
+    public function setMethod($method) {
+        $this->method = $method;
     }
 
 }

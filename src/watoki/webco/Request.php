@@ -152,4 +152,11 @@ class Request {
         return $baseExtension[0];
     }
 
+    /**
+     * @param string $method From Request::METHOD_*
+     */
+    public function setMethod($method) {
+        $this->method = $method;
+    }
+
 }
