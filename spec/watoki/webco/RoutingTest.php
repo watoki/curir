@@ -5,12 +5,32 @@ namespace spec\watoki\webco;
  * @property RoutingTest_When when
  * @property RoutingTest_Then then
  */
+use spec\watoki\webco\steps\Then;
+use spec\watoki\webco\steps\When;
 use watoki\factory\Factory;
+use watoki\webco\Request;
 use \watoki\webco\controller\Module;
 
 class RoutingTest extends Test {
 
+    function testDefaultComponent() {
+        $this->given->theFolder('defaultcomp');
+        $this->given->theFolder('defaultcomp/inner');
+        $this->given->theClass_In_Extending_WithTheBody('defaultcomp\Module', 'defaultcomp', '\watoki\webco\controller\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('defaultcomp\inner\Index', 'defaultcomp/inner', '\watoki\webco\controller\Component', '
+            public function doGet() {return "hey";}
+            public function doRender($model, $template) {}
+        ');
+
+        $this->given->theRequestMethodIs(Request::METHOD_GET);
+        $this->given->theRequestResourceIs('inner/');
+        $this->when->iSendTheRequestTo('defaultcomp\Module');
+
+        $this->then->theResponseBodyShouldBe('"hey"');
+    }
+
     function testRouteToSister() {
+        $this->markTestIncomplete();
     }
 
     function testFindChild() {
@@ -44,11 +64,12 @@ class RoutingTest extends Test {
     }
 
     function testFindAdoptedChild() {
+        $this->markTestIncomplete();
     }
 
 }
 
-class RoutingTest_When extends Step {
+class RoutingTest_When extends When {
 
     public $found;
 
@@ -63,7 +84,7 @@ class RoutingTest_When extends Step {
 /**
  * @property RoutingTest test
  */
-class RoutingTest_Then extends Step {
+class RoutingTest_Then extends Then {
 
     public function itShouldReturnAnInstanceOf($class) {
         $this->test->assertInstanceOf($class, $this->test->when->found);

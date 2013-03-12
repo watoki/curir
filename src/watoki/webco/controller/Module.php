@@ -84,7 +84,8 @@ abstract class Module extends Controller {
             }
         }
 
-        $controllerClass = $currentNamespace . '\\' . $this->makeControllerName($path->last());
+        $componentName = $path->last() ?: 'Index';
+        $controllerClass = $currentNamespace . '\\' . $this->makeControllerName($componentName);
         if (class_exists($controllerClass)) {
             $nextRoute = $path->copy();
             $path->clear();
