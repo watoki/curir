@@ -6,6 +6,8 @@ use watoki\collections\Map;
 
 class Request {
 
+    const DEFAULT_RESOURCE_NAME = 'index.html';
+
     public static $CLASS = __CLASS__;
 
     const METHOD_OPTIONS = 'options';
@@ -70,6 +72,10 @@ class Request {
         $headers = new Map();
         foreach (self::$headerKeys as $name => $key) {
             $headers->set($name, isset($_SERVER[$key]) ? $_SERVER[$key] : null);
+        }
+
+        if (substr($resource, -1) == '/') {
+            $resource .= self::DEFAULT_RESOURCE_NAME;
         }
 
         return new Request($method, $resource, $params, $headers, $body);
