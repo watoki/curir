@@ -1,6 +1,7 @@
 <?php
 namespace watoki\webco\router;
  
+use watoki\collections\Liste;
 use watoki\webco\Request;
 use watoki\webco\Router;
 
@@ -18,15 +19,16 @@ class StaticRouter extends Router {
     }
 
     /**
-     * @param $route
-     * @return null|\watoki\webco\Controller
+     * @param string $route
+     * @return boolean
      */
-    public function route($route) {
-        if ($route != $this->route) {
-            return null;
-        }
+    public function matches($route) {
+        return $route == $this->route;
+    }
 
-        return $this->createController($this->controllerClass, $route . '/');
+    public function resolve(Request $request) {
+        $request->getResourcePath()->splice(0, Liste::split('/', $this->route)->count() - 1);
+        return $this->createController($this->controllerClass, $this->route);
     }
 
     public function getControllerClass() {

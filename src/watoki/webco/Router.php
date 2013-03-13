@@ -20,10 +20,16 @@ abstract class Router {
     protected $parent;
 
     /**
-     * @param $route
+     * @param Request $request
      * @return Controller
      */
-    abstract public function route($route);
+    abstract public function resolve(Request $request);
+
+    /**
+     * @param string $route
+     * @return boolean
+     */
+    abstract public function matches($route);
 
     public function inject(Factory $factory, Module $parent) {
         $this->parent = $parent;

@@ -32,10 +32,8 @@ abstract class Module extends Controller {
      * @return Response
      */
     public function respond(Request $request) {
-        $path = $this->resourceToControllerPath($request);
-        $controller = $this->resolveController($path);
+        $controller = $this->resolveController($request);
         if ($controller) {
-            $request->setResourcePath($path);
             return $controller->respond($request);
         }
 
@@ -47,19 +45,6 @@ abstract class Module extends Controller {
         }
 
         throw new \Exception('Could not resolve request [' . $request->getResource() . '] in [' . get_class($this) . ']');
-    }
-
-    /**
-     * @param \watoki\webco\Request $request
-     * @return \watoki\collections\Liste
-     */
-    private function resourceToControllerPath(Request $request) {
-        if ($request->getResourcePath()->isEmpty()) {
-            return new Liste();
-        }
-        $path = $request->getResourcePath()->slice(0, -1);
-        $path->append($this->makeControllerName($request->getResourceName()));
-        return $path;
     }
 
     /**
@@ -77,19 +62,18 @@ abstract class Module extends Controller {
         return $response;
     }
 
-    /**
-     * @param \watoki\collections\Liste $path
-     * @return Controller|null
-     */
-    protected function resolveController(Liste $path) {
-        for ($i = count($path); $i > 0; $i--) {
+    protected function resolveController(Request $request) {
+        for ($i = count($request->getResourcePath()); $i > 0; $i--) {
+            $route = $request->getResourcePath()->slice(0, $i)->join('/');
+            if ($i != count($request->getResourcePath())) {
+                $route .= '/';
+            }
             foreach ($this->getRouters() as $router) {
-                $route = $path->slice(0, $i)->join('/');
-                $controller = $router->route($route);
-                if ($controller) {
-                    $path->splice(0, Liste::split('/', $controller->getRoute())->count()
-                            - Liste::split('/', $this->route)->count());
-                    return $controller;
+                if ($router->matches($route)) {
+                    try {
+                        return $router->resolve($request);
+                    } catch (\Exception $e) {
+                    }
                 }
             }
         }
@@ -117,7 +101,7 @@ abstract class Module extends Controller {
         if (substr($route, 0, $len) == $this->route) {
             $route = substr($route, $len);
         }
-        return $this->resolveController(Liste::split('/', $route));
+        return $this->resolveController(new Request('', $route));
     }
 
     /**
@@ -140,7 +124,7 @@ abstract class Module extends Controller {
                 continue;
             }
 
-            $controller = $router->route($router->getRoute());
+            $controller = $router->resolve(new Request('', $router->getRoute()));
 
             if ($router->getControllerClass() == $controllerClass) {
                 return $controller;
@@ -164,8 +148,9 @@ abstract class Module extends Controller {
         $commonNamespace = $this->findCommonNamespace($controllerClass, get_class($this));
         if ($commonNamespace) {
             $path = Liste::split('\\', substr($controllerClass, strlen($commonNamespace) + 1));
+            $request = new Request('', $path->join('/'));
             try {
-                return $this->resolveController($path);
+                return $this->resolveController($request);
             } catch (\Exception $e) {
             }
         }

@@ -19,20 +19,17 @@ use \watoki\webco\controller\Module;
  */
 class RoutingTest extends Test {
 
-    function testDefaultComponent() {
+    function testRequestToModule() {
         $this->given->theFolder('defaultcomp');
         $this->given->theFolder('defaultcomp/inner');
         $this->given->theClass_In_Extending_WithTheBody('defaultcomp\Module', 'defaultcomp', '\watoki\webco\controller\Module', '');
-        $this->given->theClass_In_Extending_WithTheBody('defaultcomp\inner\Index', 'defaultcomp/inner', '\watoki\webco\controller\Component', '
-            public function doGet() {return "hey";}
-            public function doRender($model, $template) {}
-        ');
+        $this->given->theClass_In_Extending_WithTheBody('defaultcomp\inner\Inner', 'defaultcomp/inner', '\watoki\webco\controller\Module', '');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->given->theRequestResourceIs('inner/');
-        $this->when->iSendTheRequestTo('defaultcomp\Module');
+        $this->when->iTryToSendTheRequestTo('defaultcomp\Module');
 
-        $this->then->theResponseBodyShouldBe('"hey"');
+        $this->then->anExceptionContaining_ShouldBeThrown('defaultcomp\inner\Inner');
     }
 
     function testChildModule() {
@@ -56,7 +53,7 @@ class RoutingTest extends Test {
         $this->given->theFolder('siblings/sister');
 
         $this->given->theModule_In_WithAStaticRouterFrom_To('siblings\brother\Module', 'siblings/brother',
-            'adopted', 'siblings\sister\Module');
+            'adopted/', 'siblings\sister\Module');
         $this->given->theModule_In('siblings\sister\Module', 'siblings/sister');
         $this->given->theComponent_In_Returning('siblings\sister\Index', 'siblings/sister', '"hello world"');
 
@@ -73,8 +70,8 @@ class RoutingTest extends Test {
         $this->given->theFolder('override/sister');
 
         $this->given->theModule_In_WithTheRouters('override\brother\Module', 'override/brother', array(
-            'adopted' => 'override\sister\NotExisting',
-            'adopted/yeah' => 'override\sister\Module'
+            'adopted/' => 'override\sister\NotExisting',
+            'adopted/yeah/' => 'override\sister\Module'
         ));
         $this->given->theModule_In('override\sister\Module', 'override/sister');
         $this->given->theComponent_In_Returning('override\sister\Index', 'override/sister', '"hello world"');
@@ -128,7 +125,7 @@ class RoutingTest extends Test {
         $this->when->iAsk_ToFind('findadopted\brother\Module', 'findadopted\sister\Index');
 
         $this->then->itShouldReturnAnInstanceOf('findadopted\sister\Index');
-        $this->then->theRouteOfTheFoundControllerShouldBe('/base/adopted/'); // TODO Fix trailing slash problem
+        $this->then->theRouteOfTheFoundControllerShouldBe('/base/adopted');
     }
 
     function testFindChildOfAdoptedChild() {
@@ -138,7 +135,7 @@ class RoutingTest extends Test {
 
         $this->given->theModule_In('findadoptedgrand\sister\Module', 'findadoptedgrand/sister');
         $this->given->theModule_In_WithAStaticRouterFrom_To('findadoptedgrand\brother\Module', 'findadoptedgrand/brother',
-            'adopted', 'findadoptedgrand\sister\Module');
+            'adopted/', 'findadoptedgrand\sister\Module');
         $this->given->theComponent_In_Returning('findadoptedgrand\sister\Index', 'findadoptedgrand/sister', '"hello you"');
 
         $this->when->iAsk_ToFind('findadoptedgrand\brother\Module', 'findadoptedgrand\sister\Index');
