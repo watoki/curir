@@ -132,8 +132,6 @@ class RoutingTest extends Test {
     }
 
     function testFindChildOfAdoptedChild() {
-        $this->markTestIncomplete();
-
         $this->given->theFolder('findadoptedgrand');
         $this->given->theFolder('findadoptedgrand/brother');
         $this->given->theFolder('findadoptedgrand/sister');

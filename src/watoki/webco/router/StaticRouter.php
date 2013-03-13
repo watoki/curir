@@ -17,6 +17,10 @@ class StaticRouter extends Router {
         $this->controllerClass = $controllerClass;
     }
 
+    /**
+     * @param $route
+     * @return null|\watoki\webco\Controller
+     */
     public function route($route) {
         if ($route != $this->route) {
             return null;

@@ -140,8 +140,17 @@ abstract class Module extends Controller {
                 continue;
             }
 
+            $controller = $router->route($router->getRoute());
+
             if ($router->getControllerClass() == $controllerClass) {
-                return $router->route($router->getRoute());
+                return $controller;
+            }
+
+            if ($controller instanceof Module) {
+                $foundChild = $controller->findController($controllerClass);
+                if ($foundChild) {
+                    return $foundChild;
+                }
             }
         }
         return null;
