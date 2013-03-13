@@ -8,6 +8,7 @@ namespace spec\watoki\webco;
 use spec\watoki\webco\steps\Then;
 use spec\watoki\webco\steps\When;
 use watoki\factory\Factory;
+use watoki\webco\Controller;
 use watoki\webco\Request;
 use \watoki\webco\controller\Module;
 
@@ -116,7 +117,36 @@ class RoutingTest extends Test {
     }
 
     function testFindAdoptedChild() {
+        $this->given->theFolder('findadopted');
+        $this->given->theFolder('findadopted/brother');
+        $this->given->theFolder('findadopted/sister');
+
+        $this->given->theModule_In_WithAStaticRouterFrom_To('findadopted\brother\Module', 'findadopted/brother',
+            'adopted', 'findadopted\sister\Index');
+        $this->given->theComponent_In_Returning('findadopted\sister\Index', 'findadopted/sister', '"hello you"');
+
+        $this->when->iAsk_ToFind('findadopted\brother\Module', 'findadopted\sister\Index');
+
+        $this->then->itShouldReturnAnInstanceOf('findadopted\sister\Index');
+        $this->then->theRouteOfTheFoundControllerShouldBe('/base/adopted/'); // TODO Fix trailing slash problem
+    }
+
+    function testFindChildOfAdoptedChild() {
         $this->markTestIncomplete();
+
+        $this->given->theFolder('findadoptedgrand');
+        $this->given->theFolder('findadoptedgrand/brother');
+        $this->given->theFolder('findadoptedgrand/sister');
+
+        $this->given->theModule_In('findadoptedgrand\sister\Module', 'findadoptedgrand/sister');
+        $this->given->theModule_In_WithAStaticRouterFrom_To('findadoptedgrand\brother\Module', 'findadoptedgrand/brother',
+            'adopted', 'findadoptedgrand\sister\Module');
+        $this->given->theComponent_In_Returning('findadoptedgrand\sister\Index', 'findadoptedgrand/sister', '"hello you"');
+
+        $this->when->iAsk_ToFind('findadoptedgrand\brother\Module', 'findadoptedgrand\sister\Index');
+
+        $this->then->itShouldReturnAnInstanceOf('findadoptedgrand\sister\Index');
+        $this->then->theRouteOfTheFoundControllerShouldBe('/base/adopted/Index');
     }
 
 }
@@ -156,12 +186,15 @@ class RoutingTest_Given extends steps\Given {
 
 class RoutingTest_When extends When {
 
+    /**
+     * @var Controller
+     */
     public $found;
 
     public function iAsk_ToFind($parentClass, $childClass) {
         $factory = new Factory();
         /** @var $parent Module */
-        $parent = $factory->getInstance($parentClass, array('route' => ''));
+        $parent = $factory->getInstance($parentClass, array('route' => '/base/'));
         $this->found = $parent->findController($childClass);
     }
 }
@@ -177,5 +210,9 @@ class RoutingTest_Then extends Then {
 
     public function itShouldNotFindIt() {
         $this->test->assertNull($this->test->when->found);
+    }
+
+    public function theRouteOfTheFoundControllerShouldBe($route) {
+        $this->test->assertEquals($route, $this->test->when->found->getRoute());
     }
 }

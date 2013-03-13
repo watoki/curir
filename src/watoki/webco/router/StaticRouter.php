@@ -24,4 +24,12 @@ class StaticRouter extends Router {
 
         return $this->createController($this->controllerClass, $route . '/');
     }
+
+    public function getControllerClass() {
+        return $this->controllerClass;
+    }
+
+    public function getRoute() {
+        return $this->route;
+    }
 }

@@ -8,6 +8,7 @@ use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Router;
 use watoki\webco\router\FileRouter;
+use watoki\webco\router\StaticRouter;
 
 abstract class Module extends Controller {
 
@@ -126,6 +127,31 @@ abstract class Module extends Controller {
      * @return Controller|null
      */
     public function findController($controllerClass) {
+        return $this->findInRouters($controllerClass) ?: $this->findInFolders($controllerClass);
+    }
+
+    /**
+     * @param $controllerClass
+     * @return null|\watoki\webco\Controller
+     */
+    private function findInRouters($controllerClass) {
+        foreach ($this->getRouters() as $router) {
+            if (!$router instanceof StaticRouter) {
+                continue;
+            }
+
+            if ($router->getControllerClass() == $controllerClass) {
+                return $router->route($router->getRoute());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param $controllerClass
+     * @return null|\watoki\webco\Controller
+     */
+    private function findInFolders($controllerClass) {
         $commonNamespace = $this->findCommonNamespace($controllerClass, get_class($this));
         if ($commonNamespace) {
             $path = Liste::split('\\', substr($controllerClass, strlen($commonNamespace) + 1));
