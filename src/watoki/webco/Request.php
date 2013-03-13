@@ -148,7 +148,11 @@ class Request {
     }
 
     public function getResourceName() {
-        $baseExtension = explode('.', $this->getResourcePath()->last());
+        $last = $this->getResourcePath()->last();
+        if (strstr($last, '.') === false) {
+            return $last;
+        }
+        $baseExtension = explode('.', $last);
         return $baseExtension[0];
     }
 

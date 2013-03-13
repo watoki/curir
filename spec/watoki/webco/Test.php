@@ -14,6 +14,8 @@ abstract class Test extends \PHPUnit_Framework_TestCase {
 
     public $undos = array();
 
+    static $folder = __DIR__;
+
     protected function setUp() {
         parent::setUp();
 

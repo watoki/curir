@@ -19,8 +19,10 @@ class Given extends Step {
     function __construct(Test $test) {
         parent::__construct($test);
 
+        $this->makeFolder(Test::$folder . '/test');
+
         spl_autoload_register(function ($className) {
-            $classFile = __DIR__ . '/' . str_replace('\\', '/', $className) . '.php';
+            $classFile = Test::$folder . '/test/' . str_replace('\\', '/', $className) . '.php';
             if (file_exists($classFile)) {
                 require_once $classFile;
             }
@@ -28,8 +30,15 @@ class Given extends Step {
     }
 
     public function theFolder($folder) {
-        $fullFolder = __DIR__ . '/' . $folder;
+        $fullFolder = Test::$folder . '/test/' . $folder;
 
+        $this->makeFolder($fullFolder);
+    }
+
+    /**
+     * @param $fullFolder
+     */
+    public function makeFolder($fullFolder) {
         $this->cleanDir($fullFolder);
 
         mkdir($fullFolder);
@@ -52,7 +61,7 @@ class Given extends Step {
     }
 
     public function theFile_In_WithContent($fileName, $folder, $content) {
-        $file = __DIR__ . '/' . $folder . '/' . $fileName;
+        $file = Test::$folder . '/test/' . $folder . '/' . $fileName;
         file_put_contents($file, $content);
 
         $test = $this->test;

@@ -195,7 +195,7 @@ class CompositeRequestTest extends Test {
         $this->when->iSendTheRequestTo('subredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else&.[sub2][param]=x&.[sub2][~]=/base/not/here#foo');
+            '/base/Super?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else&.[sub2][param]=x&.[sub2][~]=/base/not/here#foo');
     }
 
     function testPrimaryRedirect() {
@@ -233,7 +233,7 @@ class CompositeRequestTest extends Test {
         $this->when->iSendTheRequestTo('primaryredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else#bar');
+            '/base/Super?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else#bar');
     }
 
 }

@@ -2,17 +2,28 @@
 namespace watoki\webco\controller;
 
 use watoki\collections\Liste;
-use watoki\collections\Map;
-use watoki\factory\Factory;
 use watoki\webco\Controller;
 use watoki\webco\MimeTypes;
 use watoki\webco\Request;
 use watoki\webco\Response;
-use watoki\webco\Url;
+use watoki\webco\Router;
+use watoki\webco\router\FileRouter;
 
 abstract class Module extends Controller {
 
     public static $CLASS = __CLASS__;
+
+    /**
+     * @var Liste|Router[]
+     */
+    private $routers;
+
+    /**
+     * @return \watoki\collections\Liste|Router[]
+     */
+    protected function createRouters() {
+        return new Liste();
+    }
 
     /**
      * @param Request $request
@@ -20,8 +31,10 @@ abstract class Module extends Controller {
      * @return Response
      */
     public function respond(Request $request) {
-        $controller = $this->resolveController($this->resourceToControllerPath($request));
+        $path = $this->resourceToControllerPath($request);
+        $controller = $this->resolveController($path);
         if ($controller) {
+            $request->setResourcePath($path);
             return $controller->respond($request);
         }
 
@@ -32,8 +45,7 @@ abstract class Module extends Controller {
             }
         }
 
-        throw new \Exception('Could not resolve request [' . $request->getResource()
-                . '] in [' . get_class($this) . ']');
+        throw new \Exception('Could not resolve request [' . $request->getResource() . '] in [' . get_class($this) . ']');
     }
 
     /**
@@ -41,8 +53,11 @@ abstract class Module extends Controller {
      * @return \watoki\collections\Liste
      */
     private function resourceToControllerPath(Request $request) {
+        if ($request->getResourcePath()->isEmpty()) {
+            return new Liste();
+        }
         $path = $request->getResourcePath()->slice(0, -1);
-        $path->append($request->getResourceName());
+        $path->append($this->makeControllerName($request->getResourceName()));
         return $path;
     }
 
@@ -66,45 +81,30 @@ abstract class Module extends Controller {
      * @return Controller|null
      */
     protected function resolveController(Liste $path) {
-        $classReflection = new \ReflectionClass($this);
-        $classNamespace = $classReflection->getNamespaceName();
-
-        $i = 0;
-        $currentNamespace = $classNamespace;
-        foreach ($path->slice(0, -1) as $module) {
-            $i++;
-
-            $controllerClass = $currentNamespace . '\\' . $module . '\\' . $this->makeControllerName($module);
-            $currentNamespace .= '\\' . $module;
-
-            if (class_exists($controllerClass)) {
-                $nextRoute = $path->splice(0, $i);
-                $nextRoute->append('');
-                return $this->createController($controllerClass, $nextRoute);
+        for ($i = count($path); $i > 0; $i--) {
+            foreach ($this->getRouters() as $router) {
+                $route = $path->slice(0, $i)->join('/');
+                $controller = $router->route($route);
+                if ($controller) {
+                    $path->splice(0, Liste::split('/', $controller->getRoute())->count()
+                            - Liste::split('/', $this->route)->count());
+                    return $controller;
+                }
             }
         }
-
-        $componentName = $path->last() ?: 'Index';
-        $controllerClass = $currentNamespace . '\\' . $this->makeControllerName($componentName);
-        if (class_exists($controllerClass)) {
-            $nextRoute = $path->copy();
-            $path->clear();
-            return $this->createController($controllerClass, $nextRoute);
-        }
-
         return null;
     }
 
-    /**
-     * @param $controllerClass
-     * @param $nextRoute
-     * @return mixed
-     */
-    private function createController($controllerClass, Liste $nextRoute) {
-        return $this->factory->getInstance($controllerClass, array(
-            'route' => $this->route . $nextRoute->join('/'),
-            'parent' => $this
-        ));
+    private function getRouters() {
+        if (!$this->routers) {
+            $this->routers = $this->createRouters();
+            $this->routers->append(new FileRouter());
+
+            foreach ($this->routers as $router) {
+                $router->inject($this->factory, $this);
+            }
+        }
+        return $this->routers;
     }
 
     /**
@@ -154,7 +154,7 @@ abstract class Module extends Controller {
         return $common;
     }
 
-    protected function makeControllerName($name) {
+    public function makeControllerName($name) {
         return ucfirst($name);
     }
 

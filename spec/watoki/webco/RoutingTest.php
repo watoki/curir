@@ -11,6 +11,11 @@ use watoki\factory\Factory;
 use watoki\webco\Request;
 use \watoki\webco\controller\Module;
 
+/**
+ * @property RoutingTest_Given given
+ * @property RoutingTest_When when
+ * @property RoutingTest_Then then
+ */
 class RoutingTest extends Test {
 
     function testDefaultComponent() {
@@ -29,7 +34,39 @@ class RoutingTest extends Test {
         $this->then->theResponseBodyShouldBe('"hey"');
     }
 
+    function testChildModule() {
+        $this->given->theFolder('childmodule');
+        $this->given->theFolder('childmodule/child');
+
+        $this->given->theModule_In('childmodule\Module', 'childmodule');
+        $this->given->theModule_In('childmodule\child\Child', 'childmodule/child');
+        $this->given->theComponent_In_Returning('childmodule\child\Index', 'childmodule/child', '"hi there"');
+
+        $this->given->theRequestMethodIs(Request::METHOD_GET);
+        $this->given->theRequestResourceIs('child/index');
+        $this->when->iSendTheRequestTo('childmodule\Module');
+
+        $this->then->theResponseBodyShouldBe('"hi there"');
+    }
+
     function testRouteToSister() {
+        $this->given->theFolder('siblings');
+        $this->given->theFolder('siblings/brother');
+        $this->given->theFolder('siblings/sister');
+
+        $this->given->theModule_In_WithAStaticRouterFrom_To('siblings\brother\Module', 'siblings/brother',
+            'adopted', 'siblings\sister\Module');
+        $this->given->theModule_In('siblings\sister\Module', 'siblings/sister');
+        $this->given->theComponent_In_Returning('siblings\sister\Index', 'siblings/sister', '"hello world"');
+
+        $this->given->theRequestMethodIs(Request::METHOD_GET);
+        $this->given->theRequestResourceIs('adopted/index');
+        $this->when->iSendTheRequestTo('siblings\brother\Module');
+
+        $this->then->theResponseBodyShouldBe('"hello world"');
+    }
+
+    function testSpecificOverridesGeneral() {
         $this->markTestIncomplete();
     }
 
@@ -67,6 +104,30 @@ class RoutingTest extends Test {
         $this->markTestIncomplete();
     }
 
+}
+
+class RoutingTest_Given extends steps\Given {
+
+    public function theModule_In($className, $folder) {
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Module', '');
+    }
+
+    public function theComponent_In_Returning($className, $folder, $retval) {
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', '
+            public function doGet() {return ' . $retval . ';}
+            public function doRender($model, $template) {}
+        ');
+    }
+
+    public function theModule_In_WithAStaticRouterFrom_To($className, $folder, $route, $controllerClass) {
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Module', '
+            function createRouters() {
+                return new \watoki\collections\Liste(array(
+                    new \watoki\webco\router\StaticRouter("' . $route . '", \'' . $controllerClass . '\')
+                ));
+            }
+        ');
+    }
 }
 
 class RoutingTest_When extends When {
