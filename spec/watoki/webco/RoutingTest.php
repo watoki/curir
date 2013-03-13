@@ -10,6 +10,7 @@ use spec\watoki\webco\steps\When;
 use watoki\factory\Factory;
 use watoki\webco\Controller;
 use watoki\webco\Request;
+use watoki\webco\Response;
 use \watoki\webco\controller\Module;
 
 /**
@@ -142,6 +143,22 @@ class RoutingTest extends Test {
 
         $this->then->itShouldReturnAnInstanceOf('findadoptedgrand\sister\Index');
         $this->then->theRouteOfTheFoundControllerShouldBe('/base/adopted/Index');
+    }
+
+    function testRedirectRouter() {
+        $this->given->theFolder('reroute');
+        $this->given->theClass_In_Extending_WithTheBody('reroute\Module', 'reroute', '\watoki\webco\controller\Module', '
+            protected function createRouters() {
+                return new \watoki\collections\Liste(array(
+                    new \watoki\webco\router\RedirectRouter("notHere", "somewhere/else.html")
+                ));
+            }
+        ');
+
+        $this->given->theRequestResourceIs('notHere');
+        $this->when->iSendTheRequestTo('reroute\Module');
+
+        $this->then->theResponseHeader_ShouldBe(Response::HEADER_LOCATION, '/base/somewhere/else.html');
     }
 
 }

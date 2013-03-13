@@ -87,5 +87,7 @@ abstract class Controller {
         return null;
     }
 
-    abstract protected function getBaseRoute();
+    protected function getBaseRoute() {
+        return $this->route;
+    }
 }

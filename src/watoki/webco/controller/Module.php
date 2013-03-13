@@ -178,8 +178,4 @@ abstract class Module extends Controller {
         return ucfirst($name);
     }
 
-    protected function getBaseRoute() {
-        return $this->route;
-    }
-
 }
