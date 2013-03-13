@@ -67,7 +67,22 @@ class RoutingTest extends Test {
     }
 
     function testSpecificOverridesGeneral() {
-        $this->markTestIncomplete();
+        $this->given->theFolder('override');
+        $this->given->theFolder('override/brother');
+        $this->given->theFolder('override/sister');
+
+        $this->given->theModule_In_WithTheRouters('override\brother\Module', 'override/brother', array(
+            'adopted' => 'override\sister\NotExisting',
+            'adopted/yeah' => 'override\sister\Module'
+        ));
+        $this->given->theModule_In('override\sister\Module', 'override/sister');
+        $this->given->theComponent_In_Returning('override\sister\Index', 'override/sister', '"hello world"');
+
+        $this->given->theRequestMethodIs(Request::METHOD_GET);
+        $this->given->theRequestResourceIs('adopted/yeah/index');
+        $this->when->iSendTheRequestTo('override\brother\Module');
+
+        $this->then->theResponseBodyShouldBe('"hello world"');
     }
 
     function testFindChild() {
@@ -120,10 +135,19 @@ class RoutingTest_Given extends steps\Given {
     }
 
     public function theModule_In_WithAStaticRouterFrom_To($className, $folder, $route, $controllerClass) {
+        $this->theModule_In_WithTheRouters($className, $folder, array($route => $controllerClass));
+    }
+
+    public function theModule_In_WithTheRouters($className, $folder, $routers) {
+        $routerDefs = '';
+        foreach ($routers as $route => $target) {
+            $routerDefs .= 'new \watoki\webco\router\StaticRouter("' . $route . '", \'' . $target . '\'),';
+        }
+
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Module', '
             function createRouters() {
                 return new \watoki\collections\Liste(array(
-                    new \watoki\webco\router\StaticRouter("' . $route . '", \'' . $controllerClass . '\')
+                    ' . $routerDefs . '
                 ));
             }
         ');
