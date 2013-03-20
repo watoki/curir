@@ -123,8 +123,6 @@ class CompositionTest extends Test {
     }
 
     function testDeepLinkReplacement() {
-        $this->markTestIncomplete();
-
         $this->given->theFolder_WithModule('deeplink');
         $this->given->theSubComponent_In_WithTemplate('deeplink\Sub', 'deeplink',
             '<html>
@@ -148,14 +146,12 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    Hello <a href="/base/super.html?.[sub][.]=/base/some/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
+                    Hello <a href="/base/super.html?.[sub][~]=/base/some/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
                 </body>
             </html>');
     }
 
     function testSubTarget() {
-        $this->markTestIncomplete();
-
         $this->given->theFolder_WithModule('subtarget');
         $this->given->theSubComponent_In_WithTemplate('subtarget\Not', 'subtarget', '<html><head></head><body>NOT</body></html>');
 
@@ -179,7 +175,7 @@ class CompositionTest extends Test {
             '<html>
                 <head></head>
                 <body>
-                    Hello <a href="super.html?.[sub][.]=/base/subtarget/inner/sub.html">World</a>
+                    Hello <a href="super.html">World</a>
                 </body>
             </html>');
     }

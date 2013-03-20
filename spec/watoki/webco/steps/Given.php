@@ -75,13 +75,15 @@ class Given extends Step {
 
     public function cleanDir($folder) {
         if (!file_exists($folder)) {
-            return;
+            return true;
         }
 
         foreach(glob(rtrim($folder, '/') . '/' . '*') as $item) {
-            is_dir($item) ? $this->cleanDir($item) : unlink($item);
+            if (!(is_dir($item) ? $this->cleanDir($item) : unlink($item))) {
+                $this->test->fail('Could not delete ' . $item);
+            };
         }
-        rmdir($folder);
+        return rmdir($folder);
     }
 
     public function theClass_In_Extending_WithTheBody($className, $folder, $baseClass, $body) {

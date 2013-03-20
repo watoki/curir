@@ -130,14 +130,14 @@ class CompositeRequestTest extends Test {
     }
 
     function testSubTarget() {
-        $this->given->theFolder_WithModule('subtarget');
-        $this->given->theSubComponent_In_WithTemplate('subtarget\Sub1', 'subtarget',
+        $this->given->theFolder_WithModule('subtargetrequest');
+        $this->given->theSubComponent_In_WithTemplate('subtargetrequest\Sub1', 'subtargetrequest',
             '<html><head></head><body>%msg% of Sub1</body></html>');
-        $this->given->theSubComponent_In_WithTemplate('subtarget\Sub2', 'subtarget',
+        $this->given->theSubComponent_In_WithTemplate('subtargetrequest\Sub2', 'subtargetrequest',
             '<html><head></head><body>%msg% of Sub2</body></html>');#
 
 
-        $this->given->theComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
+        $this->given->theComponent_In_WithTheBody('subtargetrequest\Super', 'subtargetrequest', '
         function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
             parent::__construct($factory, $route, $parent);
             $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
@@ -149,14 +149,14 @@ class CompositeRequestTest extends Test {
                 "subling" => $this->sub->render(),
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'subtarget', '<html><head></head><body>%msg% %subling%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'subtargetrequest', '<html><head></head><body>%msg% %subling%</body></html>');
 
         $this->given->theRequestParameterHasTheState(new Map(array('sub' => new Map(array(
-            '~' => '/base/subtarget/sub2'
+            '~' => '/base/subtargetrequest/sub2'
         )))));
 
-        $this->given->theModuleRouteIs('/base/subtarget/');
-        $this->when->iSendTheRequestTo('subtarget\Module');
+        $this->given->theModuleRouteIs('/base/subtargetrequest/');
+        $this->when->iSendTheRequestTo('subtargetrequest\Module');
 
         $this->then->theHtmlResponseBodyShouldBe('<html><head></head>Hello World of Sub2</html>');
     }
