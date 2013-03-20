@@ -107,7 +107,8 @@ abstract class Component extends Controller {
             if ($parameters->has($param->getName())) {
                 $args[] = $parameters->get($param->getName());
             } else if (!$param->isOptional()) {
-                throw new \Exception('Invalid request: Missing Parameter [' . $param->getName() . ']');
+                $class = get_class($this);
+                throw new \Exception("Invalid request: Missing Parameter [{$param->getName()}] for method [{$method->getName()}] in component [$class]");
             } else {
                 $args[] = $param->getDefaultValue();
             }

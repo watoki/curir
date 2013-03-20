@@ -43,8 +43,9 @@ class Given extends Step {
 
         mkdir($fullFolder);
 
-        $this->test->undos[] = function () use ($fullFolder) {
-            rmdir($fullFolder);
+        $that = $this;
+        $this->test->undos[] = function () use ($that, $fullFolder) {
+            $that->cleanDir($fullFolder);
         };
     }
 
@@ -72,7 +73,7 @@ class Given extends Step {
         };
     }
 
-    private function cleanDir($folder) {
+    public function cleanDir($folder) {
         if (!file_exists($folder)) {
             return;
         }

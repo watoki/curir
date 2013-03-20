@@ -123,6 +123,8 @@ class CompositionTest extends Test {
     }
 
     function testDeepLinkReplacement() {
+        $this->markTestIncomplete();
+
         $this->given->theFolder_WithModule('deeplink');
         $this->given->theSubComponent_In_WithTemplate('deeplink\Sub', 'deeplink',
             '<html>
@@ -152,6 +154,8 @@ class CompositionTest extends Test {
     }
 
     function testSubTarget() {
+        $this->markTestIncomplete();
+
         $this->given->theFolder_WithModule('subtarget');
         $this->given->theSubComponent_In_WithTemplate('subtarget\Not', 'subtarget', '<html><head></head><body>NOT</body></html>');
 
@@ -219,8 +223,8 @@ class CompositionTest extends Test {
     }
 
     function testPrimaryAction() {
-        $this->given->theFolder_WithModule('primaryaction');
-        $this->given->theSubComponent_In_WithTemplate('primaryaction\Sub', 'primaryaction',
+        $this->given->theFolder_WithModule('primaryactioncomp');
+        $this->given->theSubComponent_In_WithTemplate('primaryactioncomp\Sub', 'primaryactioncomp',
             '<html>
                 <head></head>
                 <body>
@@ -228,16 +232,16 @@ class CompositionTest extends Test {
                     <a href="sub.html?action=myAction">%msg%</a>
                 </body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
+        $this->given->theComponent_In_WithTheBody('primaryactioncomp\Super', 'primaryactioncomp', '
         function doGet() {
             $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
                 "sub" => $this->sub->render()
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><body>Hello  %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'primaryactioncomp', '<html><body>Hello  %sub%</body></html>');
 
-        $this->when->iSendTheRequestTo('primaryaction\Module');
+        $this->when->iSendTheRequestTo('primaryactioncomp\Module');
 
         $this->then->theHtmlResponseBodyShouldBe(
             '<html>
