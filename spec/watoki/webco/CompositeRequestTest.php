@@ -1,12 +1,12 @@
 <?php
 namespace spec\watoki\webco;
 
+use spec\watoki\webco\steps\CompositionTestGiven;
+use spec\watoki\webco\steps\Given;
 use spec\watoki\webco\steps\Then;
 use watoki\collections\Map;
 use watoki\webco\Request;
 use watoki\webco\Response;
-
-require_once 'CompositionTest.php';
 
 /**
  * @property CompositeRequestTest_Given given
@@ -238,7 +238,7 @@ class CompositeRequestTest extends Test {
 
 }
 
-class CompositeRequestTest_Given extends CompositionTest_Given {
+class CompositeRequestTest_Given extends CompositionTestGiven {
 
     public function theRequestParameterHasTheState($param) {
         $this->theRequestParameter_WithValue('.', $param);
