@@ -14,9 +14,16 @@ abstract class SubComponent {
     protected $super;
 
     /**
+     * @param $name
+     * @param $state
      * @return string
      */
-    abstract public function render();
+    abstract public function render($name, $state);
+
+    /**
+     * @return Map
+     */
+    abstract public function getState();
 
     function __construct(Component $super) {
         $this->super = $super;

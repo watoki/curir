@@ -22,9 +22,8 @@ class CompositionTest extends Test {
         $this->given->theSubComponent_In_WithTemplate('snippet\Sub', 'snippet', '%msg%!');
         $this->given->theComponent_In_WithTheBody('snippet\Super', 'snippet', '
         function doGet() {
-            $sub = new \watoki\webco\controller\sub\PlainSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $sub->render()
+                "sub" => new \watoki\webco\controller\sub\PlainSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'snippet', 'Hello %sub%');
@@ -34,7 +33,7 @@ class CompositionTest extends Test {
         $this->then->theResponseBodyShouldBe('Hello World!');
     }
 
-    function testIncludeDocument() {
+    function testIncludeHtmlDocument() {
         $this->given->theFolder_WithModule('document');
         $this->given->theSubComponent_In_WithTemplate('document\Sub', 'document',
             '<html>
@@ -43,19 +42,19 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
         function doGet() {
-            $sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
+        // TODO add head element to template
         $this->given->theFile_In_WithContent('super.html', 'document', '<html><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('document\Module');
 
-        $this->then->theResponseBodyShouldBe('<html><body>Hello <b>World</b></body></html>');
+        $this->then->theResponseBodyShouldBe('<html><head></head><body>Hello <b>World</b></body></html>');
     }
 
-    function testAbsorbAssets() {
+    function testAbsorbHeader() {
         $this->given->theFolder_WithModule('assets');
         $this->given->theSubComponent_In_WithTemplate('assets\Sub', 'assets',
             '<html>
@@ -66,9 +65,8 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('assets\Super', 'assets', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'assets', '<html><body>Hello %sub%</body></html>');
@@ -100,9 +98,8 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('relative\Super', 'relative', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, inner\Sub::$CLASS);
             return array(
-                "sub" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, inner\Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'relative', '<html><body>Hello %sub%</body></html>');
@@ -133,9 +130,8 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('deeplink\Super', 'deeplink', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'deeplink', '<html><body>Hello %sub%</body></html>');
@@ -161,10 +157,10 @@ class CompositionTest extends Test {
 
         $this->given->theComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Not::$CLASS);
-            $this->sub->setRoute($this->getBaseRoute() . "inner/sub.html");
+            $sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Not::$CLASS);
+            $sub->setRoute($this->getBaseRoute() . "inner/sub.html");
             return array(
-                "sub" => $this->sub->render()
+                "sub" => $sub
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'subtarget', '<html><body>Hello <a href="super.html">%sub%</a></body></html>');
@@ -195,9 +191,8 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('formfields\Super', 'formfields', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'formfields', '<html><body>Hello  %sub%</body></html>');
@@ -230,9 +225,8 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('primaryactioncomp\Super', 'primaryactioncomp', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primaryactioncomp', '<html><body>Hello  %sub%</body></html>');
@@ -262,9 +256,8 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('omitprimary\Super', 'omitprimary', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'omitprimary', '<html><body>Hello  %sub%</body></html>');
@@ -293,9 +286,8 @@ class CompositionTest extends Test {
             </html>');
         $this->given->theComponent_In_WithTheBody('defroute\Super', 'defroute', '
         function doGet() {
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
             return array(
-                "sub" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'defroute', '<html><body>Hello %sub%</body></html>');
@@ -319,13 +311,13 @@ class CompositionTest extends Test {
             '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
         $this->given->theComponent_In_WithTheBody('colstate\Super', 'colstate', '
         function doGet() {
-            $this->sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
-            $this->sub1->getParameters()->set("param1", "val1");
+            $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
+            $sub1->getParameters()->set("param1", "val1");
 
-            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+            $sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
             return array(
-                "sub1" => $this->sub1->render(),
-                "sub2" => $this->sub2->render()
+                "sub1" => $sub1,
+                "sub2" => $sub2
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'colstate', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
@@ -347,16 +339,16 @@ class CompositionTest extends Test {
             '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
         $this->given->theComponent_In_WithTheBody('defbyconstr\Super', 'defbyconstr', '
         function doGet() {
-            $this->sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
+            $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
                 new \watoki\collections\Map(array("param1" => "val1", "param2" => "val2", "param3" => "val3")));
-            $this->sub1->getParameters()->set("param1", "val1");
-            $this->sub1->getParameters()->set("param2", "other");
-            $this->sub1->getParameters()->set("param4", "new");
+            $sub1->getParameters()->set("param1", "val1");
+            $sub1->getParameters()->set("param2", "other");
+            $sub1->getParameters()->set("param4", "new");
 
-            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+            $sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
             return array(
-                "sub1" => $this->sub1->render(),
-                "sub2" => $this->sub2->render()
+                "sub1" => $sub1,
+                "sub2" => $sub2
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'defbyconstr', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
@@ -382,14 +374,14 @@ class CompositionTest extends Test {
             '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
         $this->given->theComponent_In_WithTheBody('defaultargs\Super', 'defaultargs', '
         function doGet() {
-            $this->sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
+            $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
                 new \watoki\collections\Map(array("param1" => "World")));
-            $this->sub1->getParameters()->set("param2", "default");
+            $sub1->getParameters()->set("param2", "default");
 
-            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
+            $sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
             return array(
-                "sub1" => $this->sub1->render(),
-                "sub2" => $this->sub2->render()
+                "sub1" => $sub1,
+                "sub2" => $sub2
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'defaultargs', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
@@ -402,6 +394,8 @@ class CompositionTest extends Test {
                 hello <a href="/base/super.html">Sub2</a>:World
             </body></html>');
     }
+
+    // TODO We need a test with deeply nested SubComponents
 
 }
 

@@ -42,8 +42,8 @@ class HtmlSubComponent extends PlainSubComponent {
         $this->headElements = new Liste();
     }
 
-    public function render() {
-        return $this->postProcess(parent::render());
+    public function render($name, $state) {
+        return $this->postProcess(parent::render($name, $state));
     }
 
     private function postProcess($content) {
@@ -75,7 +75,7 @@ class HtmlSubComponent extends PlainSubComponent {
         }
 
         while (!$body || $body->nodeName != 'body') {
-            throw new \Exception('Cannot find body element while parsing sub component [' . $this->getName() . ']');
+            throw new \Exception('Cannot find body element while parsing sub component [' . $this->name . ']');
         }
 
         $this->replaceUrls($body);
@@ -146,14 +146,11 @@ class HtmlSubComponent extends PlainSubComponent {
             return;
         }
 
-        $subName = $this->getName();
         $subRoute = strtolower($this->getComponent()->getRoute());
         $route = $this->super->getRoute();
         $url = Url::parse($element->getAttribute($attributeName));
 
         if ($url->isSameHost()) {
-            $replace = new Url($route);
-            $replace->setFragment($url->getFragment());
 
             $subParams = new Map();
             if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
@@ -163,14 +160,19 @@ class HtmlSubComponent extends PlainSubComponent {
                 $subParams->set($key, $value);
             }
 
-            $state = new Map();
-            if ($this->getActionName($url, $element) != 'get') {
-                $state->set(Component::PARAMETER_PRIMARY_REQUEST, $subName);
-            }
-            $state->merge($this->super->getState());
-            $state->set($subName, $subParams);
-            $replace->getParameters()->set(Component::PARAMETER_STATE, $state);
+            $state = $this->state->copy();
 
+            if (!$state->has(Component::PARAMETER_SUB_STATE)) {
+                $state->set(Component::PARAMETER_SUB_STATE, new Map());
+            }
+
+            $subState = $state->get(Component::PARAMETER_SUB_STATE);
+            if ($this->getActionName($url, $element) != 'get') {
+                $subState->set(Component::PARAMETER_PRIMARY_REQUEST, $this->name);
+            }
+            $subState->set($this->name, $subParams);
+
+            $replace = new Url($route, $state, $url->getFragment());
             $element->setAttribute($attributeName, $replace->toString());
         }
     }
@@ -180,10 +182,9 @@ class HtmlSubComponent extends PlainSubComponent {
             return;
         }
 
-        $name = $this->getName();
         $url = Url::parse('?' . $child->getAttribute($attributeName));
         $replace = new Url('');
-        $replace->getParameters()->set('.', new Map(array($name => $url->getParameters())));
+        $replace->getParameters()->set('.', new Map(array($this->name => $url->getParameters())));
 
         $replaceName = substr($replace->toString(), 1, -1);
         $child->setAttribute($attributeName, $replaceName);

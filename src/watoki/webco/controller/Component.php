@@ -16,7 +16,7 @@ abstract class Component extends Controller {
     public static $CLASS = __CLASS__;
 
     const PARAMETER_PRIMARY_REQUEST = '.';
-    const PARAMETER_STATE = '.';
+    const PARAMETER_SUB_STATE = '.';
     const PARAMETER_TARGET = '~';
 
     /**
@@ -34,25 +34,30 @@ abstract class Component extends Controller {
     public function respond(Request $request) {
         $response = $this->getResponse();
 
-        if ($request->getParameters()->has(self::PARAMETER_STATE)) {
-            /** @var $state Map */
-            $state = $request->getParameters()->remove(self::PARAMETER_STATE);
-            $this->restoreState($state);
+        if ($request->getParameters()->has(self::PARAMETER_SUB_STATE)) {
+            $subState = $request->getParameters()->get(self::PARAMETER_SUB_STATE);
+            if ($subState->has(self::PARAMETER_PRIMARY_REQUEST)) {
+                $primarySubName = $subState->get(self::PARAMETER_PRIMARY_REQUEST);
+                /** @var $primaryParameters Map */
+                $primaryParameters = $subState->get($primarySubName);
 
-            if ($state->has(self::PARAMETER_PRIMARY_REQUEST)) {
-                $primarySubName = $state->remove(self::PARAMETER_PRIMARY_REQUEST);
-                $primarySub = $this->renderSubComponent($primarySubName, $request->getMethod());
-                if ($primarySub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
-                    return $this->bubbleUpRedirect($primarySubName, $primarySub->getResponse(), $response, $this->getState(), $request->getParameters()->copy());
-                }
+                $primaryTarget = $primaryParameters->get(self::PARAMETER_TARGET);
+
+                $primarySub = $this->getRoot()->resolve($primaryTarget);
+
+                $primaryResponse = $primarySub->respond(new Request($request->getMethod(), '', $primaryParameters));
                 $request->setMethod(Request::METHOD_GET);
+
+                if ($primaryResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
+                    return $this->bubbleUpRedirect($primarySubName, $primarySub->getResponse(), $response, new Map(), $request->getParameters()->copy());
+                }
             }
         }
 
         $action = $this->makeMethodName($this->getActionName($request));
         $response->setBody($this->renderAction($action, $request->getParameters()));
 
-        return $this->collectSubRedirects($response, $request->getParameters());
+        return $response;
     }
 
     /**
@@ -65,7 +70,68 @@ abstract class Component extends Controller {
         if ($model === null) {
             return null;
         }
-        return $this->mergeSubHeaders($this->render($model));
+        $subs = $this->collectSubComponents($model);
+        $rendered = $this->render($this->renderSubComponents($model, $subs, $parameters));
+
+        $this->collectSubRedirects($subs, $this->getResponse(), $parameters);
+
+        return $this->mergeSubHeaders($rendered, $subs);
+    }
+
+    // TODO Collect deep (names must be flat, though)
+    // TODO should model have to be a Map?
+    protected function collectSubComponents($model) {
+        if (!is_array($model)) {
+            return array();
+        }
+        $subs = array();
+        foreach ($model as $field => $value) {
+            if ($value instanceof SubComponent) {
+                $subs[$field] = $value;
+            }
+        }
+        return $subs;
+    }
+
+    /**
+     * @param array $model
+     * @param array|SubComponent[] $subs
+     * @param Map $parameters
+     * @return mixed
+     */
+    protected function renderSubComponents($model, $subs, $parameters) {
+        if ($parameters->has(self::PARAMETER_SUB_STATE)) {
+            $restoreState = $parameters->get(self::PARAMETER_SUB_STATE);
+            foreach ($subs as $name => $sub) {
+                if ($sub instanceof PlainSubComponent && $restoreState->has($name)) {
+                    /** @var $restoreSubState Map */
+                    $restoreSubState = $restoreState->get($name);
+                    if ($restoreSubState->has(self::PARAMETER_TARGET)) {
+                        $sub->setRoute($restoreSubState->get(self::PARAMETER_TARGET));
+                    }
+                    $sub->getParameters()->merge($restoreSubState);
+                }
+            }
+        }
+
+        $subStates = new Map();
+        foreach ($subs as $name => $sub) {
+            $subState = $sub->getState();
+            if (!$subState->isEmpty()) {
+                $subStates->set($name, $subState);
+            }
+        }
+
+        $state = $parameters->copy();
+
+        if (!$subStates->isEmpty()) {
+            $state->set(self::PARAMETER_SUB_STATE, $subStates);
+        }
+
+        foreach ($subs as $name => $sub) {
+            $model[$name] = $sub->render($name, $state);
+        }
+        return $model;
     }
 
     /**
@@ -76,7 +142,7 @@ abstract class Component extends Controller {
      */
     protected function invokeAction($action, Map $parameters) {
         if (!method_exists($this, $action)) {
-            throw new \Exception('Method [' . $action . '] not found in controller [' . get_class($this) . '].');
+            throw new \Exception('Method [' . $action . '] not found in component [' . get_class($this) . '].');
         }
 
         $method = new \ReflectionMethod($this, $action);
@@ -108,7 +174,8 @@ abstract class Component extends Controller {
                 $args[] = $parameters->get($param->getName());
             } else if (!$param->isOptional()) {
                 $class = get_class($this);
-                throw new \Exception("Invalid request: Missing Parameter [{$param->getName()}] for method [{$method->getName()}] in component [$class]");
+                throw new \Exception(
+                    "Invalid request: Missing Parameter [{$param->getName()}] for method [{$method->getName()}] in component [$class]");
             } else {
                 $args[] = $param->getDefaultValue();
             }
@@ -147,11 +214,12 @@ abstract class Component extends Controller {
         return substr($this->route, 0, strrpos($this->route, '/') + 1);
     }
 
-    private function mergeSubHeaders($body) {
+    // TODO This needs to be done by the SubComponent and decoupled asset management
+    private function mergeSubHeaders($body, array $subs) {
         $parser = new HtmlParser($body);
 
-        foreach ($this as $member) {
-            if ($member instanceof HtmlSubComponent) {
+        foreach ($subs as $sub) {
+            if ($sub instanceof HtmlSubComponent) {
                 if (!isset($head)) {
                     $head = $parser->getRoot()->firstChild;
                     if ($head->nodeName != 'head') {
@@ -161,41 +229,13 @@ abstract class Component extends Controller {
                     }
                 }
 
-                foreach ($member->getHeadElements('link') as $element) {
+                foreach ($sub->getHeadElements('link') as $element) {
                     $head->appendChild($parser->getDocument()->importNode($element, true));
                 }
             }
         }
 
         return isset($parser) ? $parser->toString() : $body;
-    }
-
-    /**
-     * @param string|null $class Filter by class
-     * @return \watoki\collections\Map|SubComponent[]
-     */
-    public function getSubComponents($class = null) {
-        $class = $class ?: SubComponent::$CLASS;
-        $subs = new Map();
-        foreach ($this as $name => $member) {
-            if (is_a($member, $class)) {
-                $subs->set($name, $member);
-            }
-        }
-        return $subs;
-    }
-
-    public function getState() {
-        $params = new Map();
-        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $sub) {
-            /** @var $sub PlainSubComponent */
-            $nonDefaultParams = $sub->getNonDefaultParameters();
-            if ($sub->hasRouteChanged()) {
-                $nonDefaultParams->set(self::PARAMETER_TARGET, $sub->getRoute());
-            }
-            $params->set($name, $nonDefaultParams);
-        }
-        return $params;
     }
 
     private function restoreState(Map $state) {
@@ -221,18 +261,18 @@ abstract class Component extends Controller {
         /** @var $sub PlainSubComponent */
         $sub = $this->getSubComponents(PlainSubComponent::$CLASS)->get($subName);
         $sub->setMethod($method);
-        $this->$subName = new RenderedSubComponent($this, $sub->render());
+        $this->$subName = new RenderedSubComponent($this, $sub->render($subName, new Map()));
         return $sub;
     }
 
-    private function collectSubRedirects(Response $response, Map $requestParams) {
+    private function collectSubRedirects($subs, Response $response, Map $requestParams) {
         $state = $target = null;
 
-        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $subName => $sub) {
+        foreach ($subs as $subName => $sub) {
             /** @var $sub PlainSubComponent */
             if ($sub->getResponse() && $sub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
                 if (!$target) {
-                    $state = $this->getState();
+                    $state = new Map();
                     $target = $this->createRedirectTarget($requestParams, $state);
                 }
 
@@ -261,7 +301,7 @@ abstract class Component extends Controller {
 
     private function createRedirectTarget(Map $requestParams, Map $state) {
         $target = new Url($this->getRoute(), $requestParams);
-        $target->getParameters()->set(self::PARAMETER_STATE, $state);
+        $target->getParameters()->set(self::PARAMETER_SUB_STATE, $state);
         return $target;
     }
 

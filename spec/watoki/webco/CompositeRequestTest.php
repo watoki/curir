@@ -30,17 +30,12 @@ class CompositeRequestTest extends Test {
         $this->given->theFile_In_WithContent('sub.html', 'restoresubs', '<html><head></head><body>%msg%</body></html>');
 
         $this->given->theComponent_In_WithTheBody('restoresubs\Super', 'restoresubs', '
-        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
-            parent::__construct($factory, $route, $parent);
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
-        }
-
         function doGet() {
             return array(
-                "subling" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'restoresubs', '<html><body>Hello %subling%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'restoresubs', '<html><body>Hello %sub%</body></html>');
 
         $this->given->theRequestParameterHasTheState(new Map(array(
             'sub' => new Map(array(
@@ -62,23 +57,19 @@ class CompositeRequestTest extends Test {
         $this->given->theFile_In_WithContent('sub.html', 'primaryaction', '<html><head></head><body>%msg%</body></html>');
 
         $this->given->theComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
-        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
-            parent::__construct($factory, $route, $parent);
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
-        }
-
         function doGet($param) {
             return array(
                 "msg" => $param,
-                "subling" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><head></head><body>%msg% %subling%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><body>%msg% %sub%</body></html>');
 
         $this->given->theRequestParameter_WithValue('param', 'Greetings');
         $this->given->theRequestParameterHasTheState(new Map(array(
             '.' => 'sub',
             'sub' => new Map(array(
+                '~' => '/base/Sub',
                 'action' => 'myAction',
                 'param1' => 'my',
                 'param2' => 'Friends'
@@ -102,24 +93,20 @@ class CompositeRequestTest extends Test {
         $this->given->theFile_In_WithContent('sub.html', 'primaryfirst', '<html><head></head><body>%msg%</body></html>');
 
         $this->given->theComponent_In_WithTheBody('primaryfirst\Super', 'primaryfirst', '
-        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
-            parent::__construct($factory, $route, $parent);
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
-        }
-
         function doGet($param) {
             global $something;
             return array(
                 "msg" => $param . ":"  . $something . ":",
-                "subling" => $this->sub->render()
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'primaryfirst', '<html><head></head><body>%msg% %subling%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'primaryfirst', '<html><body>%msg% %sub%</body></html>');
 
         $this->given->theRequestParameter_WithValue('param', 'Last');
         $this->given->theRequestParameterHasTheState(new Map(array(
             '.' => 'sub',
             'sub' => new Map(array(
+                '~' => '/base/Sub',
                 'param1' => 'hello',
                 'param2' => 'world'
             ))
@@ -138,22 +125,19 @@ class CompositeRequestTest extends Test {
 
 
         $this->given->theComponent_In_WithTheBody('subtargetrequest\Super', 'subtargetrequest', '
-        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
-            parent::__construct($factory, $route, $parent);
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
-        }
-
         function doGet() {
             return array(
                 "msg" => "Hello",
-                "subling" => $this->sub->render(),
+                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS),
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'subtargetrequest', '<html><head></head><body>%msg% %subling%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'subtargetrequest', '<html><head></head><body>%msg% %sub%</body></html>');
 
-        $this->given->theRequestParameterHasTheState(new Map(array('sub' => new Map(array(
-            '~' => '/base/subtargetrequest/sub2'
-        )))));
+        $this->given->theRequestParameterHasTheState(new Map(array(
+            'sub' => new Map(array(
+                '~' => '/base/subtargetrequest/sub2'
+            ))
+        )));
 
         $this->given->theModuleRouteIs('/base/subtargetrequest/');
         $this->when->iSendTheRequestTo('subtargetrequest\Module');
@@ -173,29 +157,23 @@ class CompositeRequestTest extends Test {
         }');
 
         $this->given->theComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
-        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
-            parent::__construct($factory, $route, $parent);
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
-            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
-        }
-
         function doGet() {
             return array(
-                "subling1" => $this->sub->render(),
-                "subling2" => $this->sub2->render(),
+                "sub1" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS),
+                "sub2" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS),
             );
         }');
 
         $this->given->theRequestParameter_WithValue('param', 'Super');
         $this->given->theRequestParameterHasTheState(new Map(array(
-            'sub' => new Map(array(
+            'sub1' => new Map(array(
                 'param1' => 'hello'
             ))
         )));
         $this->when->iSendTheRequestTo('subredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super.html?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else&.[sub2][param]=x&.[sub2][~]=/base/not/here#foo');
+            '/base/super.html?param=Super&.[sub1][param][1]=a&.[sub1][param][2]=b&.[sub1][~]=/base/somewhere/else&.[sub2][param]=x&.[sub2][~]=/base/not/here#foo');
     }
 
     function testPrimaryRedirect() {
@@ -210,30 +188,25 @@ class CompositeRequestTest extends Test {
         }');
 
         $this->given->theComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
-        function __construct(\watoki\factory\Factory $factory, $route, \watoki\webco\controller\Module $parent = null) {
-            parent::__construct($factory, $route, $parent);
-            $this->sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS);
-            $this->sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
-        }
-
         function doGet() {
             return array(
-                "subling1" => $this->sub->render(),
-                "subling2" => $this->sub2->render(),
+                "sub1" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS),
+                "sub2" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS),
             );
         }');
 
         $this->given->theRequestParameter_WithValue('param', 'Super');
         $this->given->theRequestParameterHasTheState(new Map(array(
-            '.' => 'sub',
-            'sub' => new Map(array(
+            '.' => 'sub1',
+            'sub1' => new Map(array(
+                '~' => '/base/Sub',
                 'param1' => 'hello'
             ))
         )));
         $this->when->iSendTheRequestTo('primaryredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super.html?param=Super&.[sub][param][1]=a&.[sub][param][2]=b&.[sub][~]=/base/somewhere/else#bar');
+            '/base/super.html?param=Super&.[sub1][param][1]=a&.[sub1][param][2]=b&.[sub1][~]=/base/somewhere/else#bar');
     }
 
 }

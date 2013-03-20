@@ -22,9 +22,14 @@ class PlainSubComponent extends SubComponent {
     public $changedRoute;
 
     /**
+     * @var Map
+     */
+    protected $state;
+
+    /**
      * @var string|null
      */
-    private $name;
+    protected $name;
 
     /**
      * @var Component|null
@@ -58,7 +63,10 @@ class PlainSubComponent extends SubComponent {
         $this->defaultParameters = $defaultParameters ? $defaultParameters->copy() : new Map();
     }
 
-    public function render() {
+    public function render($name, $state) {
+        $this->name = $name;
+        $this->state = $state;
+
         $this->response = $this->getComponent()->respond(new Request($this->method, '', $this->getParameters()));
         return $this->response->getBody();
     }
@@ -104,14 +112,6 @@ class PlainSubComponent extends SubComponent {
         return $this->getComponent()->getRoute();
     }
 
-    public function getName() {
-        if (!$this->name) {
-            $this->name = $this->super->getSubComponents()->keyOf($this);
-        }
-        return $this->name;
-    }
-
-
     private function isDefaultMethodArgument($key, $value) {
         $reflClass = new \ReflectionClass($this->getComponent());
         $methodName = $this->getComponent()->makeMethodName($this->method);
@@ -156,4 +156,10 @@ class PlainSubComponent extends SubComponent {
         $this->method = $method;
     }
 
+    /**
+     * @return Map
+     */
+    public function getState() {
+        return $this->getNonDefaultParameters();
+    }
 }
