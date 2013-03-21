@@ -1,6 +1,6 @@
 <?php
 namespace watoki\webco\controller;
- 
+
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Controller;
@@ -9,14 +9,15 @@ use watoki\webco\Response;
 use watoki\webco\Url;
 use watoki\webco\controller\sub\HtmlSubComponent;
 use watoki\webco\controller\sub\PlainSubComponent;
-use watoki\webco\controller\sub\RenderedSubComponent;
 
 abstract class Component extends Controller {
 
     public static $CLASS = __CLASS__;
 
     const PARAMETER_PRIMARY_REQUEST = '.';
+
     const PARAMETER_SUB_STATE = '.';
+
     const PARAMETER_TARGET = '~';
 
     /**
@@ -32,32 +33,58 @@ abstract class Component extends Controller {
      * @return Response
      */
     public function respond(Request $request) {
-        $response = $this->getResponse();
+        $subResponse = $this->handlePrimaryRequest($request);
+        if ($subResponse) {
+            return $subResponse;
+        }
 
+        $response = $this->getResponse();
+        $methodName = $this->makeMethodName($this->getActionName($request));
+        $response->setBody($this->renderAction($methodName, $request->getParameters()));
+
+        return $response;
+    }
+
+    /**
+     * @param Request $request
+     * @return Response|null If a response is returned, it should be returned immediately
+     */
+    // TODO This should be somehow passed into the model
+    private function handlePrimaryRequest(Request $request) {
         if ($request->getParameters()->has(self::PARAMETER_SUB_STATE)) {
             $subState = $request->getParameters()->get(self::PARAMETER_SUB_STATE);
             if ($subState->has(self::PARAMETER_PRIMARY_REQUEST)) {
                 $primarySubName = $subState->get(self::PARAMETER_PRIMARY_REQUEST);
-                /** @var $primaryParameters Map */
-                $primaryParameters = $subState->get($primarySubName);
 
-                $primaryTarget = $primaryParameters->get(self::PARAMETER_TARGET);
-
-                $primarySub = $this->getRoot()->resolve($primaryTarget);
-
-                $primaryResponse = $primarySub->respond(new Request($request->getMethod(), '', $primaryParameters));
-                $request->setMethod(Request::METHOD_GET);
+                $primaryResponse = $this->getPrimaryRequestResponse($primarySubName, $subState, $request);
 
                 if ($primaryResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
-                    return $this->bubbleUpRedirect($primarySubName, $primarySub->getResponse(), $response, new Map(), $request->getParameters()->copy());
+                    $this->bubbleUpRedirect($primarySubName, $primaryResponse, new Map(), $request->getParameters()->copy());
+                    return $this->getResponse();
                 }
             }
         }
+        return null;
+    }
 
-        $action = $this->makeMethodName($this->getActionName($request));
-        $response->setBody($this->renderAction($action, $request->getParameters()));
+    /**
+     * @param $primarySubName
+     * @param $subState
+     * @param Request $request
+     * @return Response
+     */
+    private function getPrimaryRequestResponse($primarySubName, Map $subState, Request $request) {
+        /** @var $primaryParameters Map */
+        $primaryParameters = $subState->get($primarySubName);
 
-        return $response;
+        $primaryTarget = $primaryParameters->get(self::PARAMETER_TARGET);
+
+        $primarySub = $this->getRoot()->resolve($primaryTarget);
+
+        $primaryResponse = $primarySub->respond(new Request($request->getMethod(), '', $primaryParameters));
+        $request->setMethod(Request::METHOD_GET);
+
+        return $primaryResponse;
     }
 
     /**
@@ -70,12 +97,31 @@ abstract class Component extends Controller {
         if ($model === null) {
             return null;
         }
-        $subs = $this->collectSubComponents($model);
-        $rendered = $this->render($this->renderSubComponents($model, $subs, $parameters));
 
-        $this->collectSubRedirects($subs, $this->getResponse(), $parameters);
+        $subs = $this->collectSubComponents($model);
+        $preparedModel = $this->renderSubComponents($model, $subs, $parameters);
+        $rendered = $this->render($preparedModel);
+
+        $this->collectSubRedirects($subs, $parameters);
 
         return $this->mergeSubHeaders($rendered, $subs);
+    }
+
+    /**
+     * @param $action
+     * @param Map $parameters
+     * @throws \Exception
+     * @return mixed
+     */
+    protected function invokeAction($action, Map $parameters) {
+        if (!method_exists($this, $action)) {
+            throw new \Exception('Method [' . $action . '] not found in component [' . get_class($this) . '].');
+        }
+
+        $method = new \ReflectionMethod($this, $action);
+        $args = $this->collectArguments($parameters, $method);
+
+        return $method->invokeArgs($this, $args);
     }
 
     // TODO Collect deep (names must be flat, though)
@@ -94,80 +140,12 @@ abstract class Component extends Controller {
     }
 
     /**
-     * @param array $model
-     * @param array|SubComponent[] $subs
-     * @param Map $parameters
-     * @return mixed
-     */
-    protected function renderSubComponents($model, $subs, $parameters) {
-        if ($parameters->has(self::PARAMETER_SUB_STATE)) {
-            $restoreState = $parameters->get(self::PARAMETER_SUB_STATE);
-            foreach ($subs as $name => $sub) {
-                if ($sub instanceof PlainSubComponent && $restoreState->has($name)) {
-                    /** @var $restoreSubState Map */
-                    $restoreSubState = $restoreState->get($name);
-                    if ($restoreSubState->has(self::PARAMETER_TARGET)) {
-                        $sub->setRoute($restoreSubState->get(self::PARAMETER_TARGET));
-                    }
-                    $sub->getParameters()->merge($restoreSubState);
-                }
-            }
-        }
-
-        $subStates = new Map();
-        foreach ($subs as $name => $sub) {
-            $subState = $sub->getState();
-            if (!$subState->isEmpty()) {
-                $subStates->set($name, $subState);
-            }
-        }
-
-        $state = $parameters->copy();
-
-        if (!$subStates->isEmpty()) {
-            $state->set(self::PARAMETER_SUB_STATE, $subStates);
-        }
-
-        foreach ($subs as $name => $sub) {
-            $model[$name] = $sub->render($name, $state);
-        }
-        return $model;
-    }
-
-    /**
-     * @param $action
-     * @param Map $parameters
-     * @throws \Exception
-     * @return mixed
-     */
-    protected function invokeAction($action, Map $parameters) {
-        if (!method_exists($this, $action)) {
-            throw new \Exception('Method [' . $action . '] not found in component [' . get_class($this) . '].');
-        }
-
-        $method = new \ReflectionMethod($this, $action);
-        $args = $this->assembleArguments($parameters, $method);
-
-        return $method->invokeArgs($this, $args);
-    }
-
-    /**
-     * @param Request $request
-     * @return string
-     */
-    protected function getActionName(Request $request) {
-        return $request->getParameters()->has('action')
-                ? $request->getParameters()->get('action')
-                : strtolower($request->getMethod());
-    }
-
-    /**
      * @param \watoki\collections\Map $parameters
      * @param \ReflectionMethod $method
      * @throws \Exception If a parameter is missing
      * @return array
      */
-    private function assembleArguments(Map $parameters, \ReflectionMethod $method) {
+    private function collectArguments(Map $parameters, \ReflectionMethod $method) {
         $args = array();
         foreach ($method->getParameters() as $param) {
             if ($parameters->has($param->getName())) {
@@ -181,6 +159,73 @@ abstract class Component extends Controller {
             }
         }
         return $args;
+    }
+
+    /**
+     * @param array $model
+     * @param array|SubComponent[] $subs
+     * @param Map $parameters
+     * @return mixed
+     */
+    protected function renderSubComponents($model, $subs, $parameters) {
+        if ($parameters->has(self::PARAMETER_SUB_STATE)) {
+            $this->restoreSubStates($subs, $parameters->get(self::PARAMETER_SUB_STATE));
+        }
+
+        $subStates = $this->collectSubStates($subs);
+
+        $state = $parameters->copy();
+        if (!$subStates->isEmpty()) {
+            $state->set(self::PARAMETER_SUB_STATE, $subStates);
+        }
+
+        foreach ($subs as $name => $sub) {
+            $model[$name] = $sub->render($name, $state);
+        }
+        return $model;
+    }
+
+    /**
+     * @param $subs
+     * @param \watoki\collections\Map $state
+     * @return void
+     */
+    private function restoreSubStates($subs, Map $state) {
+        foreach ($subs as $name => $sub) {
+            if ($sub instanceof PlainSubComponent && $state->has($name)) {
+                /** @var $restoreSubState Map */
+                $restoreSubState = $state->get($name);
+                if ($restoreSubState->has(self::PARAMETER_TARGET)) {
+                    $sub->setRoute($restoreSubState->get(self::PARAMETER_TARGET));
+                }
+                $sub->getParameters()->merge($restoreSubState);
+            }
+        }
+    }
+
+    /**
+     * @param SubComponent[] $subs
+     * @return Map
+     */
+    private function collectSubStates($subs) {
+        $subStates = new Map();
+        foreach ($subs as $name => $sub) {
+            $subState = $sub->getState();
+            if (!$subState->isEmpty()) {
+                $subStates->set($name, $subState);
+            }
+        }
+        return $subStates;
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function getActionName(Request $request) {
+        return $request->getParameters()->has('action')
+                ? $request->getParameters()->get('action')
+                : strtolower($request->getMethod());
     }
 
     /**
@@ -238,34 +283,7 @@ abstract class Component extends Controller {
         return isset($parser) ? $parser->toString() : $body;
     }
 
-    private function restoreState(Map $state) {
-        foreach ($this->getSubComponents(PlainSubComponent::$CLASS) as $name => $subComponent) {
-            /** @var $subComponent PlainSubComponent */
-            if ($state->has($name)) {
-                /** @var $subState Map */
-                $subState = $state->get($name);
-                if ($subState->has(self::PARAMETER_TARGET)) {
-                    $subComponent->setRoute($subState->remove(self::PARAMETER_TARGET));
-                }
-                $subComponent->getParameters()->merge($subState);
-            }
-        }
-    }
-
-    /**
-     * @param $subName
-     * @param $method
-     * @return PlainSubComponent
-     */
-    private function renderSubComponent($subName, $method) {
-        /** @var $sub PlainSubComponent */
-        $sub = $this->getSubComponents(PlainSubComponent::$CLASS)->get($subName);
-        $sub->setMethod($method);
-        $this->$subName = new RenderedSubComponent($this, $sub->render($subName, new Map()));
-        return $sub;
-    }
-
-    private function collectSubRedirects($subs, Response $response, Map $requestParams) {
+    private function collectSubRedirects($subs, Map $requestParams) {
         $state = $target = null;
 
         foreach ($subs as $subName => $sub) {
@@ -276,14 +294,12 @@ abstract class Component extends Controller {
                     $target = $this->createRedirectTarget($requestParams, $state);
                 }
 
-                $this->bubbleUpRedirect($subName, $sub->getResponse(), $response, $state, $requestParams, $target);
+                $this->bubbleUpRedirect($subName, $sub->getResponse(), $state, $requestParams, $target);
             }
         }
-
-        return $response;
     }
 
-    private function bubbleUpRedirect($subName, Response $subResponse, Response $response, Map $state, Map $requestParams, Url $target = null) {
+    private function bubbleUpRedirect($subName, Response $subResponse, Map $state, Map $requestParams, Url $target = null) {
         if (!$target) {
             $target = $this->createRedirectTarget($requestParams, $state);
         }
@@ -294,9 +310,8 @@ abstract class Component extends Controller {
         $target->setFragment($subTarget->getFragment());
         $state->set($subName, $subParams);
 
+        $response = $this->getResponse();
         $response->getHeaders()->set(Response::HEADER_LOCATION, $target->toString());
-
-        return $response;
     }
 
     private function createRedirectTarget(Map $requestParams, Map $state) {
