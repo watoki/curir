@@ -158,7 +158,7 @@ class CompositionTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
         function doGet() {
             $sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Not::$CLASS);
-            $sub->setRoute($this->getBaseRoute() . "inner/sub.html");
+            $sub->getState()->set(\watoki\webco\controller\SuperComponent::PARAMETER_TARGET, $this->getBaseRoute() . "inner/sub.html");
             return array(
                 "sub" => $sub
             );
@@ -312,7 +312,7 @@ class CompositionTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('colstate\Super', 'colstate', '
         function doGet() {
             $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
-            $sub1->getParameters()->set("param1", "val1");
+            $sub1->getState()->set("param1", "val1");
 
             $sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
             return array(
@@ -341,9 +341,9 @@ class CompositionTest extends Test {
         function doGet() {
             $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
                 new \watoki\collections\Map(array("param1" => "val1", "param2" => "val2", "param3" => "val3")));
-            $sub1->getParameters()->set("param1", "val1");
-            $sub1->getParameters()->set("param2", "other");
-            $sub1->getParameters()->set("param4", "new");
+            $sub1->getState()->set("param1", "val1");
+            $sub1->getState()->set("param2", "other");
+            $sub1->getState()->set("param4", "new");
 
             $sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
             return array(
@@ -376,7 +376,7 @@ class CompositionTest extends Test {
         function doGet() {
             $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
                 new \watoki\collections\Map(array("param1" => "World")));
-            $sub1->getParameters()->set("param2", "default");
+            $sub1->getState()->set("param2", "default");
 
             $sub2 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS);
             return array(

@@ -6,6 +6,7 @@ use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\controller\Component;
 use watoki\webco\controller\SubComponent;
+use watoki\webco\controller\SuperComponent;
 
 class PlainSubComponent extends SubComponent {
 
@@ -15,21 +16,6 @@ class PlainSubComponent extends SubComponent {
      * @var null|Response
      */
     public $response;
-
-    /**
-     * @var null|string
-     */
-    public $changedRoute;
-
-    /**
-     * @var Map
-     */
-    protected $state;
-
-    /**
-     * @var string|null
-     */
-    protected $name;
 
     /**
      * @var Component|null
@@ -42,32 +28,18 @@ class PlainSubComponent extends SubComponent {
     protected $componentClass;
 
     /**
-     * @var \watoki\collections\Map
-     */
-    private $parameters;
-
-    /**
-     * @var \watoki\collections\Map
-     */
-    private $defaultParameters;
-
-    /**
      * @var string
      */
     protected $method = Request::METHOD_GET;
 
-    function __construct(Component $super, $componentClass, Map $defaultParameters = null) {
-        parent::__construct($super, $defaultParameters);
+    function __construct(SuperComponent $super, $componentClass, Map $defaultState = null) {
+        parent::__construct($super, $defaultState ?: new Map());
         $this->componentClass = $componentClass;
-        $this->parameters = $defaultParameters ?: new Map();
-        $this->defaultParameters = $defaultParameters ? $defaultParameters->copy() : new Map();
     }
 
-    public function render($name, $state) {
-        $this->name = $name;
-        $this->state = $state;
-
-        $this->response = $this->getComponent()->respond(new Request($this->method, '', $this->getParameters()));
+    public function render($name, Map $superState) {
+        $this->response = $this->getComponent()->respond(
+            new Request($this->method, '', $this->getState()));
         return $this->response->getBody();
     }
 
@@ -78,24 +50,20 @@ class PlainSubComponent extends SubComponent {
      */
     protected function getComponent() {
         if (!$this->component) {
-            $this->component = $this->super->getRoot()->findController($this->componentClass);
-            if (!$this->component) {
-                throw new \Exception('Could not find route to ' . $this->componentClass);
+            if ($this->getState()->has(SuperComponent::PARAMETER_TARGET)) {
+                $route = $this->getState()->get(SuperComponent::PARAMETER_TARGET);
+                $this->component = $this->super->getRoot()->resolve($route);
+                if (!$this->component) {
+                    throw new \Exception('Could not resolve route ' . $route);
+                }
+            } else {
+                $this->component = $this->super->getRoot()->findController($this->componentClass);
+                if (!$this->component) {
+                    throw new \Exception('Could not find route to ' . (string)$this->componentClass);
+                }
             }
         }
         return $this->component;
-    }
-
-    public function setRoute($absoluteRoute) {
-        $this->component = $this->super->getRoot()->resolve($absoluteRoute);
-        if (!$this->component) {
-            throw new \Exception("Could not set route. Can't resolve [$absoluteRoute].");
-        }
-        $this->changedRoute = $absoluteRoute;
-    }
-
-    public function hasRouteChanged() {
-        return $this->changedRoute != null;
     }
 
     /**
@@ -105,20 +73,17 @@ class PlainSubComponent extends SubComponent {
         return $this->response;
     }
 
-    public function getRoute() {
-        if ($this->changedRoute) {
-            return $this->changedRoute;
-        }
-        return $this->getComponent()->getRoute();
+    protected function isDefaultStateValue($key, $value) {
+        return parent::isDefaultStateValue($key, $value) || $this->isDefaultMethodArgument($key, $value);
     }
 
     private function isDefaultMethodArgument($key, $value) {
-        $reflClass = new \ReflectionClass($this->getComponent());
+        $class = new \ReflectionClass($this->getComponent());
         $methodName = $this->getComponent()->makeMethodName($this->method);
-        if (!$reflClass->hasMethod($methodName)) {
+        if (!$class->hasMethod($methodName)) {
             return false;
         }
-        $method = $reflClass->getMethod($methodName);
+        $method = $class->getMethod($methodName);
         foreach ($method->getParameters() as $param) {
             if ($param->getName() == $key) {
                 return $param->isDefaultValueAvailable() && $param->getDefaultValue() == $value;
@@ -127,39 +92,7 @@ class PlainSubComponent extends SubComponent {
         return false;
     }
 
-    /**
-     * @return \watoki\collections\Map
-     */
-    public function getParameters() {
-        return $this->parameters;
-    }
-
-    public function getNonDefaultParameters() {
-        $nonDefault = new Map();
-        foreach ($this->parameters as $key => $value) {
-            if (!$this->isDefaultParameter($key, $value)) {
-                $nonDefault->set($key, $value);
-            }
-        }
-        return $nonDefault;
-    }
-
-    protected function isDefaultParameter($key, $value) {
-        return $this->defaultParameters->has($key) && $this->defaultParameters->get($key) == $value
-                || $this->isDefaultMethodArgument($key, $value);
-    }
-
-    /**
-     * @param string $method
-     */
     public function setMethod($method) {
         $this->method = $method;
-    }
-
-    /**
-     * @return Map
-     */
-    public function getState() {
-        return $this->getNonDefaultParameters();
     }
 }

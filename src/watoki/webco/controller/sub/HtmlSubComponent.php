@@ -34,17 +34,29 @@ class HtmlSubComponent extends PlainSubComponent {
     );
 
     /**
+     * @var string
+     */
+    public $name;
+
+    /**
+     * @var Map
+     */
+    public $superState;
+
+    /**
      * @var Liste|\DOMElement[]
      */
     private $headElements;
 
-    function __construct(Component $super, $componentClass, Map $defaultParameters = null) {
-        parent::__construct($super, $componentClass, $defaultParameters);
+    function __construct(SuperComponent $super, $componentClass, Map $defaultState = null) {
+        parent::__construct($super, $componentClass, $defaultState);
         $this->headElements = new Liste();
     }
 
-    public function render($name, $state) {
-        return $this->postProcess(parent::render($name, $state));
+    public function render($name, Map $superState) {
+        $this->name = $name;
+        $this->superState = $superState;
+        return $this->postProcess(parent::render($name, $superState));
     }
 
     private function postProcess($content) {
@@ -161,7 +173,7 @@ class HtmlSubComponent extends PlainSubComponent {
                 $subParams->set($key, $value);
             }
 
-            $state = $this->state->copy();
+            $state = $this->superState->copy();
 
             if (!$state->has(SuperComponent::PARAMETER_SUB_STATE)) {
                 $state->set(SuperComponent::PARAMETER_SUB_STATE, new Map());

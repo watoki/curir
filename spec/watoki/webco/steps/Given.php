@@ -1,6 +1,6 @@
 <?php
 namespace spec\watoki\webco\steps;
- 
+
 use spec\watoki\webco\Step;
 use spec\watoki\webco\Test;
 
@@ -19,10 +19,17 @@ class Given extends Step {
     function __construct(Test $test) {
         parent::__construct($test);
 
-        $this->makeFolder(Test::$folder . '/test');
+        $testFolder = Test::$folder . '/tmp';
+        $this->cleanDir($testFolder);
+        $this->makeFolder($testFolder);
 
-        spl_autoload_register(function ($className) {
-            $classFile = Test::$folder . '/test/' . str_replace('\\', '/', $className) . '.php';
+        $that = $this;
+        $this->test->undos[] = function () use ($that, $testFolder) {
+            $that->cleanDir($testFolder);
+        };
+
+        spl_autoload_register(function ($className) use ($testFolder) {
+            $classFile = $testFolder . '/' . str_replace('\\', '/', $className) . '.php';
             if (file_exists($classFile)) {
                 require_once $classFile;
             }
@@ -30,7 +37,7 @@ class Given extends Step {
     }
 
     public function theFolder($folder) {
-        $fullFolder = Test::$folder . '/test/' . $folder;
+        $fullFolder = Test::$folder . '/tmp/' . $folder;
 
         $this->makeFolder($fullFolder);
     }
@@ -39,14 +46,7 @@ class Given extends Step {
      * @param $fullFolder
      */
     public function makeFolder($fullFolder) {
-        $this->cleanDir($fullFolder);
-
         mkdir($fullFolder);
-
-        $that = $this;
-        $this->test->undos[] = function () use ($that, $fullFolder) {
-            $that->cleanDir($fullFolder);
-        };
     }
 
     public function theRequestMethodIs($method) {
@@ -62,15 +62,8 @@ class Given extends Step {
     }
 
     public function theFile_In_WithContent($fileName, $folder, $content) {
-        $file = Test::$folder . '/test/' . $folder . '/' . $fileName;
+        $file = Test::$folder . '/tmp/' . $folder . '/' . $fileName;
         file_put_contents($file, $content);
-
-        $test = $this->test;
-        $this->test->undos[] = function () use ($file, $test) {
-            if (!unlink($file)) {
-                $test->fail('Could not delete ' . $file);
-            }
-        };
     }
 
     public function cleanDir($folder) {
@@ -78,11 +71,13 @@ class Given extends Step {
             return true;
         }
 
-        foreach(glob(rtrim($folder, '/') . '/' . '*') as $item) {
-            if (!(is_dir($item) ? $this->cleanDir($item) : unlink($item))) {
-                $this->test->fail('Could not delete ' . $item);
-            };
-        }
+        do {
+            $items = glob(rtrim($folder, '/') . '/' . '*');
+            foreach ($items as $item) {
+                is_dir($item) ? $this->cleanDir($item) : unlink($item);
+            }
+        } while ($items);
+
         return rmdir($folder);
     }
 

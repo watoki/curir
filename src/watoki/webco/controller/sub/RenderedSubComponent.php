@@ -16,7 +16,7 @@ class RenderedSubComponent extends SubComponent {
         $this->content = $content;
     }
 
-    public function render($name, $state) {
+    public function render($name, $superState) {
         return $this->content;
     }
 

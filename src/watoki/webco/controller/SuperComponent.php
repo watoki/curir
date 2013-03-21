@@ -134,19 +134,16 @@ abstract class SuperComponent extends Component {
     }
 
     /**
-     * @param $subs
+     * @param SubComponent[] $subs
      * @param \watoki\collections\Map $state
      * @return void
      */
     private function restoreSubStates($subs, Map $state) {
         foreach ($subs as $name => $sub) {
-            if ($sub instanceof PlainSubComponent && $state->has($name)) {
+            if ($state->has($name)) {
                 /** @var $restoreSubState Map */
                 $restoreSubState = $state->get($name);
-                if ($restoreSubState->has(self::PARAMETER_TARGET)) {
-                    $sub->setRoute($restoreSubState->get(self::PARAMETER_TARGET));
-                }
-                $sub->getParameters()->merge($restoreSubState);
+                $sub->getState()->merge($restoreSubState);
             }
         }
     }
@@ -158,7 +155,7 @@ abstract class SuperComponent extends Component {
     private function collectSubStates($subs) {
         $subStates = new Map();
         foreach ($subs as $name => $sub) {
-            $subState = $sub->getState();
+            $subState = $sub->getNonDefaultState();
             if (!$subState->isEmpty()) {
                 $subStates->set($name, $subState);
             }
@@ -195,7 +192,8 @@ abstract class SuperComponent extends Component {
 
         foreach ($subs as $subName => $sub) {
             /** @var $sub PlainSubComponent */
-            if ($sub->getResponse() && $sub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
+            $subResponse = $sub->getResponse();
+            if ($subResponse && $subResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
                 if (!$target) {
                     $state = new Map();
                     $target = $this->createRedirectTarget($requestParams, $state);
