@@ -29,7 +29,7 @@ class CompositeRequestTest extends Test {
         }');
         $this->given->theFile_In_WithContent('sub.html', 'restoresubs', '<html><head></head><body>%msg%</body></html>');
 
-        $this->given->theComponent_In_WithTheBody('restoresubs\Super', 'restoresubs', '
+        $this->given->theSuperComponent_In_WithTheBody('restoresubs\Super', 'restoresubs', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -56,7 +56,7 @@ class CompositeRequestTest extends Test {
         }');
         $this->given->theFile_In_WithContent('sub.html', 'primaryaction', '<html><head></head><body>%msg%</body></html>');
 
-        $this->given->theComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
+        $this->given->theSuperComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
         function doGet($param) {
             return array(
                 "msg" => $param,
@@ -92,7 +92,7 @@ class CompositeRequestTest extends Test {
         }');
         $this->given->theFile_In_WithContent('sub.html', 'primaryfirst', '<html><head></head><body>%msg%</body></html>');
 
-        $this->given->theComponent_In_WithTheBody('primaryfirst\Super', 'primaryfirst', '
+        $this->given->theSuperComponent_In_WithTheBody('primaryfirst\Super', 'primaryfirst', '
         function doGet($param) {
             global $something;
             return array(
@@ -124,7 +124,7 @@ class CompositeRequestTest extends Test {
             '<html><head></head><body>%msg% of Sub2</body></html>');#
 
 
-        $this->given->theComponent_In_WithTheBody('subtargetrequest\Super', 'subtargetrequest', '
+        $this->given->theSuperComponent_In_WithTheBody('subtargetrequest\Super', 'subtargetrequest', '
         function doGet() {
             return array(
                 "msg" => "Hello",
@@ -156,7 +156,7 @@ class CompositeRequestTest extends Test {
             return $this->redirect(new \watoki\webco\Url("not/here?param=x#foo"));
         }');
 
-        $this->given->theComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
+        $this->given->theSuperComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
         function doGet() {
             return array(
                 "sub1" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS),
@@ -187,7 +187,7 @@ class CompositeRequestTest extends Test {
             throw new \Exception("Shuold not be called");
         }');
 
-        $this->given->theComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
+        $this->given->theSuperComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
         function doGet() {
             return array(
                 "sub1" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS),

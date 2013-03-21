@@ -6,19 +6,11 @@ use watoki\tempan\HtmlParser;
 use watoki\webco\Controller;
 use watoki\webco\Request;
 use watoki\webco\Response;
-use watoki\webco\Url;
 use watoki\webco\controller\sub\HtmlSubComponent;
-use watoki\webco\controller\sub\PlainSubComponent;
 
 abstract class Component extends Controller {
 
     public static $CLASS = __CLASS__;
-
-    const PARAMETER_PRIMARY_REQUEST = '.';
-
-    const PARAMETER_SUB_STATE = '.';
-
-    const PARAMETER_TARGET = '~';
 
     /**
      * @param array|object $model
@@ -33,58 +25,11 @@ abstract class Component extends Controller {
      * @return Response
      */
     public function respond(Request $request) {
-        $subResponse = $this->handlePrimaryRequest($request);
-        if ($subResponse) {
-            return $subResponse;
-        }
-
         $response = $this->getResponse();
         $methodName = $this->makeMethodName($this->getActionName($request));
         $response->setBody($this->renderAction($methodName, $request->getParameters()));
 
         return $response;
-    }
-
-    /**
-     * @param Request $request
-     * @return Response|null If a response is returned, it should be returned immediately
-     */
-    // TODO This should be somehow passed into the model
-    private function handlePrimaryRequest(Request $request) {
-        if ($request->getParameters()->has(self::PARAMETER_SUB_STATE)) {
-            $subState = $request->getParameters()->get(self::PARAMETER_SUB_STATE);
-            if ($subState->has(self::PARAMETER_PRIMARY_REQUEST)) {
-                $primarySubName = $subState->get(self::PARAMETER_PRIMARY_REQUEST);
-
-                $primaryResponse = $this->getPrimaryRequestResponse($primarySubName, $subState, $request);
-
-                if ($primaryResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
-                    $this->bubbleUpRedirect($primarySubName, $primaryResponse, new Map(), $request->getParameters()->copy());
-                    return $this->getResponse();
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @param $primarySubName
-     * @param $subState
-     * @param Request $request
-     * @return Response
-     */
-    private function getPrimaryRequestResponse($primarySubName, Map $subState, Request $request) {
-        /** @var $primaryParameters Map */
-        $primaryParameters = $subState->get($primarySubName);
-
-        $primaryTarget = $primaryParameters->get(self::PARAMETER_TARGET);
-
-        $primarySub = $this->getRoot()->resolve($primaryTarget);
-
-        $primaryResponse = $primarySub->respond(new Request($request->getMethod(), '', $primaryParameters));
-        $request->setMethod(Request::METHOD_GET);
-
-        return $primaryResponse;
     }
 
     /**
@@ -98,13 +43,7 @@ abstract class Component extends Controller {
             return null;
         }
 
-        $subs = $this->collectSubComponents($model);
-        $preparedModel = $this->renderSubComponents($model, $subs, $parameters);
-        $rendered = $this->render($preparedModel);
-
-        $this->collectSubRedirects($subs, $parameters);
-
-        return $this->mergeSubHeaders($rendered, $subs);
+        return $this->render($model);
     }
 
     /**
@@ -122,21 +61,6 @@ abstract class Component extends Controller {
         $args = $this->collectArguments($parameters, $method);
 
         return $method->invokeArgs($this, $args);
-    }
-
-    // TODO Collect deep (names must be flat, though)
-    // TODO should model have to be a Map?
-    protected function collectSubComponents($model) {
-        if (!is_array($model)) {
-            return array();
-        }
-        $subs = array();
-        foreach ($model as $field => $value) {
-            if ($value instanceof SubComponent) {
-                $subs[$field] = $value;
-            }
-        }
-        return $subs;
     }
 
     /**
@@ -159,63 +83,6 @@ abstract class Component extends Controller {
             }
         }
         return $args;
-    }
-
-    /**
-     * @param array $model
-     * @param array|SubComponent[] $subs
-     * @param Map $parameters
-     * @return mixed
-     */
-    protected function renderSubComponents($model, $subs, $parameters) {
-        if ($parameters->has(self::PARAMETER_SUB_STATE)) {
-            $this->restoreSubStates($subs, $parameters->get(self::PARAMETER_SUB_STATE));
-        }
-
-        $subStates = $this->collectSubStates($subs);
-
-        $state = $parameters->copy();
-        if (!$subStates->isEmpty()) {
-            $state->set(self::PARAMETER_SUB_STATE, $subStates);
-        }
-
-        foreach ($subs as $name => $sub) {
-            $model[$name] = $sub->render($name, $state);
-        }
-        return $model;
-    }
-
-    /**
-     * @param $subs
-     * @param \watoki\collections\Map $state
-     * @return void
-     */
-    private function restoreSubStates($subs, Map $state) {
-        foreach ($subs as $name => $sub) {
-            if ($sub instanceof PlainSubComponent && $state->has($name)) {
-                /** @var $restoreSubState Map */
-                $restoreSubState = $state->get($name);
-                if ($restoreSubState->has(self::PARAMETER_TARGET)) {
-                    $sub->setRoute($restoreSubState->get(self::PARAMETER_TARGET));
-                }
-                $sub->getParameters()->merge($restoreSubState);
-            }
-        }
-    }
-
-    /**
-     * @param SubComponent[] $subs
-     * @return Map
-     */
-    private function collectSubStates($subs) {
-        $subStates = new Map();
-        foreach ($subs as $name => $sub) {
-            $subState = $sub->getState();
-            if (!$subState->isEmpty()) {
-                $subStates->set($name, $subState);
-            }
-        }
-        return $subStates;
     }
 
     /**
@@ -257,67 +124,6 @@ abstract class Component extends Controller {
 
     public function getBaseRoute() {
         return substr($this->route, 0, strrpos($this->route, '/') + 1);
-    }
-
-    // TODO This needs to be done by the SubComponent and decoupled asset management
-    private function mergeSubHeaders($body, array $subs) {
-        $parser = new HtmlParser($body);
-
-        foreach ($subs as $sub) {
-            if ($sub instanceof HtmlSubComponent) {
-                if (!isset($head)) {
-                    $head = $parser->getRoot()->firstChild;
-                    if ($head->nodeName != 'head') {
-                        $body = $head;
-                        $head = $parser->getDocument()->createElement('head');
-                        $parser->getRoot()->insertBefore($head, $body);
-                    }
-                }
-
-                foreach ($sub->getHeadElements('link') as $element) {
-                    $head->appendChild($parser->getDocument()->importNode($element, true));
-                }
-            }
-        }
-
-        return isset($parser) ? $parser->toString() : $body;
-    }
-
-    private function collectSubRedirects($subs, Map $requestParams) {
-        $state = $target = null;
-
-        foreach ($subs as $subName => $sub) {
-            /** @var $sub PlainSubComponent */
-            if ($sub->getResponse() && $sub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
-                if (!$target) {
-                    $state = new Map();
-                    $target = $this->createRedirectTarget($requestParams, $state);
-                }
-
-                $this->bubbleUpRedirect($subName, $sub->getResponse(), $state, $requestParams, $target);
-            }
-        }
-    }
-
-    private function bubbleUpRedirect($subName, Response $subResponse, Map $state, Map $requestParams, Url $target = null) {
-        if (!$target) {
-            $target = $this->createRedirectTarget($requestParams, $state);
-        }
-
-        $subTarget = Url::parse($subResponse->getHeaders()->get(Response::HEADER_LOCATION));
-        $subParams = $subTarget->getParameters()->copy();
-        $subParams->set(self::PARAMETER_TARGET, $subTarget->getResource());
-        $target->setFragment($subTarget->getFragment());
-        $state->set($subName, $subParams);
-
-        $response = $this->getResponse();
-        $response->getHeaders()->set(Response::HEADER_LOCATION, $target->toString());
-    }
-
-    private function createRedirectTarget(Map $requestParams, Map $state) {
-        $target = new Url($this->getRoute(), $requestParams);
-        $target->getParameters()->set(self::PARAMETER_SUB_STATE, $state);
-        return $target;
     }
 
 }

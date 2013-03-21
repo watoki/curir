@@ -32,6 +32,19 @@ class CompositionTestGiven extends Given {
         ");
     }
 
+    public function theSuperComponent_In_WithTheBody($className, $folder, $body) {
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\SuperComponent', "
+            protected function doRender(\$model, \$template) {
+                foreach (\$model as \$key => \$value) {
+                    \$template = str_replace('%' . \$key . '%', \$value, \$template);
+                }
+                return \$template;
+            }
+
+            $body
+        ");
+    }
+
     public function theModule_In($moduleClass, $folder) {
         $this->theClass_In_Extending_WithTheBody($moduleClass, $folder, '\watoki\webco\controller\Module', '');
     }

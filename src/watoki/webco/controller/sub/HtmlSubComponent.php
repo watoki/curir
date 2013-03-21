@@ -7,6 +7,7 @@ use watoki\tempan\HtmlParser;
 use watoki\webco\Request;
 use watoki\webco\Url;
 use watoki\webco\controller\Component;
+use watoki\webco\controller\SuperComponent;
 
 class HtmlSubComponent extends PlainSubComponent {
 
@@ -154,7 +155,7 @@ class HtmlSubComponent extends PlainSubComponent {
 
             $subParams = new Map();
             if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
-                $subParams->set(Component::PARAMETER_TARGET, $url->getResource());
+                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getResource());
             }
             foreach ($url->getParameters() as $key => $value) {
                 $subParams->set($key, $value);
@@ -162,13 +163,13 @@ class HtmlSubComponent extends PlainSubComponent {
 
             $state = $this->state->copy();
 
-            if (!$state->has(Component::PARAMETER_SUB_STATE)) {
-                $state->set(Component::PARAMETER_SUB_STATE, new Map());
+            if (!$state->has(SuperComponent::PARAMETER_SUB_STATE)) {
+                $state->set(SuperComponent::PARAMETER_SUB_STATE, new Map());
             }
 
-            $subState = $state->get(Component::PARAMETER_SUB_STATE);
+            $subState = $state->get(SuperComponent::PARAMETER_SUB_STATE);
             if ($this->getActionName($url, $element) != 'get') {
-                $subState->set(Component::PARAMETER_PRIMARY_REQUEST, $this->name);
+                $subState->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
             }
             $subState->set($this->name, $subParams);
 

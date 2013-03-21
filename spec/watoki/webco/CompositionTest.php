@@ -20,7 +20,7 @@ class CompositionTest extends Test {
     function testIncludePlain() {
         $this->given->theFolder_WithModule('snippet');
         $this->given->theSubComponent_In_WithTemplate('snippet\Sub', 'snippet', '%msg%!');
-        $this->given->theComponent_In_WithTheBody('snippet\Super', 'snippet', '
+        $this->given->theSuperComponent_In_WithTheBody('snippet\Super', 'snippet', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\PlainSubComponent($this, Sub::$CLASS)
@@ -40,7 +40,7 @@ class CompositionTest extends Test {
                 <head><title>Sub Component</title></head>
                 <body><b>%msg%</b></body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('document\Super', 'document', '
+        $this->given->theSuperComponent_In_WithTheBody('document\Super', 'document', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -63,7 +63,7 @@ class CompositionTest extends Test {
                 </head>
                 <body><i>%msg%</i></body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('assets\Super', 'assets', '
+        $this->given->theSuperComponent_In_WithTheBody('assets\Super', 'assets', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -96,7 +96,7 @@ class CompositionTest extends Test {
                     <img src="/not/relative.png">
                 </body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('relative\Super', 'relative', '
+        $this->given->theSuperComponent_In_WithTheBody('relative\Super', 'relative', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, inner\Sub::$CLASS)
@@ -128,7 +128,7 @@ class CompositionTest extends Test {
                     <a href="some/link.html?param1[map][map2]=val1&amp;param2=val2">%msg%</a>
                 </body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('deeplink\Super', 'deeplink', '
+        $this->given->theSuperComponent_In_WithTheBody('deeplink\Super', 'deeplink', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -155,7 +155,7 @@ class CompositionTest extends Test {
         $this->given->theSubComponent_In_WithTemplate('subtarget\inner\Sub', 'subtarget/inner',
             '<html><head></head><body>%msg%</body></html>');
 
-        $this->given->theComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
+        $this->given->theSuperComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
         function doGet() {
             $sub = new \watoki\webco\controller\sub\HtmlSubComponent($this, Not::$CLASS);
             $sub->setRoute($this->getBaseRoute() . "inner/sub.html");
@@ -189,7 +189,7 @@ class CompositionTest extends Test {
                     </form>
                 </body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('formfields\Super', 'formfields', '
+        $this->given->theSuperComponent_In_WithTheBody('formfields\Super', 'formfields', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -223,7 +223,7 @@ class CompositionTest extends Test {
                     <a href="sub.html?action=myAction">%msg%</a>
                 </body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('primaryactioncomp\Super', 'primaryactioncomp', '
+        $this->given->theSuperComponent_In_WithTheBody('primaryactioncomp\Super', 'primaryactioncomp', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -254,7 +254,7 @@ class CompositionTest extends Test {
                     <a href="sub.html">%msg%</a>
                 </body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('omitprimary\Super', 'omitprimary', '
+        $this->given->theSuperComponent_In_WithTheBody('omitprimary\Super', 'omitprimary', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -284,7 +284,7 @@ class CompositionTest extends Test {
                     <a href="sub.html?param1=val1">%msg%</a>
                 </body>
             </html>');
-        $this->given->theComponent_In_WithTheBody('defroute\Super', 'defroute', '
+        $this->given->theSuperComponent_In_WithTheBody('defroute\Super', 'defroute', '
         function doGet() {
             return array(
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
@@ -309,7 +309,7 @@ class CompositionTest extends Test {
             '<html><head></head><body>Sub1:%msg%</body></html>');
         $this->given->theSubComponent_In_WithTemplate('colstate\Sub2', 'colstate',
             '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
-        $this->given->theComponent_In_WithTheBody('colstate\Super', 'colstate', '
+        $this->given->theSuperComponent_In_WithTheBody('colstate\Super', 'colstate', '
         function doGet() {
             $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS);
             $sub1->getParameters()->set("param1", "val1");
@@ -337,7 +337,7 @@ class CompositionTest extends Test {
             '<html><head></head><body>Sub1:%msg%</body></html>');
         $this->given->theSubComponent_In_WithTemplate('defbyconstr\Sub2', 'defbyconstr',
             '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
-        $this->given->theComponent_In_WithTheBody('defbyconstr\Super', 'defbyconstr', '
+        $this->given->theSuperComponent_In_WithTheBody('defbyconstr\Super', 'defbyconstr', '
         function doGet() {
             $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
                 new \watoki\collections\Map(array("param1" => "val1", "param2" => "val2", "param3" => "val3")));
@@ -372,7 +372,7 @@ class CompositionTest extends Test {
 
         $this->given->theSubComponent_In_WithTemplate('defaultargs\Sub2', 'defaultargs',
             '<html><head></head><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
-        $this->given->theComponent_In_WithTheBody('defaultargs\Super', 'defaultargs', '
+        $this->given->theSuperComponent_In_WithTheBody('defaultargs\Super', 'defaultargs', '
         function doGet() {
             $sub1 = new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS,
                 new \watoki\collections\Map(array("param1" => "World")));
