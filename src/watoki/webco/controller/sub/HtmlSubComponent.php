@@ -170,20 +170,18 @@ class HtmlSubComponent extends PlainSubComponent {
             if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
                 $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getResource());
             }
-            foreach ($url->getParameters() as $key => $value) {
-                $subParams->set($key, $value);
-            }
+            $subParams->merge($url->getParameters());
 
             $state = $this->superState->copy();
+            if ($this->getActionName($url, $element) != 'get') {
+                $state->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
+            }
 
             if (!$state->has(SuperComponent::PARAMETER_SUB_STATE)) {
                 $state->set(SuperComponent::PARAMETER_SUB_STATE, new Map());
             }
 
             $subState = $state->get(SuperComponent::PARAMETER_SUB_STATE);
-            if ($this->getActionName($url, $element) != 'get') {
-                $subState->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
-            }
             $subState->set($this->name, $subParams);
 
             $replace = new Url($route, $state, $url->getFragment());

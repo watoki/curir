@@ -48,10 +48,12 @@ class CompositeRequestTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe('<html><head></head><body>Hello All:World</body></html>');
     }
 
-    function testPrimaryAction() {
+    function testPrimaryActionFirst() {
         $this->given->theFolder_WithModule('primaryaction');
         $this->given->theComponent_In_WithTheBody('primaryaction\Sub', 'primaryaction', '
+        public static $executed = "NOT";
         function doMyAction($param1, $param2) {
+            self::$executed = "First";
             return array("msg" => $param1 . " " . $param2);
         }');
         $this->given->theFile_In_WithContent('sub.html', 'primaryaction', '<html><head></head><body>%msg%</body></html>');
@@ -59,15 +61,15 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
         function doGet($param) {
             return array(
-                "msg" => $param,
+                "msg" => Sub::$executed . ":" . $param,
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><body>%msg% %sub%</body></html>');
 
         $this->given->theRequestParameter_WithValue('param', 'Greetings');
+        $this->given->thePrimaryRequestIsFor('sub');
         $this->given->theRequestParameterHasTheState(new Map(array(
-            '.' => 'sub',
             'sub' => new Map(array(
                 '~' => '/base/Sub',
                 'action' => 'myAction',
@@ -77,34 +79,31 @@ class CompositeRequestTest extends Test {
         )));
         $this->when->iSendTheRequestTo('primaryaction\Module');
 
-        $this->then->theHtmlResponseBodyShouldBe('<html><head></head><body>Greetings my Friends</body></html>');
+        $this->then->theHtmlResponseBodyShouldBe('<html><body>First:Greetings my Friends</body></html>');
     }
 
-    function testPrimaryActionFirst() {
+    function testPrimaryActionOnlyOnce() {
         $this->given->theFolder_WithModule('primaryfirst');
         $this->given->theComponent_In_WithTheBody('primaryfirst\Sub', 'primaryfirst', '
-        public $called = 0;
+        public static $called = 0;
         function doGet($param1, $param2) {
-            $this->called++;
-            global $something;
-            $something = "First";
-            return array("msg" => $param1 . " " . $param2 . " " . $this->called);
+            self::$called++;
+            return array("msg" => $param1 . " " . $param2 . " " . self::$called);
         }');
         $this->given->theFile_In_WithContent('sub.html', 'primaryfirst', '<html><head></head><body>%msg%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('primaryfirst\Super', 'primaryfirst', '
         function doGet($param) {
-            global $something;
             return array(
-                "msg" => $param . ":"  . $something . ":",
+                "msg" => $param,
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primaryfirst', '<html><body>%msg% %sub%</body></html>');
 
-        $this->given->theRequestParameter_WithValue('param', 'Last');
+        $this->given->theRequestParameter_WithValue('param', 'Super');
+        $this->given->thePrimaryRequestIsFor('sub');
         $this->given->theRequestParameterHasTheState(new Map(array(
-            '.' => 'sub',
             'sub' => new Map(array(
                 '~' => '/base/Sub',
                 'param1' => 'hello',
@@ -113,7 +112,11 @@ class CompositeRequestTest extends Test {
         )));
         $this->when->iSendTheRequestTo('primaryfirst\Module');
 
-        $this->then->theHtmlResponseBodyShouldBe('<html><head></head><body>Last:First: hello world 1</body></html>');
+        $this->then->theHtmlResponseBodyShouldBe('<html><body>Super hello world 1</body></html>');
+    }
+
+    function testPrimaryRequestWithState() {
+        $this->markTestIncomplete();
     }
 
     function testSubTarget() {
@@ -184,7 +187,7 @@ class CompositeRequestTest extends Test {
         }');
         $this->given->theComponent_In_WithTheBody('primaryredirect\Sub2', 'primaryredirect', '
         function doGet() {
-            throw new \Exception("Shuold not be called");
+            throw new \Exception("Should not be called");
         }');
 
         $this->given->theSuperComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
@@ -196,8 +199,8 @@ class CompositeRequestTest extends Test {
         }');
 
         $this->given->theRequestParameter_WithValue('param', 'Super');
+        $this->given->thePrimaryRequestIsFor('sub1');
         $this->given->theRequestParameterHasTheState(new Map(array(
-            '.' => 'sub1',
             'sub1' => new Map(array(
                 '~' => '/base/Sub',
                 'param1' => 'hello'
@@ -215,6 +218,10 @@ class CompositeRequestTest_Given extends CompositionTestGiven {
 
     public function theRequestParameterHasTheState($param) {
         $this->theRequestParameter_WithValue('.', $param);
+    }
+
+    public function thePrimaryRequestIsFor($subName) {
+        $this->theRequestParameter_WithValue('!', $subName);
     }
 }
 

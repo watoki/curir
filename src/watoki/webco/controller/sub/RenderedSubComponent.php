@@ -12,11 +12,11 @@ class RenderedSubComponent extends SubComponent {
     private $content;
 
     function __construct(Component $super, $content) {
-        parent::__construct($super);
+        parent::__construct($super, new Map());
         $this->content = $content;
     }
 
-    public function render($name, $superState) {
+    public function render($name, Map $superState) {
         return $this->content;
     }
 

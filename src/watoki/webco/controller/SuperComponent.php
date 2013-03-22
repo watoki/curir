@@ -8,21 +8,22 @@ use watoki\webco\Response;
 use watoki\webco\Url;
 use watoki\webco\controller\sub\HtmlSubComponent;
 use watoki\webco\controller\sub\PlainSubComponent;
+use watoki\webco\controller\sub\RenderedSubComponent;
 
 abstract class SuperComponent extends Component {
 
     public static $CLASS = __CLASS__;
 
-    const PARAMETER_PRIMARY_REQUEST = '.';
+    const PARAMETER_PRIMARY_REQUEST = '!';
 
     const PARAMETER_SUB_STATE = '.';
 
     const PARAMETER_TARGET = '~';
 
     /**
-     * @var null|array|SubComponent[] Null until invokeAction has been called
+     * @var null|array|SubComponent[]
      */
-    public $subs;
+    public $subs = array();
 
     public function respond(Request $request) {
         $subResponse = $this->handlePrimaryRequest($request);
@@ -37,42 +38,46 @@ abstract class SuperComponent extends Component {
      * @param Request $request
      * @return Response|null If a response is returned, it should be returned immediately
      */
-    // TODO This should be somehow passed into the model
     private function handlePrimaryRequest(Request $request) {
-        if ($request->getParameters()->has(self::PARAMETER_SUB_STATE)) {
-            $subState = $request->getParameters()->get(self::PARAMETER_SUB_STATE);
-            if ($subState->has(self::PARAMETER_PRIMARY_REQUEST)) {
-                $primarySubName = $subState->get(self::PARAMETER_PRIMARY_REQUEST);
+        $params = $request->getParameters();
+        if ($params->has(self::PARAMETER_PRIMARY_REQUEST)) {
+            $subName = $params->remove(self::PARAMETER_PRIMARY_REQUEST);
 
-                $primaryResponse = $this->getPrimaryRequestResponse($primarySubName, $subState, $request);
+            $subState = $this->getSubState($params, $subName);
+            $sub = $this->createSubComponent($subState);
+            $sub->setMethod($request->getMethod());
+            $request->setMethod(Request::METHOD_GET);
 
-                if ($primaryResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
-                    $this->bubbleUpRedirect($primarySubName, $primaryResponse, new Map(), $request->getParameters()->copy());
-                    return $this->getResponse();
-                }
+            $rendered = $sub->render($subName, $subState);
+
+            if ($sub->getResponse()->getHeaders()->has(Response::HEADER_LOCATION)) {
+                $this->bubbleUpRedirect($subName, $sub->getResponse(), new Map(), $request->getParameters()->copy());
+                return $this->getResponse();
             }
+
+            $this->subs[$subName] = new RenderedSubComponent($this, $rendered);
         }
         return null;
     }
 
     /**
-     * @param $primarySubName
-     * @param $subState
-     * @param Request $request
-     * @return Response
+     * @param Map $params
+     * @param $subName
+     * @return Map
      */
-    private function getPrimaryRequestResponse($primarySubName, Map $subState, Request $request) {
-        /** @var $primaryParameters Map */
-        $primaryParameters = $subState->get($primarySubName);
+    private function getSubState(Map $params, $subName) {
+        $subParams = new Map();
+        if ($params->has(self::PARAMETER_SUB_STATE) && $params->get(self::PARAMETER_SUB_STATE)->has($subName)) {
+            $subParams = $params->get(self::PARAMETER_SUB_STATE)->get($subName);
+            return $subParams;
+        }
+        return $subParams;
+    }
 
-        $primaryTarget = $primaryParameters->get(self::PARAMETER_TARGET);
-
-        $primarySub = $this->getRoot()->resolve($primaryTarget);
-
-        $primaryResponse = $primarySub->respond(new Request($request->getMethod(), '', $primaryParameters));
-        $request->setMethod(Request::METHOD_GET);
-
-        return $primaryResponse;
+    private function createSubComponent(Map $state) {
+        $sub = new HtmlSubComponent($this, null);
+        $sub->getState()->merge($state);
+        return $sub;
     }
 
     protected function invokeAction($action, Map $parameters) {
@@ -81,65 +86,58 @@ abstract class SuperComponent extends Component {
             return $model;
         }
 
-        $this->subs = $this->collectSubComponents($model);
-        $preparedModel = $this->renderSubComponents($model, $this->subs, $parameters);
+        $this->collectSubComponents($model);
+        $preparedModel = $this->renderSubComponents($model, $parameters);
 
-        $this->collectSubRedirects($this->subs, $parameters);
+        $this->collectSubRedirects($parameters);
         return $preparedModel;
     }
 
     protected function render($model) {
-        $rendered = parent::render($model);
-
-        return $this->mergeSubHeaders($rendered, $this->subs);
+        return $this->mergeSubHeaders(parent::render($model), $this->subs);
     }
 
-    // TODO Collect deep (names must be flat, though)
-    // TODO should model have to be a Map?
+    // TODO should model have to be a Map? No. Array, Object and Map should be handled. => We need a unified iterator.
     private function collectSubComponents($model) {
         if (!is_array($model)) {
-            return array();
+            return;
         }
-        $subs = array();
-        foreach ($model as $field => $value) {
-            if ($value instanceof SubComponent) {
-                $subs[$field] = $value;
+        foreach ($model as $name => $sub) {
+            if ($sub instanceof SubComponent && !array_key_exists($name, $this->subs)) {
+                $this->subs[$name] = $sub;
             }
         }
-        return $subs;
     }
 
     /**
      * @param array $model
-     * @param array|SubComponent[] $subs
      * @param Map $parameters
      * @return mixed
      */
-    private function renderSubComponents($model, $subs, $parameters) {
+    private function renderSubComponents($model, $parameters) {
         if ($parameters->has(self::PARAMETER_SUB_STATE)) {
-            $this->restoreSubStates($subs, $parameters->get(self::PARAMETER_SUB_STATE));
+            $this->restoreSubStates($parameters->get(self::PARAMETER_SUB_STATE));
         }
 
-        $subStates = $this->collectSubStates($subs);
+        $subStates = $this->collectSubStates();
 
         $state = $parameters->copy();
         if (!$subStates->isEmpty()) {
             $state->set(self::PARAMETER_SUB_STATE, $subStates);
         }
 
-        foreach ($subs as $name => $sub) {
+        foreach ($this->subs as $name => $sub) {
             $model[$name] = $sub->render($name, $state);
         }
         return $model;
     }
 
     /**
-     * @param SubComponent[] $subs
      * @param \watoki\collections\Map $state
      * @return void
      */
-    private function restoreSubStates($subs, Map $state) {
-        foreach ($subs as $name => $sub) {
+    private function restoreSubStates(Map $state) {
+        foreach ($this->subs as $name => $sub) {
             if ($state->has($name)) {
                 /** @var $restoreSubState Map */
                 $restoreSubState = $state->get($name);
@@ -149,12 +147,11 @@ abstract class SuperComponent extends Component {
     }
 
     /**
-     * @param SubComponent[] $subs
      * @return Map
      */
-    private function collectSubStates($subs) {
+    private function collectSubStates() {
         $subStates = new Map();
-        foreach ($subs as $name => $sub) {
+        foreach ($this->subs as $name => $sub) {
             $subState = $sub->getNonDefaultState();
             if (!$subState->isEmpty()) {
                 $subStates->set($name, $subState);
@@ -187,11 +184,14 @@ abstract class SuperComponent extends Component {
         return isset($parser) ? $parser->toString() : $body;
     }
 
-    private function collectSubRedirects($subs, Map $requestParams) {
+    private function collectSubRedirects(Map $requestParams) {
         $state = $target = null;
 
-        foreach ($subs as $subName => $sub) {
-            /** @var $sub PlainSubComponent */
+        foreach ($this->subs as $subName => $sub) {
+            if (!$sub instanceof PlainSubComponent) {
+                continue;
+            }
+
             $subResponse = $sub->getResponse();
             if ($subResponse && $subResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
                 if (!$target) {

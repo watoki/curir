@@ -203,7 +203,7 @@ class CompositionTest extends Test {
                 <head></head>
                 <body>
                     Hello
-                    <form action="/base/super.html?.[.]=sub" method="post">
+                    <form action="/base/super.html?!=sub" method="post">
                         <input name=".[sub][field][1]">
                         <textarea name=".[sub][field][2]"></textarea>
                         <select name=".[sub][field][3]"></select>
@@ -237,8 +237,8 @@ class CompositionTest extends Test {
                 <head></head>
                 <body>
                     Hello
-                    <form action="/base/super.html?.[.]=sub" method="post"></form>
-                    <a href="/base/super.html?.[.]=sub&.[sub][action]=myAction">World</a>
+                    <form action="/base/super.html?!=sub" method="post"></form>
+                    <a href="/base/super.html?!=sub&.[sub][action]=myAction">World</a>
                 </body>
             </html>');
     }
@@ -394,7 +394,9 @@ class CompositionTest extends Test {
             </body></html>');
     }
 
-    // TODO We need a test with deeply nested SubComponents
+    function testDeeplyNestedSub() {
+        $this->markTestIncomplete();
+    }
 
 }
 
