@@ -65,7 +65,8 @@ class HtmlSubComponent extends PlainSubComponent {
         }
 
         $parser = new HtmlParser($content);
-        return $parser->toString($this->extractBody($parser->getRoot()));
+        $rendered = $parser->toString($this->extractBody($parser->getRoot()));
+        return str_replace(array('<body>', '</body>'), '', $rendered);
     }
 
     /**

@@ -46,8 +46,7 @@ class CompositionTest extends Test {
                 "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
             );
         }');
-        // TODO add head element to template
-        $this->given->theFile_In_WithContent('super.html', 'document', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'document', '<html><head></head><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('document\Module');
 

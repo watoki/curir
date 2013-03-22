@@ -142,7 +142,7 @@ class CompositeRequestTest extends Test {
         $this->given->theModuleRouteIs('/base/subtargetrequest/');
         $this->when->iSendTheRequestTo('subtargetrequest\Module');
 
-        $this->then->theHtmlResponseBodyShouldBe('<html><head></head>Hello World of Sub2</html>');
+        $this->then->theHtmlResponseBodyShouldBe('<html><head></head><body>Hello World of Sub2</body></html>');
     }
 
     function testSubRedirect() {
