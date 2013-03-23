@@ -59,6 +59,16 @@ class ModuleTest extends Test {
         $this->then->theResponseBodyShouldBe('Found outer\inner\InnerComponent');
     }
 
+    public function testAbsoluteResource() {
+        $this->given->theFolder('absolute');
+        $this->given->theModule_In('absolute\Module', 'absolute');
+        $this->given->theComponent_In('absolute\Component', 'absolute');
+
+        $this->when->iRequest_From('/base/Component', 'absolute\Module');
+
+        $this->then->theResponseBodyShouldBe('Found absolute\Component');
+    }
+
     public function testNonExistingComponent() {
         $this->given->theFolder('wrongmodule');
         $this->given->theModule_In('wrongmodule\EmptyModule', 'wrongmodule');

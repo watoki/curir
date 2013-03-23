@@ -32,6 +32,7 @@ abstract class Module extends Controller {
      * @return Response
      */
     public function respond(Request $request) {
+        $this->cutAbsoluteBaseFromResource($request);
         $controller = $this->resolveController($request);
         if ($controller) {
             return $controller->respond($request);
@@ -177,5 +178,14 @@ abstract class Module extends Controller {
     public function makeControllerName($name) {
         return ucfirst($name);
     }
+
+    // TODO Route should be a type
+    private function cutAbsoluteBaseFromResource(Request $request) {
+        $route = $this->getRoute();
+        $target = $request->getResource();
+        if (substr($target, 0, strlen($route)) == $route) {
+            $request->setResourcePath(Liste::split('/', substr($target, strlen($route))));
+        }
+   }
 
 }
