@@ -36,7 +36,9 @@ class CompositionTestGiven extends Given {
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\SuperComponent', "
             protected function doRender(\$model, \$template) {
                 foreach (\$model as \$key => \$value) {
-                    \$template = str_replace('%' . \$key . '%', \$value, \$template);
+                    if (is_string(\$value)) {
+                        \$template = str_replace('%' . \$key . '%', \$value, \$template);
+                    }
                 }
                 return \$template;
             }

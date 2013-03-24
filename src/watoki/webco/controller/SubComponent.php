@@ -56,6 +56,7 @@ public $response;
     }
 
     /**
+     * @throws \Exception
      * @return Response
      */
     public function getResponse() {
@@ -67,6 +68,7 @@ public $response;
 
     private function postProcess(Response $response, $name, Map $superParameters) {
         // TODO There needs to be a better way to handle the component instance
+        /** @var $component Component */
         $component = $this->super->getRoot()->resolve($this->request->getResource());
         $postProcessor = new SubComponentPostProcessor($name, $superParameters, $component, $this->super);
         $response->setBody($postProcessor->postProcess($response->getBody()));

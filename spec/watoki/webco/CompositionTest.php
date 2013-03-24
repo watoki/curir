@@ -463,7 +463,32 @@ class CompositionTest extends Test {
     }
 
     function testSubNestedInModel() {
-        $this->markTestIncomplete();
+        $this->given->theFolder_WithModule('nested');
+        $this->given->theComponent_In_WithTemplate('nested\Sub', 'nested',
+            '<html><body><a href="sub">Sub</a></body></html>');
+        $this->given->theSuperComponent_In_WithTheBody('nested\Super', 'nested', '
+        function doGet() {
+            $item = new \watoki\webco\controller\SubComponent($this, Sub::$CLASS);
+            $item->getRequest()->getParameters()->set("x", "y");
+            return array(
+                "list" => array(
+                    array(
+                        "item" => $item
+                    )
+                ),
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'nested',
+            '<html><body>%sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('nested\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe('<html>
+            <body>
+                <a href="/base/super.html?.[list.0.item][x]=y">Sub</a>
+            </body>
+        </html>');
     }
 
 }

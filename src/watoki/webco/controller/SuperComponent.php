@@ -83,7 +83,7 @@ abstract class SuperComponent extends Component {
                 $subs[$name] = $this->primaryRequestSub;
                 $response = $this->primaryRequestSub->getResponse();
             } else {
-                $response = $sub->execute($name, $parameters);
+                $response = $sub->execute($name, $parameters->deepCopy());
                 $responses[$name] = $response;
             }
             $model[$name] = $response->getBody();
@@ -96,17 +96,22 @@ abstract class SuperComponent extends Component {
 
     /**
      * @param $model
+     * @param string $prefix
      * @return array|SubComponent[]
      */
     // TODO should model have to be a Map? No. Array, Object and Map should be handled. => We need a unified iterator.
-    private function collectSubComponents($model) {
+    private function collectSubComponents($model, $prefix = '') {
         if (!is_array($model)) {
             return array();
         }
         $subs = array();
-        foreach ($model as $name => $sub) {
-            if ($sub instanceof SubComponent) {
-                $subs[$name] = $sub;
+        foreach ($model as $key => $value) {
+            if ($value instanceof SubComponent) {
+                $subs[$prefix . $key] = $value;
+            } else if (is_array($value)) {
+                foreach ($this->collectSubComponents($value, $key . '.') as $nestedKey => $nestedValue) {
+                    $subs[$prefix .$nestedKey] = $nestedValue;
+                }
             }
         }
         return $subs;
@@ -139,7 +144,7 @@ abstract class SuperComponent extends Component {
         foreach ($subs as $name => $sub) {
             $parameters = $sub->getNonDefaultRequest()->getParameters();
             if (!$parameters->isEmpty()) {
-                $requests->set($name, $parameters);
+                $requests->set($name, $parameters->deepCopy());
             }
         }
         return $requests;
