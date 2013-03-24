@@ -6,6 +6,7 @@ use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Request;
 use watoki\webco\Response;
+use watoki\webco\Url;
 
 abstract class SuperComponent extends Component {
 
@@ -33,8 +34,7 @@ abstract class SuperComponent extends Component {
             $response = $this->getPrimaryRequestResponse($params);
 
             if ($response->getHeaders()->has(Response::HEADER_LOCATION)) {
-                // TODO Re-route location
-                return $response;
+                return $this->bubbleUpRedirect($this->primaryRequestSubName, $response, $params);
             }
 
             $request->setMethod(Request::METHOD_GET);
@@ -77,16 +77,19 @@ abstract class SuperComponent extends Component {
             $parameters->set(self::PARAMETER_SUB_REQUESTS, $subRequests);
         }
 
+        $responses = array();
         foreach ($subs as $name => $sub) {
             if ($name == $this->primaryRequestSubName) {
+                $subs[$name] = $this->primaryRequestSub;
                 $response = $this->primaryRequestSub->getResponse();
             } else {
                 $response = $sub->execute($name, $parameters);
+                $responses[$name] = $response;
             }
             $model[$name] = $response->getBody();
         }
 
-        $this->collectSubRedirects($subs, $parameters);
+        $this->collectSubRedirects($responses, $parameters);
 
         return $this->mergeSubHeaders($this->render($model), $subs);
     }
@@ -168,48 +171,37 @@ abstract class SuperComponent extends Component {
     }
 
     /**
-     * @param array|SubComponent[] $subs
+     * @param array|Response[] $responses
      * @param Map $requestParams
      */
-    private function collectSubRedirects($subs, Map $requestParams) {
-//        $state = $target = null;
-//
-//        foreach ($subs as $subName => $sub) {
-//            if (!$sub instanceof PlainSubComponent) {
-//                continue;
-//            }
-//
-//            $subResponse = $sub->getResponse();
-//            if ($subResponse && $subResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
-//                if (!$target) {
-//                    $state = new Map();
-//                    $target = $this->createRedirectTarget($requestParams, $state);
-//                }
-//
-//                $this->bubbleUpRedirect($subName, $sub->getResponse(), $state, $requestParams, $target);
-//            }
-//        }
+    private function collectSubRedirects($responses, Map $requestParams) {
+        $target = null;
+
+        foreach ($responses as $subName => $subResponse) {
+            if ($subResponse->getHeaders()->has(Response::HEADER_LOCATION)) {
+                if (!$target) {
+                    $target = new Url($this->getRoute(), $requestParams);
+                }
+
+                $this->bubbleUpRedirect($subName, $subResponse, $requestParams, $target);
+            }
+        }
     }
 
-//    private function bubbleUpRedirect($subName, Response $subResponse, Map $state, Map $requestParams, Url $target = null) {
-//        if (!$target) {
-//            $target = $this->createRedirectTarget($requestParams, $state);
-//        }
-//
-//        $subTarget = Url::parse($subResponse->getHeaders()->get(Response::HEADER_LOCATION));
-//        $subParams = $subTarget->getParameters()->copy();
-//        $subParams->set(self::PARAMETER_TARGET, $subTarget->getResource());
-//        $target->setFragment($subTarget->getFragment());
-//        $state->set($subName, $subParams);
-//
-//        $response = $this->getResponse();
-//        $response->getHeaders()->set(Response::HEADER_LOCATION, $target->toString());
-//    }
-//
-//    private function createRedirectTarget(Map $requestParams, Map $state) {
-//        $target = new Url($this->getRoute(), $requestParams);
-//        $target->getParameters()->set(self::PARAMETER_SUB_STATE, $state);
-//        return $target;
-//    }
+    private function bubbleUpRedirect($subName, Response $subResponse, Map $requestParams, Url $target = null) {
+        if (!$target) {
+            $target = new Url($this->getRoute(), $requestParams);
+        }
+
+        $subTarget = Url::parse($subResponse->getHeaders()->get(Response::HEADER_LOCATION));
+        $subParams = $subTarget->getParameters()->copy();
+        $subParams->set(self::PARAMETER_TARGET, $subTarget->getResource());
+        $target->setFragment($subTarget->getFragment());
+        $requestParams->get(self::PARAMETER_SUB_REQUESTS)->set($subName, $subParams);
+
+        $response = $this->getResponse();
+        $response->getHeaders()->set(Response::HEADER_LOCATION, $target->toString());
+        return $response;
+    }
 
 }

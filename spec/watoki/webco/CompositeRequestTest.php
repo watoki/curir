@@ -183,8 +183,6 @@ class CompositeRequestTest extends Test {
     }
 
     function testSubRedirect() {
-        $this->markTestIncomplete();
-
         $this->given->theFolder_WithModule('subredirect');
         $this->given->theComponent_In_WithTheBody('subredirect\Sub', 'subredirect', '
         function doGet() {
@@ -216,8 +214,6 @@ class CompositeRequestTest extends Test {
     }
 
     function testPrimaryRedirect() {
-        $this->markTestIncomplete();
-
         $this->given->theFolder_WithModule('primaryredirect');
         $this->given->theComponent_In_WithTheBody('primaryredirect\Sub', 'primaryredirect', '
         function doGet() {
