@@ -19,7 +19,7 @@ class CompositionTest extends Test {
 
     function testIncludeSimple() {
         $this->given->theFolder_WithModule('snippet');
-        $this->given->theSubComponent_In_WithTemplate('snippet\Sub', 'snippet', '%msg%!');
+        $this->given->theComponent_In_WithTemplate('snippet\Sub', 'snippet', '%msg%!');
         $this->given->theSuperComponent_In_WithTheBody('snippet\Super', 'snippet', '
         function doGet() {
             return array(
@@ -35,7 +35,7 @@ class CompositionTest extends Test {
 
     function testIncludeHtmlDocument() {
         $this->given->theFolder_WithModule('document');
-        $this->given->theSubComponent_In_WithTemplate('document\Sub', 'document',
+        $this->given->theComponent_In_WithTemplate('document\Sub', 'document',
             '<html>
                 <head><title>Sub Component</title></head>
                 <body><b>%msg%</b></body>
@@ -57,7 +57,7 @@ class CompositionTest extends Test {
         $this->markTestIncomplete('Think of better way to handle header.');
 
         $this->given->theFolder_WithModule('assets');
-        $this->given->theSubComponent_In_WithTemplate('assets\Sub', 'assets',
+        $this->given->theComponent_In_WithTemplate('assets\Sub', 'assets',
             '<html>
                 <head>
                     <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
@@ -88,7 +88,7 @@ class CompositionTest extends Test {
 
         $this->given->theFolder_WithModule('relative');
         $this->given->theFolder_WithModule('relative/inner');
-        $this->given->theSubComponent_In_WithTemplate('relative\inner\Sub', 'relative/inner',
+        $this->given->theComponent_In_WithTemplate('relative\inner\Sub', 'relative/inner',
             '<html>
                 <head>
                     <link href="relative/path/file.css" rel="stylesheet">
@@ -124,7 +124,7 @@ class CompositionTest extends Test {
 
     function testDeepLinkReplacement() {
         $this->given->theFolder_WithModule('deeplink');
-        $this->given->theSubComponent_In_WithTemplate('deeplink\Sub', 'deeplink',
+        $this->given->theComponent_In_WithTemplate('deeplink\Sub', 'deeplink',
             '<html>
                 <body>
                     <a href="some/link.html?param1[map][map2]=val1&amp;param2=val2">%msg%</a>
@@ -150,10 +150,10 @@ class CompositionTest extends Test {
 
     function testSubTarget() {
         $this->given->theFolder_WithModule('subtarget');
-        $this->given->theSubComponent_In_WithTemplate('subtarget\Not', 'subtarget', '<html><head></head><body>NOT</body></html>');
+        $this->given->theComponent_In_WithTemplate('subtarget\Not', 'subtarget', '<html><head></head><body>NOT</body></html>');
 
         $this->given->theFolder('subtarget/inner');
-        $this->given->theSubComponent_In_WithTemplate('subtarget\inner\Sub', 'subtarget/inner',
+        $this->given->theComponent_In_WithTemplate('subtarget\inner\Sub', 'subtarget/inner',
             '<html><head></head><body>%msg%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
@@ -178,7 +178,7 @@ class CompositionTest extends Test {
 
     function testReplaceFormFieldNames() {
         $this->given->theFolder_WithModule('formfields');
-        $this->given->theSubComponent_In_WithTemplate('formfields\Sub', 'formfields',
+        $this->given->theComponent_In_WithTemplate('formfields\Sub', 'formfields',
             '<html>
                 <body>
                     <form action="sub.html" method="post">
@@ -213,7 +213,7 @@ class CompositionTest extends Test {
 
     function testPrimaryAction() {
         $this->given->theFolder_WithModule('primaryactioncomp');
-        $this->given->theSubComponent_In_WithTemplate('primaryactioncomp\Sub', 'primaryactioncomp',
+        $this->given->theComponent_In_WithTemplate('primaryactioncomp\Sub', 'primaryactioncomp',
             '<html>
                 <body>
                     <form action="sub.html" method="post"></form>
@@ -242,7 +242,7 @@ class CompositionTest extends Test {
 
     function testOmitPrimaryRequest() {
         $this->given->theFolder_WithModule('omitprimary');
-        $this->given->theSubComponent_In_WithTemplate('omitprimary\Sub', 'omitprimary',
+        $this->given->theComponent_In_WithTemplate('omitprimary\Sub', 'omitprimary',
             '<html>
                 <body>
                     <form action="sub.html" method="get"></form>
@@ -271,7 +271,7 @@ class CompositionTest extends Test {
 
     function testDefaultRoute() {
         $this->given->theFolder_WithModule('defroute');
-        $this->given->theSubComponent_In_WithTemplate('defroute\Sub', 'defroute',
+        $this->given->theComponent_In_WithTemplate('defroute\Sub', 'defroute',
             '<html>
                 <body>
                     <a href="sub.html?param1=val1">%msg%</a>
@@ -297,9 +297,9 @@ class CompositionTest extends Test {
 
     function testCollectState() {
         $this->given->theFolder_WithModule('colstate');
-        $this->given->theSubComponent_In_WithTemplate('colstate\Sub1', 'colstate',
+        $this->given->theComponent_In_WithTemplate('colstate\Sub1', 'colstate',
             '<html><body>Sub1:%msg%</body></html>');
-        $this->given->theSubComponent_In_WithTemplate('colstate\Sub2', 'colstate',
+        $this->given->theComponent_In_WithTemplate('colstate\Sub2', 'colstate',
             '<html><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
         $this->given->theSuperComponent_In_WithTheBody('colstate\Super', 'colstate', '
         function doGet() {
@@ -325,9 +325,9 @@ class CompositionTest extends Test {
 
     function testDefaultStateByConstructor() {
         $this->given->theFolder_WithModule('defbyconstr');
-        $this->given->theSubComponent_In_WithTemplate('defbyconstr\Sub1', 'defbyconstr',
+        $this->given->theComponent_In_WithTemplate('defbyconstr\Sub1', 'defbyconstr',
             '<html><body>Sub1:%msg%</body></html>');
-        $this->given->theSubComponent_In_WithTemplate('defbyconstr\Sub2', 'defbyconstr',
+        $this->given->theComponent_In_WithTemplate('defbyconstr\Sub2', 'defbyconstr',
             '<html><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
         $this->given->theSuperComponent_In_WithTheBody('defbyconstr\Super', 'defbyconstr', '
         function doGet() {
@@ -362,7 +362,7 @@ class CompositionTest extends Test {
         }');
         $this->given->theFile_In_WithContent('sub1.html', 'defaultargs', '<html><body>Sub1:%msg%</body></html>');
 
-        $this->given->theSubComponent_In_WithTemplate('defaultargs\Sub2', 'defaultargs',
+        $this->given->theComponent_In_WithTemplate('defaultargs\Sub2', 'defaultargs',
             '<html><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
         $this->given->theSuperComponent_In_WithTheBody('defaultargs\Super', 'defaultargs', '
         function doGet() {
@@ -387,11 +387,41 @@ class CompositionTest extends Test {
             </body></html>');
     }
 
-    function testSubNestedInModels() {
-        $this->markTestIncomplete();
+    function testSubInSub() {
+        $this->given->theFolder_WithModule('subsub');
+        $this->given->theComponent_In_WithTemplate('subsub\Sub2', 'subsub',
+            '<html><body><a href="sub2.html?a=b">Sub2</a></body></html>');
+        $this->given->theSuperComponent_In_WithTheBody('subsub\Sub1', 'subsub', '
+        function doGet() {
+            return array(
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS)
+            );
+        }');
+        $this->given->theFile_In_WithContent('sub1.html', 'subsub',
+            '<html><a href="sub1.html?x=y">Sub1</a>  %sub%</html>');
+
+        $this->given->theSuperComponent_In_WithTheBody('subsub\Super', 'subsub', '
+        function doGet() {
+            return array(
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS)
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'subsub',
+            '<html><body><a href="super.html?i=k">Super</a>  %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('subsub\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe('
+        <html>
+            <body>
+                <a href="super.html?i=k">Super</a>
+                <a href="/base/super.html?.[sub][x]=y">Sub1</a>
+                <a href="/base/super.html?.[sub][.][sub][a]=b">Sub2</a>
+            </body>
+        </html>');
     }
 
-    function testSubInSub() {
+    function testSubNestedInModel() {
         $this->markTestIncomplete();
     }
 

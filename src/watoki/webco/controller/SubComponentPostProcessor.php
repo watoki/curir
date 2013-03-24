@@ -153,7 +153,7 @@ class SubComponentPostProcessor {
 
         $route = $this->component->getBaseRoute();
         $value = $element->getAttribute($attributeName);
-        $url = Url::parse($value);
+        $url = Url::parse(html_entity_decode($value));
         if ($url->isRelative()) {
             $element->setAttribute($attributeName, $route . $value);
         }
@@ -167,7 +167,8 @@ class SubComponentPostProcessor {
 
         $subRoute = strtolower($this->component->getRoute());
         $route = $this->super->getRoute();
-        $url = Url::parse($element->getAttribute($attributeName));
+        $attributeValue = $element->getAttribute($attributeName);
+        $url = Url::parse(urldecode(html_entity_decode($attributeValue)));
 
         if ($url->isSameHost()) {
 
@@ -199,7 +200,7 @@ class SubComponentPostProcessor {
             return;
         }
 
-        $url = Url::parse('?' . $child->getAttribute($attributeName));
+        $url = Url::parse('?' . html_entity_decode($child->getAttribute($attributeName)));
         $replace = new Url('');
         $replace->getParameters()->set('.', new Map(array($this->name => $url->getParameters())));
 

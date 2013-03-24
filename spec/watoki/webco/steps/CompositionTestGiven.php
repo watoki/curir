@@ -10,7 +10,7 @@ class CompositionTestGiven extends Given {
         $this->theModule_In($folder . '\Module', $folder);
     }
 
-    public function theSubComponent_In_WithTemplate($className, $folder, $template) {
+    public function theComponent_In_WithTemplate($className, $folder, $template) {
         $shortClassName = Liste::split('\\', $className)->pop();
         $this->theComponent_In_WithTheBody($className, $folder, '
         function doGet() {

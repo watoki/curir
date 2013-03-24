@@ -116,9 +116,9 @@ class CompositeRequestTest extends Test {
 
     function testPrimaryRequestWithState() {
         $this->given->theFolder_WithModule('primarystate');
-        $this->given->theSubComponent_In_WithTemplate('primarystate\Sub1', 'primarystate',
+        $this->given->theComponent_In_WithTemplate('primarystate\Sub1', 'primarystate',
             '<html><body>Sub1</body></html>');
-        $this->given->theSubComponent_In_WithTemplate('primarystate\Sub2', 'primarystate',
+        $this->given->theComponent_In_WithTemplate('primarystate\Sub2', 'primarystate',
             '<html><body><a href="sub2?x=y">Sub2</a></body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('primarystate\Super', 'primarystate', '
@@ -155,9 +155,9 @@ class CompositeRequestTest extends Test {
 
     function testSubTarget() {
         $this->given->theFolder_WithModule('subtargetrequest');
-        $this->given->theSubComponent_In_WithTemplate('subtargetrequest\Sub1', 'subtargetrequest',
+        $this->given->theComponent_In_WithTemplate('subtargetrequest\Sub1', 'subtargetrequest',
             '<html><body>%msg% of Sub1</body></html>');
-        $this->given->theSubComponent_In_WithTemplate('subtargetrequest\Sub2', 'subtargetrequest',
+        $this->given->theComponent_In_WithTemplate('subtargetrequest\Sub2', 'subtargetrequest',
             '<html><body>%msg% of Sub2</body></html>');#
 
 
