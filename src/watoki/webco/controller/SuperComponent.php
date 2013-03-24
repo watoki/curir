@@ -18,36 +18,50 @@ abstract class SuperComponent extends Component {
     const PARAMETER_TARGET = '~';
 
     /**
-     * @var null|Request
+     * @var null|SubComponent
      */
-    public $primaryRequest;
+    public $primaryRequestSub;
+
+    /**
+     * @var null|string
+     */
+    public $primaryRequestSubName;
 
     public function respond(Request $request) {
         $params = $request->getParameters();
         if ($params->has(self::PARAMETER_PRIMARY_REQUEST)) {
-            /** @var $subParameters Map */
-            $subName = $params->get(self::PARAMETER_PRIMARY_REQUEST);
-            $subRequests = $params->has(self::PARAMETER_SUB_REQUESTS)
-                ? $params->get(self::PARAMETER_SUB_REQUESTS)
-                : new Map();
-            $subParameters = $subRequests->has($subName)
-                    ? $subRequests->get($subName)
-                    : new Map();
+            $response = $this->getPrimaryRequestResponse($params);
 
-            $this->primaryRequest = new Request(
-                $request->getMethod(),
-                $subParameters->has(self::PARAMETER_TARGET)
-                        ? $subParameters->get(self::PARAMETER_TARGET)
-                        : null,
-                $subParameters
-            );
+            if ($response->getHeaders()->has(Response::HEADER_LOCATION)) {
+                // TODO Re-route location
+                return $response;
+            }
+
             $request->setMethod(Request::METHOD_GET);
         }
         return parent::respond($request);
     }
 
+    /**
+     * @param Map $params
+     * @return Response
+     */
+    private function getPrimaryRequestResponse(Map $params) {
+        $this->primaryRequestSubName = $params->remove(self::PARAMETER_PRIMARY_REQUEST);
+        $subRequests = $params->get(self::PARAMETER_SUB_REQUESTS);
+        /** @var $subParameters Map */
+        $subParameters = $subRequests->get($this->primaryRequestSubName);
+        $subTarget = $subParameters->get(self::PARAMETER_TARGET);
+
+        $this->primaryRequestSub = new SubComponent($this, null, $subParameters);
+        $this->primaryRequestSub->getRequest()->setResourcePath(Liste::split('/', $subTarget));
+        $response = $this->primaryRequestSub->execute($this->primaryRequestSubName, $params);
+        return $response;
+    }
+
     protected function renderAction($action, Map $parameters) {
         $model = $this->invokeAction($action, $parameters);
+
         if ($model === null) {
             return null;
         }
@@ -63,27 +77,13 @@ abstract class SuperComponent extends Component {
             $parameters->set(self::PARAMETER_SUB_REQUESTS, $subRequests);
         }
 
-        if ($this->primaryRequest) {
-            /** @var $primarySub SubComponent */
-            $primarySubName = $parameters->remove(self::PARAMETER_PRIMARY_REQUEST);
-            $primarySub = $subs[$primarySubName];
-            $primarySub->getRequest()->setMethod($this->primaryRequest->getMethod());
-            $primarySub->getRequest()->getParameters()->merge($this->primaryRequest->getParameters());
-
-            if ($this->primaryRequest->getResourcePath()) {
-                $primarySub->getRequest()->setResourcePath($this->primaryRequest->getResourcePath());
-            }
-            $primaryRendered = $primarySub->getResponse($primarySubName, $parameters)->getBody();
-
-            $model = $this->invokeAction($action, $parameters);
-        }
-
         foreach ($subs as $name => $sub) {
-            if (isset($primaryRendered) && isset($primarySubName) && $name == $primarySubName) {
-                $model[$name] = $primaryRendered;
+            if ($name == $this->primaryRequestSubName) {
+                $response = $this->primaryRequestSub->getResponse();
             } else {
-                $model[$name] = $sub->getResponse($name, $parameters)->getBody();
+                $response = $sub->execute($name, $parameters);
             }
+            $model[$name] = $response->getBody();
         }
 
         $this->collectSubRedirects($subs, $parameters);

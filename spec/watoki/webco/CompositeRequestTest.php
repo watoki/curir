@@ -51,17 +51,16 @@ class CompositeRequestTest extends Test {
     function testPrimaryActionFirst() {
         $this->given->theFolder_WithModule('primaryaction');
         $this->given->theComponent_In_WithTheBody('primaryaction\Sub', 'primaryaction', '
-        public static $executed = "NOT";
         function doMyAction($param1, $param2) {
-            self::$executed = "First";
-            return array("msg" => $param1 . " " . $param2);
+            return array("msg" => $param1 . " " . $param2 . ":" . ++Super::$executed);
         }');
         $this->given->theFile_In_WithContent('sub.html', 'primaryaction', '<html><body>%msg%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
+        public static $executed = 0;
         function doGet($param) {
             return array(
-                "msg" => Sub::$executed . ":" . $param,
+                "msg" => ++self::$executed . ":" . $param,
                 "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
             );
         }');
@@ -79,7 +78,7 @@ class CompositeRequestTest extends Test {
         )));
         $this->when->iSendTheRequestTo('primaryaction\Module');
 
-        $this->then->theHtmlResponseBodyShouldBe('<html><body>First:Greetings my Friends</body></html>');
+        $this->then->theHtmlResponseBodyShouldBe('<html><body>2:Greetings my Friends:1</body></html>');
     }
 
     function testPrimaryActionOnlyOnce() {
@@ -133,6 +132,9 @@ class CompositeRequestTest extends Test {
 
         $this->given->thePrimaryRequestIsFor('sub2');
         $this->given->theRequestParameterHasTheState(new Map(array(
+            'sub2' => new Map(array(
+                '~' => '/base/sub2'
+            )),
             'sub1' => new Map(array(
                 '~' => '/base/sub1',
                 'param1' => 'val1',
@@ -145,7 +147,7 @@ class CompositeRequestTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe('
             <html>
                 <body>
-                    Sub1 <a href="/base/super.html?.[sub1][~]=/base/sub1&.[sub1][param1]=val1&.[sub1][param2]=val2&.[sub2][x]=y">Sub2</a>
+                    Sub1 <a href="/base/super.html?.[sub2][x]=y&.[sub1][~]=/base/sub1&.[sub1][param1]=val1&.[sub1][param2]=val2">Sub2</a>
                 </body>
             </html>
         ');

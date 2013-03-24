@@ -25,10 +25,16 @@ class SubComponent {
      */
     private $request;
 
-    function __construct(SuperComponent $super, $defaultComponent, Map $defaultParameters = null) {
+    /**
+     * @var Response
+     */
+public $response;
+
+    // TODO Use lazy Route type instead of component class
+    function __construct(SuperComponent $super, $defaultComponent = null, Map $defaultParameters = null) {
         $this->super = $super;
         $defaultParameters = $defaultParameters ?: new Map();
-        $route = $super->getRoot()->findController($defaultComponent)->getRoute();
+        $route = $defaultComponent ? $super->getRoot()->findController($defaultComponent)->getRoute() : null;
 
         $this->defaultRequest = new Request(Request::METHOD_GET, $route, $defaultParameters);
         $this->request = new Request(Request::METHOD_GET, $route, $defaultParameters->copy());
@@ -38,9 +44,25 @@ class SubComponent {
         return $this->request;
     }
 
-    public function getResponse($name, Map $superParameters) {
-        return $this->postProcess($this->super->getRoot()->respond($this->request),
+    /**
+     * @param $name
+     * @param Map $superParameters
+     * @return Response
+     */
+    public function execute($name, Map $superParameters) {
+        $this->response = $this->postProcess($this->super->getRoot()->respond($this->request),
             $name, $superParameters);
+        return $this->response;
+    }
+
+    /**
+     * @return Response
+     */
+    public function getResponse() {
+        if (!$this->response) {
+            throw new \Exception('Cannot get Response. SubComponent needs to be executed first.');
+        }
+        return $this->response;
     }
 
     private function postProcess(Response $response, $name, Map $superParameters) {
