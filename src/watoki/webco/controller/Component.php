@@ -33,11 +33,11 @@ abstract class Component extends Controller {
     }
 
     /**
-     * @param $action
-     * @param $parameters
+     * @param string $action
+     * @param Map $parameters
      * @return null|string
      */
-    protected function renderAction($action, $parameters) {
+    protected function renderAction($action, Map $parameters) {
         $model = $this->invokeAction($action, $parameters);
         if ($model === null) {
             return null;

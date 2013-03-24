@@ -93,7 +93,7 @@ class Request {
         $this->parameters = $parameters ?: new Map();
         $this->headers = $headers ?: new Map();
         $this->body = $body;
-        $this->setResourcePath(Liste::split('/', $resource));
+        $this->setResourcePath($resource !== null ? Liste::split('/', $resource) : null);
     }
 
     /**

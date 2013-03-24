@@ -1,15 +1,13 @@
 <?php
-namespace watoki\webco\controller\sub;
+namespace watoki\webco\controller;
 
 use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Request;
 use watoki\webco\Url;
-use watoki\webco\controller\Component;
-use watoki\webco\controller\SuperComponent;
 
-class HtmlSubComponent extends PlainSubComponent {
+class SubComponentPostProcessor {
 
     public static $CLASS = __CLASS__;
 
@@ -34,33 +32,40 @@ class HtmlSubComponent extends PlainSubComponent {
     );
 
     /**
-     * @var string
-     */
-    public $name;
-
-    /**
      * @var Map
      */
-    public $superState;
+    public $parameters;
+
+    /**
+     * @var Component
+     */
+    public $component;
+
+    /**
+     * @var Component
+     */
+    public $super;
+
+    /**
+     * @var string
+     */
+    private $name;
 
     /**
      * @var Liste|\DOMElement[]
      */
     private $headElements;
 
-    function __construct(SuperComponent $super, $componentClass, Map $defaultState = null) {
-        parent::__construct($super, $componentClass, $defaultState);
+    public function __construct($name, Map $parameters, Component $component, Component $super) {
+        $this->name = $name;
+        $this->parameters = $parameters;
+        $this->component = $component;
+        $this->super = $super;
         $this->headElements = new Liste();
     }
 
-    public function render($name, Map $superState) {
-        $this->name = $name;
-        $this->superState = $superState;
-        return $this->postProcess(parent::render($name, $superState));
-    }
-
-    private function postProcess($content) {
-        if (!$content) {
+    public function postProcess($content) {
+        if (!$content || substr(trim($content), 0, 5) != '<html') {
             return $content;
         }
 
@@ -146,7 +151,7 @@ class HtmlSubComponent extends PlainSubComponent {
             return;
         }
 
-        $route = $this->getComponent()->getBaseRoute();
+        $route = $this->component->getBaseRoute();
         $value = $element->getAttribute($attributeName);
         $url = Url::parse($value);
         if ($url->isRelative()) {
@@ -160,7 +165,7 @@ class HtmlSubComponent extends PlainSubComponent {
             return;
         }
 
-        $subRoute = strtolower($this->getComponent()->getRoute());
+        $subRoute = strtolower($this->component->getRoute());
         $route = $this->super->getRoute();
         $url = Url::parse($element->getAttribute($attributeName));
 
@@ -172,16 +177,16 @@ class HtmlSubComponent extends PlainSubComponent {
             }
             $subParams->merge($url->getParameters());
 
-            $state = $this->superState->copy();
+            $state = $this->parameters->copy();
             if ($this->getActionName($url, $element) != 'get') {
                 $state->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
             }
 
-            if (!$state->has(SuperComponent::PARAMETER_SUB_STATE)) {
-                $state->set(SuperComponent::PARAMETER_SUB_STATE, new Map());
+            if (!$state->has(SuperComponent::PARAMETER_SUB_REQUESTS)) {
+                $state->set(SuperComponent::PARAMETER_SUB_REQUESTS, new Map());
             }
 
-            $subState = $state->get(SuperComponent::PARAMETER_SUB_STATE);
+            $subState = $state->get(SuperComponent::PARAMETER_SUB_REQUESTS);
             $subState->set($this->name, $subParams);
 
             $replace = new Url($route, $state, $url->getFragment());
@@ -211,5 +216,4 @@ class HtmlSubComponent extends PlainSubComponent {
             return Request::METHOD_GET;
         }
     }
-
 }

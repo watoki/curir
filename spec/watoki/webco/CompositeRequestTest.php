@@ -32,7 +32,7 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('restoresubs\Super', 'restoresubs', '
         function doGet() {
             return array(
-                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'restoresubs', '<html><body>Hello %sub%</body></html>');
@@ -45,7 +45,7 @@ class CompositeRequestTest extends Test {
         )));
         $this->when->iSendTheRequestTo('restoresubs\Module');
 
-        $this->then->theHtmlResponseBodyShouldBe('<html><head></head><body>Hello All:World</body></html>');
+        $this->then->theHtmlResponseBodyShouldBe('<html><body>Hello All:World</body></html>');
     }
 
     function testPrimaryActionFirst() {
@@ -56,13 +56,13 @@ class CompositeRequestTest extends Test {
             self::$executed = "First";
             return array("msg" => $param1 . " " . $param2);
         }');
-        $this->given->theFile_In_WithContent('sub.html', 'primaryaction', '<html><head></head><body>%msg%</body></html>');
+        $this->given->theFile_In_WithContent('sub.html', 'primaryaction', '<html><body>%msg%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
         function doGet($param) {
             return array(
                 "msg" => Sub::$executed . ":" . $param,
-                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><body>%msg% %sub%</body></html>');
@@ -90,13 +90,13 @@ class CompositeRequestTest extends Test {
             self::$called++;
             return array("msg" => $param1 . " " . $param2 . " " . self::$called);
         }');
-        $this->given->theFile_In_WithContent('sub.html', 'primaryfirst', '<html><head></head><body>%msg%</body></html>');
+        $this->given->theFile_In_WithContent('sub.html', 'primaryfirst', '<html><body>%msg%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('primaryfirst\Super', 'primaryfirst', '
         function doGet($param) {
             return array(
                 "msg" => $param,
-                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS)
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primaryfirst', '<html><body>%msg% %sub%</body></html>');
@@ -116,25 +116,57 @@ class CompositeRequestTest extends Test {
     }
 
     function testPrimaryRequestWithState() {
-        $this->markTestIncomplete();
+        $this->given->theFolder_WithModule('primarystate');
+        $this->given->theSubComponent_In_WithTemplate('primarystate\Sub1', 'primarystate',
+            '<html><body>Sub1</body></html>');
+        $this->given->theSubComponent_In_WithTemplate('primarystate\Sub2', 'primarystate',
+            '<html><body><a href="sub2?x=y">Sub2</a></body></html>');
+
+        $this->given->theSuperComponent_In_WithTheBody('primarystate\Super', 'primarystate', '
+        function doGet() {
+            return array(
+                "sub1" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS),
+                "sub2" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'primarystate', '<html><body>%sub1% %sub2%</body></html>');
+
+        $this->given->thePrimaryRequestIsFor('sub2');
+        $this->given->theRequestParameterHasTheState(new Map(array(
+            'sub1' => new Map(array(
+                '~' => '/base/sub1',
+                'param1' => 'val1',
+                'param2' => 'val2'
+            ))
+        )));
+
+        $this->when->iSendTheRequestTo('primarystate\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe('
+            <html>
+                <body>
+                    Sub1 <a href="/base/super.html?.[sub1][~]=/base/sub1&.[sub1][param1]=val1&.[sub1][param2]=val2&.[sub2][x]=y">Sub2</a>
+                </body>
+            </html>
+        ');
     }
 
     function testSubTarget() {
         $this->given->theFolder_WithModule('subtargetrequest');
         $this->given->theSubComponent_In_WithTemplate('subtargetrequest\Sub1', 'subtargetrequest',
-            '<html><head></head><body>%msg% of Sub1</body></html>');
+            '<html><body>%msg% of Sub1</body></html>');
         $this->given->theSubComponent_In_WithTemplate('subtargetrequest\Sub2', 'subtargetrequest',
-            '<html><head></head><body>%msg% of Sub2</body></html>');#
+            '<html><body>%msg% of Sub2</body></html>');#
 
 
         $this->given->theSuperComponent_In_WithTheBody('subtargetrequest\Super', 'subtargetrequest', '
         function doGet() {
             return array(
                 "msg" => "Hello",
-                "sub" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub1::$CLASS),
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS),
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'subtargetrequest', '<html><head></head><body>%msg% %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.html', 'subtargetrequest', '<html><body>%msg% %sub%</body></html>');
 
         $this->given->theRequestParameterHasTheState(new Map(array(
             'sub' => new Map(array(
@@ -145,10 +177,12 @@ class CompositeRequestTest extends Test {
         $this->given->theModuleRouteIs('/base/subtargetrequest/');
         $this->when->iSendTheRequestTo('subtargetrequest\Module');
 
-        $this->then->theHtmlResponseBodyShouldBe('<html><head></head><body>Hello World of Sub2</body></html>');
+        $this->then->theHtmlResponseBodyShouldBe('<html><body>Hello World of Sub2</body></html>');
     }
 
     function testSubRedirect() {
+        $this->markTestIncomplete();
+
         $this->given->theFolder_WithModule('subredirect');
         $this->given->theComponent_In_WithTheBody('subredirect\Sub', 'subredirect', '
         function doGet() {
@@ -162,8 +196,8 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
         function doGet() {
             return array(
-                "sub1" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS),
-                "sub2" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS),
+                "sub1" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS),
+                "sub2" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
             );
         }');
 
@@ -180,6 +214,8 @@ class CompositeRequestTest extends Test {
     }
 
     function testPrimaryRedirect() {
+        $this->markTestIncomplete();
+
         $this->given->theFolder_WithModule('primaryredirect');
         $this->given->theComponent_In_WithTheBody('primaryredirect\Sub', 'primaryredirect', '
         function doGet() {
@@ -193,8 +229,8 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
         function doGet() {
             return array(
-                "sub1" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub::$CLASS),
-                "sub2" => new \watoki\webco\controller\sub\HtmlSubComponent($this, Sub2::$CLASS),
+                "sub1" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS),
+                "sub2" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
             );
         }');
 
@@ -210,6 +246,10 @@ class CompositeRequestTest extends Test {
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
             '/base/super.html?param=Super&.[sub1][param][1]=a&.[sub1][param][2]=b&.[sub1][~]=/base/somewhere/else#bar');
+    }
+
+    function testPrimaryActionInsideSub() {
+        $this->markTestIncomplete();
     }
 
 }
