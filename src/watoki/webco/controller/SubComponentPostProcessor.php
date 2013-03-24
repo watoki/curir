@@ -172,17 +172,19 @@ class SubComponentPostProcessor {
 
         if ($url->isSameHost()) {
 
-            $subParams = new Map();
-            if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute) {
-                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getResource());
-            }
-            $subParams->merge($url->getParameters());
-
             $state = new Map();
-            if ($this->getActionName($url, $element) != 'get' || $subParams->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
+            if ($this->getActionName($url, $element) != 'get'
+                    || $url->getParameters()->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
                 $state->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
             }
             $state->merge($this->parameters);
+
+            $subParams = new Map();
+            if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute
+                    || $state->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
+                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getResource());
+            }
+            $subParams->merge($url->getParameters());
 
             if (!$state->has(SuperComponent::PARAMETER_SUB_REQUESTS)) {
                 $state->set(SuperComponent::PARAMETER_SUB_REQUESTS, new Map());

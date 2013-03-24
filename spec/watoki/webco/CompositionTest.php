@@ -202,7 +202,7 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     Hello
-                    <form action="/base/super.html?!=sub" method="post">
+                    <form action="/base/super.html?!=sub&.[sub][~]=/base/sub.html" method="post">
                         <input name=".[sub][field][1]">
                         <textarea name=".[sub][field][2]"></textarea>
                         <select name=".[sub][field][3]"></select>
@@ -234,8 +234,8 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     Hello
-                    <form action="/base/super.html?!=sub" method="post"></form>
-                    <a href="/base/super.html?!=sub&.[sub][action]=myAction">World</a>
+                    <form action="/base/super.html?!=sub&.[sub][~]=/base/sub.html" method="post"></form>
+                    <a href="/base/super.html?!=sub&.[sub][~]=/base/sub.html&.[sub][action]=myAction">World</a>
                 </body>
             </html>');
     }
@@ -454,7 +454,10 @@ class CompositionTest extends Test {
             <body>
                 Super
                 Sub1
-                <a href="/base/super.html?!=sub&.[sub][!]=sub&.[sub][p]=v&.[sub][.][sub][action]=primary&.[sub][.][sub][z]=u">Sub2</a>
+                <a href="/base/super.html
+                    ?!=sub
+                    &.[sub][~]=/base/Sub1&.[sub][!]=sub&.[sub][p]=v
+                    &.[sub][.][sub][~]=/base/sub2&.[sub][.][sub][action]=primary&.[sub][.][sub][z]=u">Sub2</a>
             </body>
         </html>');
     }
