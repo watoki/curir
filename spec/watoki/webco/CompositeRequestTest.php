@@ -247,7 +247,50 @@ class CompositeRequestTest extends Test {
     }
 
     function testPrimaryActionInsideSub() {
-        $this->markTestIncomplete();
+        $this->given->theFolder_WithModule('nestedprimary');
+        $this->given->theComponent_In_WithTheBody('nestedprimary\Sub2', 'nestedprimary', '
+        static $executed = "No";
+        function doMyAction($a) {
+            self::$executed = "Yes";
+        }');
+        $this->given->theSuperComponent_In_WithTheBody('nestedprimary\Sub1', 'nestedprimary', '
+        function doGet($x) {
+            return array(
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
+                "msg" => Sub2::$executed,
+                "x" => $x
+            );
+        }');
+        $this->given->theFile_In_WithContent('sub1.html', 'nestedprimary',
+            '<html><body>Sub2 %x% - %msg%</body></html>');
+
+        $this->given->theSuperComponent_In_WithTheBody('nestedprimary\Super', 'nestedprimary', '
+        function doGet() {
+            return array(
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS)
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'nestedprimary',
+            '<html><body>%sub%</body></html>');
+
+        $this->given->thePrimaryRequestIsFor('sub');
+        $this->given->theRequestParameterHasTheState(new Map(array(
+            'sub' => new Map(array(
+                '!' => 'sub',
+                '~' => '/base/sub1',
+                'x' => 'hi',
+                '.' => new Map(array(
+                    'sub' => new Map(array(
+                        '~' => '/base/sub2',
+                        'action' => 'myAction',
+                        'a' => 'hello'
+                    ))
+                ))
+            ))
+        )));
+        $this->when->iSendTheRequestTo('nestedprimary\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe('<html><body>Sub2 hi - Yes</body></html>');
     }
 
 }
