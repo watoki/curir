@@ -153,7 +153,7 @@ class SubComponentPostProcessor {
 
         $route = $this->component->getBaseRoute();
         $value = $element->getAttribute($attributeName);
-        $url = Url::parse(html_entity_decode($value));
+        $url = Url::parse($value);
         if ($url->isRelative()) {
             $element->setAttribute($attributeName, $route . $value);
         }
@@ -167,8 +167,8 @@ class SubComponentPostProcessor {
 
         $subRoute = strtolower($this->component->getRoute());
         $route = $this->super->getRoute();
-        $attributeValue = $element->getAttribute($attributeName);
-        $url = Url::parse(urldecode(html_entity_decode($attributeValue)));
+        $attributeValue = urldecode(html_entity_decode($element->getAttribute($attributeName)));
+        $url = Url::parse($attributeValue);
 
         if ($url->isSameHost()) {
 
@@ -178,10 +178,11 @@ class SubComponentPostProcessor {
             }
             $subParams->merge($url->getParameters());
 
-            $state = $this->parameters->copy();
-            if ($this->getActionName($url, $element) != 'get') {
+            $state = new Map();
+            if ($this->getActionName($url, $element) != 'get' || $subParams->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
                 $state->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
             }
+            $state->merge($this->parameters);
 
             if (!$state->has(SuperComponent::PARAMETER_SUB_REQUESTS)) {
                 $state->set(SuperComponent::PARAMETER_SUB_REQUESTS, new Map());
@@ -200,7 +201,7 @@ class SubComponentPostProcessor {
             return;
         }
 
-        $url = Url::parse('?' . html_entity_decode($child->getAttribute($attributeName)));
+        $url = Url::parse('?' . urldecode(html_entity_decode($child->getAttribute($attributeName))));
         $replace = new Url('');
         $replace->getParameters()->set('.', new Map(array($this->name => $url->getParameters())));
 

@@ -387,10 +387,10 @@ class CompositionTest extends Test {
             </body></html>');
     }
 
-    function testSubInSub() {
+    function testSubInSubParameters() {
         $this->given->theFolder_WithModule('subsub');
         $this->given->theComponent_In_WithTemplate('subsub\Sub2', 'subsub',
-            '<html><body><a href="sub2.html?a=b">Sub2</a></body></html>');
+            '<html><body><a href="sub2.html?a=b">Sub2</a>');
         $this->given->theSuperComponent_In_WithTheBody('subsub\Sub1', 'subsub', '
         function doGet() {
             return array(
@@ -398,12 +398,14 @@ class CompositionTest extends Test {
             );
         }');
         $this->given->theFile_In_WithContent('sub1.html', 'subsub',
-            '<html><a href="sub1.html?x=y">Sub1</a>  %sub%</html>');
+            '<html><body><a href="sub1.html?x=y">Sub1</a>  %sub%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('subsub\Super', 'subsub', '
         function doGet() {
+            $sub = new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS);
+            $sub->getRequest()->getParameters()->set("p1", "v1");
             return array(
-                "sub" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS)
+                "sub" => $sub
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'subsub',
@@ -416,7 +418,43 @@ class CompositionTest extends Test {
             <body>
                 <a href="super.html?i=k">Super</a>
                 <a href="/base/super.html?.[sub][x]=y">Sub1</a>
-                <a href="/base/super.html?.[sub][.][sub][a]=b">Sub2</a>
+                <a href="/base/super.html?.[sub][p1]=v1&.[sub][.][sub][a]=b">Sub2</a>
+            </body>
+        </html>');
+    }
+
+    function testPrimaryRequestSubInSub() {
+        $this->given->theFolder_WithModule('primarysubsub');
+        $this->given->theComponent_In_WithTemplate('primarysubsub\Sub2', 'primarysubsub',
+            '<html><body><a href="sub2?action=primary&amp;z=u">Sub2</a></body></html>');
+        $this->given->theSuperComponent_In_WithTheBody('primarysubsub\Sub1', 'primarysubsub', '
+        function doGet() {
+            return array(
+                "sub" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS)
+            );
+        }');
+        $this->given->theFile_In_WithContent('sub1.html', 'primarysubsub',
+            '<html><body>Sub1  %sub%</body></html>');
+
+        $this->given->theSuperComponent_In_WithTheBody('primarysubsub\Super', 'primarysubsub', '
+        function doGet() {
+            $sub = new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS);
+            $sub->getRequest()->getParameters()->set("p", "v");
+            return array(
+                "sub" => $sub
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'primarysubsub',
+            '<html><body>Super  %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('primarysubsub\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe('
+        <html>
+            <body>
+                Super
+                Sub1
+                <a href="/base/super.html?!=sub&.[sub][!]=sub&.[sub][p]=v&.[sub][.][sub][action]=primary&.[sub][.][sub][z]=u">Sub2</a>
             </body>
         </html>');
     }
