@@ -293,6 +293,39 @@ class CompositeRequestTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe('<html><body>Sub2 hi - Yes</body></html>');
     }
 
+    function testNestedSubComponent() {
+        $this->given->theFolder_WithModule('nestedSub');
+        $this->given->theComponent_In_WithTheBody('nestedSub\Sub', 'nestedSub', '
+        function doGet($a) {
+            return array(
+                "a" => $a
+            );
+        }');
+        $this->given->theFile_In_WithContent('sub.html', 'nestedSub', '<html><body>%a% Sub</body></html>');
+
+        $this->given->theSuperComponent_In_WithTheBody('nestedSub\Super', 'nestedSub', '
+        function doGet() {
+            $item = new \watoki\webco\controller\SubComponent($this, Sub::$CLASS);
+            return array(
+                "list" => array(
+                    array(
+                        "item" => $item
+                    )
+                )
+            );
+        }');
+        $this->given->theFile_In_WithContent('super.html', 'nestedSub', '<html><body>%list/0/item%</body></html>');
+
+        $this->given->theRequestParameterHasTheState(new Map(array(
+            'list.0.item' => new Map(array(
+                'a' => 'Hello'
+            ))
+        )));
+        $this->when->iSendTheRequestTo('nestedSub\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe('<html><body>Hello Sub</body></html>');
+    }
+
 }
 
 class CompositeRequestTest_Given extends CompositionTestGiven {

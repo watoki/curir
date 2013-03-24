@@ -86,12 +86,19 @@ abstract class SuperComponent extends Component {
                 $response = $sub->execute($name, $parameters->deepCopy());
                 $responses[$name] = $response;
             }
-            $model[$name] = $response->getBody();
+            $this->setModelKey($model, $name, $response->getBody());
         }
 
         $this->collectSubRedirects($responses, $parameters);
 
         return $this->mergeSubHeaders($this->render($model), $subs);
+    }
+
+    public function setModelKey(array &$model, $name, $value) {
+        foreach (explode('.', $name) as $part) {
+            $model =& $model[$part];
+        }
+        $model = $value;
     }
 
     /**
