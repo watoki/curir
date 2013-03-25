@@ -170,14 +170,6 @@ abstract class Module extends Controller {
         return $common;
     }
 
-    // TODO ( ) This needs to be handled better
-    public function makeControllerName($name) {
-        if (strstr($name, '.')) {
-            list($name,) = explode('.', $name);
-        }
-        return ucfirst($name);
-    }
-
     private function cutAbsoluteBase(Path $path) {
         $route = $this->getRoute();
         if ($path->getNodes()->slice(0, $route->getNodes()->count()) == $route->getNodes()) {

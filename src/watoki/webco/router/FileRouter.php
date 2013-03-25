@@ -21,36 +21,34 @@ class FileRouter extends Router {
      * @return boolean
      */
     public function matches(Path $route) {
-        return $this->resolveClass($route) != null;
+        return $this->resolveController($route) != null;
     }
 
     public function resolve(Request $request) {
-        return $this->createController($this->resolveClass($request->getResource()), $this->nextPath);
+        return $this->resolveController($request->getResource());
     }
 
-    private function resolveClass(Path $route) {
+    private function resolveController(Path $route) {
         $classReflection = new \ReflectionClass($this->parent);
         $classNamespace = $classReflection->getNamespaceName();
 
-        $i = 0;
-        $currentNamespace = $classNamespace;
-        foreach ($route->getNodes() as $module) {
-            $i++;
-
-            // TODO Somehow we need to find out if a module of component is targeted
-            $moduleClass = $currentNamespace . '\\' . $module . '\\' . $this->parent->makeControllerName($module);
-            if (class_exists($moduleClass)) {
-                $this->nextPath = new Path($route->getNodes()->splice(0, $i));
-                return $moduleClass;
+        $classPath = new Path(Liste::split('\\', $classNamespace));
+        foreach ($route->getNodes() as $i => $module) {
+            $classPath->getNodes()->append($module);
+            $classPath->getNodes()->append(ucfirst($module));
+            $className = $classPath->getNodes()->join('\\');
+            if (class_exists($className)) {
+                return $this->createController($className, new Path($route->getNodes()->splice(0, $i + 1)));
             }
+            $classPath->getNodes()->pop();
+        }
 
-            $componentClass = $currentNamespace . '\\' . $this->parent->makeControllerName($module);
-            if (class_exists($componentClass)) {
-                $this->nextPath = new Path($route->getNodes()->splice(0, $i));
-                return $componentClass;
-            }
-
-            $currentNamespace .= '\\' . $module;
+        $componentName = ucfirst($classPath->getLeafName());
+        $classPath->getNodes()->pop();
+        $classPath->getNodes()->append($componentName);
+        $className = $classPath->getNodes()->join('\\');
+        if (class_exists($className)) {
+            return $this->createController($className, $route);
         }
 
         return null;
