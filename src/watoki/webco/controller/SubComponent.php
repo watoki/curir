@@ -37,14 +37,12 @@ class SubComponent {
      */
 public $response;
 
-    // TODO > Use lazy Route type instead of component class
-    function __construct(SuperComponent $super, $defaultComponent = null, Map $defaultParameters = null) {
+    function __construct(SuperComponent $super, Path $defaultRoute = null, Map $defaultParameters = null) {
         $this->super = $super;
         $defaultParameters = $defaultParameters ?: new Map();
-        $route = $defaultComponent ? $super->getRoot()->findController($defaultComponent)->getRoute() : new Path();
 
-        $this->defaultRequest = new Request(Request::METHOD_GET, $route, $defaultParameters);
-        $this->request = new Request(Request::METHOD_GET, $route, $defaultParameters->copy());
+        $this->defaultRequest = new Request(Request::METHOD_GET, $defaultRoute ?: new Path(), $defaultParameters);
+        $this->request = new Request(Request::METHOD_GET, $defaultRoute ? $defaultRoute->copy() : new Path(), $defaultParameters->copy());
     }
 
     public function getRequest() {
@@ -74,7 +72,6 @@ public $response;
     }
 
     private function postProcess(Response $response, $name, Map $superParameters) {
-        // TODO > There needs to be a better way to handle the component instance
         /** @var $component Component */
         $component = $this->super->getRoot()->resolve($this->request->getResource());
         $postProcessor = new SubComponentPostProcessor($name, $superParameters, $component, $this->super);

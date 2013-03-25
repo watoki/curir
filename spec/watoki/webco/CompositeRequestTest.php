@@ -32,7 +32,7 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('restoresubs\Super', 'restoresubs', '
         function doGet() {
             return array(
-                "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
+                "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'restoresubs', '<html><body>Hello %sub%</body></html>');
@@ -61,7 +61,7 @@ class CompositeRequestTest extends Test {
         function doGet($param) {
             return array(
                 "msg" => ++self::$executed . ":" . $param,
-                "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
+                "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primaryaction', '<html><body>%msg% %sub%</body></html>');
@@ -95,7 +95,7 @@ class CompositeRequestTest extends Test {
         function doGet($param) {
             return array(
                 "msg" => $param,
-                "sub" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS)
+                "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primaryfirst', '<html><body>%msg% %sub%</body></html>');
@@ -124,8 +124,8 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('primarystate\Super', 'primarystate', '
         function doGet() {
             return array(
-                "sub1" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS),
-                "sub2" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
+                "sub1" => $this->subComponent(Sub1::$CLASS),
+                "sub2" => $this->subComponent(Sub2::$CLASS),
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'primarystate', '<html><body>%sub1% %sub2%</body></html>');
@@ -165,7 +165,7 @@ class CompositeRequestTest extends Test {
         function doGet() {
             return array(
                 "msg" => "Hello",
-                "sub" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS),
+                "sub" => $this->subComponent(Sub1::$CLASS),
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'subtargetrequest', '<html><body>%msg% %sub%</body></html>');
@@ -196,8 +196,8 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
         function doGet() {
             return array(
-                "sub1" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS),
-                "sub2" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
+                "sub1" => $this->subComponent(Sub::$CLASS),
+                "sub2" => $this->subComponent(Sub2::$CLASS),
             );
         }');
 
@@ -227,8 +227,8 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
         function doGet() {
             return array(
-                "sub1" => new \watoki\webco\controller\SubComponent($this, Sub::$CLASS),
-                "sub2" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
+                "sub1" => $this->subComponent(Sub::$CLASS),
+                "sub2" => $this->subComponent(Sub2::$CLASS),
             );
         }');
 
@@ -256,7 +256,7 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('nestedprimary\Sub1', 'nestedprimary', '
         function doGet($x) {
             return array(
-                "sub" => new \watoki\webco\controller\SubComponent($this, Sub2::$CLASS),
+                "sub" => $this->subComponent(Sub2::$CLASS),
                 "msg" => Sub2::$executed,
                 "x" => $x
             );
@@ -267,7 +267,7 @@ class CompositeRequestTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('nestedprimary\Super', 'nestedprimary', '
         function doGet() {
             return array(
-                "sub" => new \watoki\webco\controller\SubComponent($this, Sub1::$CLASS)
+                "sub" => $this->subComponent(Sub1::$CLASS)
             );
         }');
         $this->given->theFile_In_WithContent('super.html', 'nestedprimary',
@@ -305,7 +305,7 @@ class CompositeRequestTest extends Test {
 
         $this->given->theSuperComponent_In_WithTheBody('nestedSub\Super', 'nestedSub', '
         function doGet() {
-            $item = new \watoki\webco\controller\SubComponent($this, Sub::$CLASS);
+            $item = $this->subComponent(Sub::$CLASS);
             return array(
                 "list" => array(
                     array(

@@ -28,6 +28,11 @@ abstract class SuperComponent extends Component {
      */
     public $primaryRequestSubName;
 
+    protected function subComponent($componentClass, Map $parameters = null) {
+        $route = $this->getRoot()->findController($componentClass)->getRoute();
+        return new SubComponent($this, $route, $parameters);
+    }
+
     public function respond(Request $request) {
         $params = $request->getParameters();
         if ($params->has(self::PARAMETER_PRIMARY_REQUEST)) {
@@ -94,7 +99,7 @@ abstract class SuperComponent extends Component {
         return $this->mergeSubHeaders($this->render($model), $subs);
     }
 
-    // TODO > This could do without reference passing using a Map
+    // TODO (2) This could do without reference passing using a Map
     public function setModelKey(array &$model, $name, $value) {
         foreach (explode('.', $name) as $part) {
             $model =& $model[$part];

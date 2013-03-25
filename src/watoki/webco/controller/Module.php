@@ -2,6 +2,8 @@
 namespace watoki\webco\controller;
 
 use watoki\collections\Liste;
+use watoki\collections\Map;
+use watoki\factory\Factory;
 use watoki\webco\Controller;
 use watoki\webco\MimeTypes;
 use watoki\webco\Path;
@@ -16,9 +18,19 @@ abstract class Module extends Controller {
     public static $CLASS = __CLASS__;
 
     /**
+     * @var Map Runtime cache for resolved controllers
+     */
+    public $resolved;
+
+    /**
      * @var Liste|Router[]
      */
     private $routers;
+
+    function __construct(Factory $factory, Path $route, Module $parent = null) {
+        parent::__construct($factory, $route, $parent);
+        $this->resolved = new Map();
+    }
 
     /**
      * @return \watoki\collections\Liste|Router[]
@@ -95,9 +107,12 @@ abstract class Module extends Controller {
      * @return Controller
      */
     public function resolve(Path $route) {
-        $route = $route->copy();
-        $this->cutAbsoluteBase($route);
-        return $this->resolveController(new Request('', $route));
+        if (!$this->resolved->has($route->toString())) {
+            $route = $route->copy();
+            $this->cutAbsoluteBase($route);
+            $this->resolved->set($route->toString(), $this->resolveController(new Request('', $route)));
+        }
+        return $this->resolved->get($route->toString());
     }
 
     /**
