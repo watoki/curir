@@ -179,7 +179,7 @@ abstract class Module extends Controller {
         return ucfirst($name);
     }
 
-    // TODO Route should be a type
+    // TODO (1) Route should be a type
     private function cutAbsoluteBaseFromResource(Request $request) {
         $route = $this->getRoute();
         $target = $request->getResource();

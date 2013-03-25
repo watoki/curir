@@ -5,6 +5,7 @@ use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Request;
+use watoki\webco\Response;
 use watoki\webco\Url;
 
 class SubComponentPostProcessor {
@@ -30,6 +31,8 @@ class SubComponentPostProcessor {
         'select' => 'name',
         'button' => 'name'
     );
+
+    const HEADER_HTML_HEAD = 'x-html-head';
 
     /**
      * @var Map
@@ -64,14 +67,24 @@ class SubComponentPostProcessor {
         $this->headElements = new Liste();
     }
 
-    public function postProcess($content) {
-        if (!$content || substr(trim($content), 0, 5) != '<html') {
-            return $content;
+    public function postProcess(Response $response) {
+        $body = $response->getBody();
+        $parser = new HtmlParser($body);
+
+        if (!$body || !$parser->isHtmlDocument()) {
+            return $response;
         }
 
-        $parser = new HtmlParser($content);
         $rendered = $parser->toString($this->extractBody($parser->getRoot()));
-        return str_replace(array('<body>', '</body>'), '', $rendered);
+        $response->setBody(str_replace(array('<body>', '</body>'), '', $rendered));
+
+        $elements = array();
+        foreach ($this->headElements as $element) {
+            $elements[] = $parser->toString($element);
+        }
+        $response->getHeaders()->set(self::HEADER_HTML_HEAD, implode("", $elements));
+
+        return $response;
     }
 
     /**
@@ -110,20 +123,6 @@ class SubComponentPostProcessor {
         }
     }
 
-    /**
-     * @param string|null $nodeName Filter by node name (if given)
-     * @return \watoki\collections\Liste
-     */
-    public function getHeadElements($nodeName = null) {
-        if (!$nodeName) {
-            return $this->headElements;
-        } else {
-            return $this->headElements->filter(function (\DOMNode $element) use ($nodeName) {
-                return $element->nodeName == $nodeName;
-            });
-        }
-    }
-
     private function replaceUrls(\DOMElement $element) {
         foreach ($element->childNodes as $child) {
             if (!$child instanceof \DOMElement) {
@@ -159,7 +158,7 @@ class SubComponentPostProcessor {
         }
     }
 
-    // TODO This whole strtolower logic should be somewhere central
+    // TODO (3) This whole strtolower logic should be somewhere central
     private function replaceLinkUrl(\DOMElement $element, $attributeName) {
         if (!$element->hasAttribute($attributeName)) {
             return;
@@ -219,5 +218,9 @@ class SubComponentPostProcessor {
         } else {
             return Request::METHOD_GET;
         }
+    }
+
+    public function getHeadElements() {
+        return $this->headElements;
     }
 }

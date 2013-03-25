@@ -94,6 +94,7 @@ abstract class SuperComponent extends Component {
         return $this->mergeSubHeaders($this->render($model), $subs);
     }
 
+    // TODO > This could do without reference passing using a Map
     public function setModelKey(array &$model, $name, $value) {
         foreach (explode('.', $name) as $part) {
             $model =& $model[$part];
@@ -106,7 +107,7 @@ abstract class SuperComponent extends Component {
      * @param string $prefix
      * @return array|SubComponent[]
      */
-    // TODO should model have to be a Map? No. Array, Object and Map should be handled. => We need a unified iterator.
+    // TODO (2) should model have to be a Map? No. Array, Object and Map should be handled. => We need a unified iterator.
     private function collectSubComponents($model, $prefix = '') {
         if (!is_array($model)) {
             return array();
@@ -116,9 +117,7 @@ abstract class SuperComponent extends Component {
             if ($value instanceof SubComponent) {
                 $subs[$prefix . $key] = $value;
             } else if (is_array($value)) {
-                foreach ($this->collectSubComponents($value, $key . '.') as $nestedKey => $nestedValue) {
-                    $subs[$prefix .$nestedKey] = $nestedValue;
-                }
+                $subs = array_merge($subs, $this->collectSubComponents($value, $prefix . $key . '.'));
             }
         }
         return $subs;
@@ -157,29 +156,31 @@ abstract class SuperComponent extends Component {
         return $requests;
     }
 
-    // TODO This needs to be done by the SubComponent and decoupled asset management
+    /**
+     * @param string $body
+     * @param array|SubComponent[] $subs
+     * @return \DOMElement|mixed|string
+     */
     private function mergeSubHeaders($body, array $subs) {
-        return $body;
-//        $parser = new HtmlParser($body);
-//
-//        foreach ($subs as $sub) {
-//            if ($sub instanceof HtmlSubComponent) {
-//                if (!isset($head)) {
-//                    $head = $parser->getRoot()->firstChild;
-//                    if ($head->nodeName != 'head') {
-//                        $body = $head;
-//                        $head = $parser->getDocument()->createElement('head');
-//                        $parser->getRoot()->insertBefore($head, $body);
-//                    }
-//                }
-//
-//                foreach ($sub->getHeadElements('link') as $element) {
-//                    $head->appendChild($parser->getDocument()->importNode($element, true));
-//                }
-//            }
-//        }
-//
-//        return isset($parser) ? $parser->toString() : $body;
+        $parser = new HtmlParser($body);
+        $head = null;
+
+        foreach ($subs as $sub) {
+            foreach ($sub->getHeadElements('link') as $element) {
+                if (!$head) {
+                    $head = $parser->getRoot()->firstChild;
+                    if ($head->nodeName != 'head') {
+                        $body = $head;
+                        $head = $parser->getDocument()->createElement('head');
+                        $parser->getRoot()->insertBefore($head, $body);
+                    }
+                }
+
+                $head->appendChild($parser->getDocument()->importNode($element, true));
+            }
+        }
+
+        return isset($parser) ? $parser->toString() : $body;
     }
 
     /**

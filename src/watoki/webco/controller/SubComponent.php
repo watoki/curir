@@ -1,6 +1,7 @@
 <?php
 namespace watoki\webco\controller;
 
+use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\webco\Controller;
 use watoki\webco\Request;
@@ -9,6 +10,11 @@ use watoki\webco\Response;
 class SubComponent {
 
     public static $CLASS = __CLASS__;
+
+    /**
+     * @var Liste
+     */
+    public $headElements;
 
     /**
      * @var \watoki\webco\controller\Component
@@ -30,7 +36,7 @@ class SubComponent {
      */
 public $response;
 
-    // TODO Use lazy Route type instead of component class
+    // TODO > Use lazy Route type instead of component class
     function __construct(SuperComponent $super, $defaultComponent = null, Map $defaultParameters = null) {
         $this->super = $super;
         $defaultParameters = $defaultParameters ?: new Map();
@@ -67,12 +73,26 @@ public $response;
     }
 
     private function postProcess(Response $response, $name, Map $superParameters) {
-        // TODO There needs to be a better way to handle the component instance
+        // TODO > There needs to be a better way to handle the component instance
         /** @var $component Component */
         $component = $this->super->getRoot()->resolve($this->request->getResource());
         $postProcessor = new SubComponentPostProcessor($name, $superParameters, $component, $this->super);
-        $response->setBody($postProcessor->postProcess($response->getBody()));
-        return $response;
+        $this->headElements = $postProcessor->getHeadElements();
+        return $postProcessor->postProcess($response);
+    }
+
+    /**
+     * @param string|null $nodeName Filter by node name (if given)
+     * @return \watoki\collections\Liste
+     */
+    public function getHeadElements($nodeName = null) {
+        if (!$nodeName) {
+            return $this->headElements;
+        } else {
+            return $this->headElements->filter(function (\DOMNode $element) use ($nodeName) {
+                return $element->nodeName == $nodeName;
+            });
+        }
     }
 
     public function getNonDefaultRequest() {

@@ -54,8 +54,6 @@ class CompositionTest extends Test {
     }
 
     function testAbsorbHeader() {
-        $this->markTestIncomplete('Think of better way to handle header.');
-
         $this->given->theFolder_WithModule('assets');
         $this->given->theComponent_In_WithTemplate('assets\Sub', 'assets',
             '<html>
@@ -84,8 +82,6 @@ class CompositionTest extends Test {
     }
 
     function testRelativeUrls() {
-        $this->markTestIncomplete('Think of better way to handle header.');
-
         $this->given->theFolder_WithModule('relative');
         $this->given->theFolder_WithModule('relative/inner');
         $this->given->theComponent_In_WithTemplate('relative\inner\Sub', 'relative/inner',
