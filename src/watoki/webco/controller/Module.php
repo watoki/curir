@@ -71,10 +71,7 @@ abstract class Module extends Controller {
             $route = new Path($resource->getNodes()->slice(0, $i));
             foreach ($this->getRouters() as $router) {
                 if ($router->matches($route)) {
-                    try {
-                        return $router->resolve($request);
-                    } catch (\Exception $e) {
-                    }
+                    return $router->resolve($request);
                 }
             }
         }
