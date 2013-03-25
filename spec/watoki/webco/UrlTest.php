@@ -2,6 +2,7 @@
 namespace spec\watoki\webco;
  
 use watoki\collections\Map;
+use watoki\webco\Path;
 use watoki\webco\Url;
 
 class UrlTest extends Test {
@@ -15,7 +16,7 @@ class UrlTest extends Test {
     }
 
     function testMapParameters() {
-        $url = new Url('test.html', Map::toCollections(array(
+        $url = new Url(new Path(array('test.html')), Map::toCollections(array(
             'a' => array(
                 'b' => 1,
                 'c' => array(

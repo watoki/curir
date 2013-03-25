@@ -4,6 +4,7 @@ namespace watoki\webco\controller;
 use watoki\collections\Liste;
 use watoki\webco\Controller;
 use watoki\webco\MimeTypes;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Router;
@@ -32,20 +33,20 @@ abstract class Module extends Controller {
      * @return Response
      */
     public function respond(Request $request) {
-        $this->cutAbsoluteBaseFromResource($request);
+        $this->cutAbsoluteBase($request->getResource());
         $controller = $this->resolveController($request);
         if ($controller) {
             return $controller->respond($request);
         }
 
         if ($request->getResource()) {
-            $file = $this->getDirectory() . '/' . $request->getResource();
-            if (file_exists($file) && is_file($file) && $request->getResourceExtension() != 'php') {
+            $file = $this->getDirectory() . '/' . $request->getResource()->toString();
+            if (file_exists($file) && is_file($file) && $request->getResource()->getLeafExtension() != 'php') {
                 return $this->createFileResponse($request);
             }
         }
 
-        throw new \Exception('Could not resolve request [' . $request->getResource() . '] in [' . get_class($this) . ']');
+        throw new \Exception('Could not resolve request [' . $request->getResource()->toString() . '] in [' . get_class($this) . ']');
     }
 
     /**
@@ -54,21 +55,21 @@ abstract class Module extends Controller {
      */
     protected function createFileResponse(Request $request) {
         $response = $this->getResponse();
-        $mimeType = MimeTypes::getType($request->getResourceExtension());
+        $mimeType = MimeTypes::getType($request->getResource()->getLeafExtension());
         if ($mimeType) {
             $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, $mimeType);
         }
 
-        $response->setBody(file_get_contents($this->getDirectory() . '/' . $request->getResource()));
+        $response->setBody(file_get_contents($this->getDirectory() . '/' . $request->getResource()->toString()));
         return $response;
     }
 
     protected function resolveController(Request $request) {
-        for ($i = count($request->getResourcePath()); $i > 0; $i--) {
-            $route = $request->getResourcePath()->slice(0, $i)->join('/');
-            if ($i != count($request->getResourcePath())) {
-                $route .= '/';
-            }
+        $resource = $request->getResource();
+
+        for ($i = $resource->count(); $i > 0; $i--) {
+            /** @var $route Path */
+            $route = $resource->slice(0, $i);
             foreach ($this->getRouters() as $router) {
                 if ($router->matches($route)) {
                     try {
@@ -94,14 +95,12 @@ abstract class Module extends Controller {
     }
 
     /**
-     * @param $route
+     * @param Path $route
      * @return Controller
      */
-    public function resolve($route) {
-        $len = strlen($this->route);
-        if (substr($route, 0, $len) == $this->route) {
-            $route = substr($route, $len);
-        }
+    public function resolve(Path $route) {
+        $route = $route->copy();
+        $this->cutAbsoluteBase($route);
         return $this->resolveController(new Request('', $route));
     }
 
@@ -125,7 +124,7 @@ abstract class Module extends Controller {
                 continue;
             }
 
-            $controller = $router->resolve(new Request('', $router->getRoute()));
+            $controller = $router->resolve(new Request('', $router->getRoute()->copy()));
 
             if ($router->getControllerClass() == $controllerClass) {
                 return $controller;
@@ -148,8 +147,8 @@ abstract class Module extends Controller {
     private function findInFolders($controllerClass) {
         $commonNamespace = $this->findCommonNamespace($controllerClass, get_class($this));
         if ($commonNamespace) {
-            $path = Liste::split('\\', substr($controllerClass, strlen($commonNamespace) + 1));
-            $request = new Request('', $path->join('/'));
+            $path = Path::split('\\', substr($controllerClass, strlen($commonNamespace) + 1));
+            $request = new Request('', $path);
             try {
                 return $this->resolveController($request);
             } catch (\Exception $e) {
@@ -175,16 +174,18 @@ abstract class Module extends Controller {
         return $common;
     }
 
+    // TODO ( ) This needs to be handled better
     public function makeControllerName($name) {
+        if (strstr($name, '.')) {
+            list($name,) = explode('.', $name);
+        }
         return ucfirst($name);
     }
 
-    // TODO (1) Route should be a type
-    private function cutAbsoluteBaseFromResource(Request $request) {
+    private function cutAbsoluteBase(Path $path) {
         $route = $this->getRoute();
-        $target = $request->getResource();
-        if (substr($target, 0, strlen($route)) == $route) {
-            $request->setResourcePath(Liste::split('/', substr($target, strlen($route))));
+        if ($path->slice(0, $route->count()) == $route) {
+            $path->splice(0, $route->count());
         }
    }
 

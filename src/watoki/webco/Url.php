@@ -8,7 +8,7 @@ class Url {
     public static $CLASS = __CLASS__;
 
     /**
-     * @var string
+     * @var Path
      */
     private $resource;
 
@@ -22,10 +22,16 @@ class Url {
      */
     private $fragment;
 
-    function __construct($resource, Map $parameters = null, $fragment = null) {
+    /**
+     * @var null|string
+     */
+    private $scheme;
+
+    function __construct(Path $resource, Map $parameters = null, $fragment = null, $scheme = null) {
         $this->resource = $resource;
         $this->parameters = $parameters ?: new Map();
         $this->fragment = $fragment;
+        $this->scheme = $scheme;
     }
 
     static public function parse($string) {
@@ -34,6 +40,13 @@ class Url {
         if ($fragmentPos !== false) {
             $fragment = substr($string, $fragmentPos + 1);
             $string = substr($string, 0, $fragmentPos);
+        }
+
+        $scheme = null;
+        $schemeSepPos = strpos($string, ':');
+        if ($schemeSepPos !== false) {
+            $scheme = substr($string, 0, $schemeSepPos);
+            $string = substr($string, $schemeSepPos + 1);
         }
 
         $parameters = new Map();
@@ -71,11 +84,11 @@ class Url {
             }
         }
 
-        return new Url($string, $parameters, $fragment);
+        return new Url(Path::parse($string), $parameters, $fragment, $scheme);
     }
 
     public function isRelative() {
-        return substr($this->resource, 0, 1) != '/' && $this->isSameHost();
+        return !$this->resource->isAbsolute() && $this->isSameHost();
     }
 
     public function toString() {
@@ -84,32 +97,29 @@ class Url {
             $queries[] = urlencode($key) . '=' . urlencode($value);
         }
 
-        return $this->resource
+        return $this->resource->toString()
             . ($queries ? '?' . implode('&', $queries) : '')
             . ($this->fragment ? '#' . $this->fragment : '');
     }
 
-    function __toString() {
-        return $this->toString();
-    }
-
     public function isSameHost() {
-        return !preg_match('#^([^:/]+:)?//#', $this->resource);
+        return $this->resource->toString() != '//';
     }
 
     /**
-     * @return string
+     * @return Path
      */
     public function getResource() {
         return $this->resource;
     }
 
+    // TODO This should all be done by Path
     public function getResourceDir() {
-        return dirname($this->resource) . '/';
+        return dirname($this->resource->toString()) . '/';
     }
 
     public function getResourceBase() {
-        return basename($this->resource);
+        return basename($this->resource->toString());
     }
 
     public function getResourceBaseName() {

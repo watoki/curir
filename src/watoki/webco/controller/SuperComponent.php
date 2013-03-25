@@ -1,9 +1,9 @@
 <?php
 namespace watoki\webco\controller;
 
-use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Url;
@@ -54,7 +54,7 @@ abstract class SuperComponent extends Component {
         $subTarget = $subParameters->get(self::PARAMETER_TARGET);
 
         $this->primaryRequestSub = new SubComponent($this, null, $subParameters);
-        $this->primaryRequestSub->getRequest()->setResourcePath(Liste::split('/', $subTarget));
+        $this->primaryRequestSub->getRequest()->setResource(Path::parse($subTarget));
         $response = $this->primaryRequestSub->execute($this->primaryRequestSubName, $params);
         return $response;
     }
@@ -134,7 +134,7 @@ abstract class SuperComponent extends Component {
                 $subParameters = $parameters->get($name);
                 $sub->getRequest()->getParameters()->merge($subParameters);
                 if ($subParameters->has(self::PARAMETER_TARGET)) {
-                    $sub->getRequest()->setResourcePath(Liste::split('/', $subParameters->get(self::PARAMETER_TARGET)));
+                    $sub->getRequest()->setResource(Path::parse($subParameters->get(self::PARAMETER_TARGET)));
                 }
 
             }
@@ -206,9 +206,9 @@ abstract class SuperComponent extends Component {
             $target = new Url($this->getRoute(), $requestParams);
         }
 
-        $subTarget = Url::parse($subResponse->getHeaders()->get(Response::HEADER_LOCATION));
+        $subTarget = Url::parse(urldecode($subResponse->getHeaders()->get(Response::HEADER_LOCATION)));
         $subParams = $subTarget->getParameters()->copy();
-        $subParams->set(self::PARAMETER_TARGET, $subTarget->getResource());
+        $subParams->set(self::PARAMETER_TARGET, $subTarget->getResource()->toString());
         $target->setFragment($subTarget->getFragment());
         $requestParams->get(self::PARAMETER_SUB_REQUESTS)->set($subName, $subParams);
 

@@ -3,6 +3,7 @@ namespace spec\watoki\webco\steps;
 
 use spec\watoki\webco\Step;
 use spec\watoki\webco\Test;
+use watoki\webco\Path;
 
 class Given extends Step {
 
@@ -14,10 +15,12 @@ class Given extends Step {
 
     public $requestHeaders = array();
 
-    public $moduleRoute = '/base/';
+    public $moduleRoute;
 
     function __construct(Test $test) {
         parent::__construct($test);
+
+        $this->moduleRoute = Path::parse('/base/');
 
         $testFolder = Test::$folder . '/tmp';
         $this->cleanDir($testFolder);
@@ -54,7 +57,7 @@ class Given extends Step {
     }
 
     public function theRequestResourceIs($resource) {
-        $this->requestResource = $resource;
+        $this->requestResource = Path::parse($resource);
     }
 
     public function theRequestParameter_WithValue($key, $value) {
@@ -100,7 +103,7 @@ class Given extends Step {
     }
 
     public function theModuleRouteIs($route) {
-        $this->moduleRoute = $route;
+        $this->moduleRoute = Path::parse($route);
     }
 
 }

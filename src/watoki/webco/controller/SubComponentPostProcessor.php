@@ -4,6 +4,7 @@ namespace watoki\webco\controller;
 use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Url;
@@ -154,7 +155,9 @@ class SubComponentPostProcessor {
         $value = $element->getAttribute($attributeName);
         $url = Url::parse($value);
         if ($url->isRelative()) {
-            $element->setAttribute($attributeName, $route . $value);
+            $absolute = $route->copy();
+            $absolute->append($value);
+            $element->setAttribute($attributeName, $absolute->toString());
         }
     }
 
@@ -164,7 +167,7 @@ class SubComponentPostProcessor {
             return;
         }
 
-        $subRoute = strtolower($this->component->getRoute());
+        $subRoute = strtolower($this->component->getRoute()->toString());
         $route = $this->super->getRoute();
         $attributeValue = urldecode(html_entity_decode($element->getAttribute($attributeName)));
         $url = Url::parse($attributeValue);
@@ -181,7 +184,7 @@ class SubComponentPostProcessor {
             $subParams = new Map();
             if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute
                     || $state->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
-                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getResource());
+                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getResource()->toString());
             }
             $subParams->merge($url->getParameters());
 
@@ -203,7 +206,7 @@ class SubComponentPostProcessor {
         }
 
         $url = Url::parse('?' . urldecode(html_entity_decode($child->getAttribute($attributeName))));
-        $replace = new Url('');
+        $replace = new Url(new Path());
         $replace->getParameters()->set('.', new Map(array($this->name => $url->getParameters())));
 
         $replaceName = substr($replace->toString(), 1, -1);

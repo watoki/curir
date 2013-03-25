@@ -3,6 +3,7 @@ namespace watoki\webco\controller;
  
 use watoki\factory\Factory;
 use watoki\webco\Controller;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Url;
@@ -16,7 +17,7 @@ class RedirectController extends Controller {
      */
     private $target;
 
-    function __construct($target, Factory $factory, $route, Module $parent = null) {
+    function __construct($target, Factory $factory, Path $route, Module $parent = null) {
         parent::__construct($factory, $route, $parent);
         $this->target = $target;
     }

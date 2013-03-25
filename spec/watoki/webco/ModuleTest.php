@@ -60,13 +60,13 @@ class ModuleTest extends Test {
     }
 
     public function testAbsoluteResource() {
-        $this->given->theFolder('absolute');
-        $this->given->theModule_In('absolute\Module', 'absolute');
-        $this->given->theComponent_In('absolute\Component', 'absolute');
+        $this->given->theFolder('isAbsolute');
+        $this->given->theModule_In('isAbsolute\Module', 'isAbsolute');
+        $this->given->theComponent_In('isAbsolute\Component', 'isAbsolute');
 
-        $this->when->iRequest_From('/base/Component', 'absolute\Module');
+        $this->when->iRequest_From('/base/Component', 'isAbsolute\Module');
 
-        $this->then->theResponseBodyShouldBe('Found absolute\Component');
+        $this->then->theResponseBodyShouldBe('Found isAbsolute\Component');
     }
 
     public function testNonExistingComponent() {
@@ -111,7 +111,7 @@ class ModuleTest_Given extends Given {
     public function theModule_InThatRedirectsTo($moduleName, $folder, $target) {
         $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\webco\controller\Module', "
             public function respond(\\watoki\\webco\\Request \$request) {
-                \$this->redirect(new \\watoki\\webco\\Url('$target'));
+                \$this->redirect(\\watoki\\webco\\Url::parse('$target'));
                 return \$this->getResponse();
             }
         ");
@@ -130,7 +130,7 @@ class ModuleTest_Given extends Given {
     public function theComponent_In_ThatRedirectsTo($className, $folder, $target) {
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Component', '
             public function respond(\watoki\webco\Request $request) {
-                $this->redirect(new \watoki\webco\Url("' . $target. '"));
+                $this->redirect(\watoki\webco\Url::parse("' . $target. '"));
                 return $this->getResponse();
             }
 

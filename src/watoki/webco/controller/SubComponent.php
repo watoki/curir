@@ -4,6 +4,7 @@ namespace watoki\webco\controller;
 use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\webco\Controller;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 
@@ -40,7 +41,7 @@ public $response;
     function __construct(SuperComponent $super, $defaultComponent = null, Map $defaultParameters = null) {
         $this->super = $super;
         $defaultParameters = $defaultParameters ?: new Map();
-        $route = $defaultComponent ? $super->getRoot()->findController($defaultComponent)->getRoute() : null;
+        $route = $defaultComponent ? $super->getRoot()->findController($defaultComponent)->getRoute() : new Path();
 
         $this->defaultRequest = new Request(Request::METHOD_GET, $route, $defaultParameters);
         $this->request = new Request(Request::METHOD_GET, $route, $defaultParameters->copy());
@@ -56,7 +57,7 @@ public $response;
      * @return Response
      */
     public function execute($name, Map $superParameters) {
-        $this->response = $this->postProcess($this->super->getRoot()->respond($this->request),
+        $this->response = $this->postProcess($this->super->getRoot()->respond($this->request->copy()),
             $name, $superParameters);
         return $this->response;
     }

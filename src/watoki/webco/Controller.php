@@ -15,9 +15,9 @@ abstract class Controller {
     protected $factory;
 
     /**
-     * @var string
+     * @var Path
      */
-    protected $route;
+    private $route;
 
     /**
      * @var Module|null
@@ -29,7 +29,7 @@ abstract class Controller {
      */
     private $response;
 
-    function __construct(Factory $factory, $route, Module $parent = null) {
+    function __construct(Factory $factory, Path $route, Module $parent = null) {
         $this->parent = $parent;
         $this->factory = $factory;
         $this->route = $route;
@@ -42,10 +42,10 @@ abstract class Controller {
     abstract public function respond(Request $request);
 
     /**
-     * @return string
+     * @return Path
      */
     public function getRoute() {
-        return $this->route;
+        return $this->route->copy();
     }
 
     protected function getResponse() {
@@ -78,16 +78,14 @@ abstract class Controller {
     }
 
     protected function redirect(Url $url) {
-        $urlString = $url->toString();
         if ($url->isRelative()) {
-            $urlString = $this->getBaseRoute() . $urlString;
+            $url->getResource()->insertAll($this->getBaseRoute(), 0);
         }
-        $response = $this->getResponse();
-        $response->getHeaders()->set(Response::HEADER_LOCATION, $urlString);
+        $this->getResponse()->getHeaders()->set(Response::HEADER_LOCATION, $url->toString());
         return null;
     }
 
     protected function getBaseRoute() {
-        return $this->route;
+        return $this->getRoute();
     }
 }

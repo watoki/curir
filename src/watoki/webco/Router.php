@@ -26,10 +26,10 @@ abstract class Router {
     abstract public function resolve(Request $request);
 
     /**
-     * @param string $route
+     * @param Path $route
      * @return boolean
      */
-    abstract public function matches($route);
+    abstract public function matches(Path $route);
 
     public function inject(Factory $factory, Module $parent) {
         $this->parent = $parent;
@@ -38,13 +38,16 @@ abstract class Router {
 
     /**
      * @param $controllerClass
-     * @param string $nextRoute
+     * @param Path $nextRoute
      * @param array $additionalConstructorArguments
      * @return Controller
      */
-    protected function createController($controllerClass, $nextRoute, $additionalConstructorArguments = array()) {
+    protected function createController($controllerClass, Path $nextRoute, $additionalConstructorArguments = array()) {
+        $nextRoute = $nextRoute->copy();
+        $nextRoute->insertAll($this->parent->getRoute(), 0);
+
         $args = array_merge(array(
-            'route' => $this->parent->getRoute() . $nextRoute,
+            'route' =>  $nextRoute,
             'parent' => $this->parent
         ), $additionalConstructorArguments);
         return $this->factory->getInstance($controllerClass, $args);

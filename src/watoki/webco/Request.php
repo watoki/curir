@@ -44,9 +44,9 @@ class Request {
     private $method;
 
     /**
-     * @var Liste List of parts of URL without query string
+     * @var Path
      */
-    private $resourcePath;
+    private $resource;
 
     /**
      * @var Map Parameter keys and values parsed from query string or body
@@ -63,7 +63,11 @@ class Request {
      */
     private $body;
 
-    public static function build($resource) {
+    /**
+     * @param $string
+     * @return Request
+     */
+    public static function build($string) {
         $method = $_SERVER['REQUEST_METHOD'];
 
         $params = Map::toCollections($_REQUEST);
@@ -74,26 +78,27 @@ class Request {
             $headers->set($name, isset($_SERVER[$key]) ? $_SERVER[$key] : null);
         }
 
-        if (substr($resource, -1) == '/') {
-            $resource .= self::DEFAULT_RESOURCE_NAME;
+        if (substr($string, -1) == '/') {
+            $string .= self::DEFAULT_RESOURCE_NAME;
         }
 
-        return new Request($method, $resource, $params, $headers, $body);
+        return new Request($method, Path::parse($string), $params, $headers, $body);
     }
 
     /**
      * @param string $method
-     * @param string $resource
+     * @param Path $resource
      * @param \watoki\collections\Map $parameters
      * @param \watoki\collections\Map $headers
      * @param string $body
+     * @return \watoki\webco\Request
      */
-    function __construct($method = Request::METHOD_GET, $resource = '', Map $parameters = null, Map $headers = null, $body = '') {
+    function __construct($method = Request::METHOD_GET, Path $resource = null, Map $parameters = null, Map $headers = null, $body = '') {
         $this->method = $method;
+        $this->resource = $resource ?: new Path();
         $this->parameters = $parameters ?: new Map();
         $this->headers = $headers ?: new Map();
         $this->body = $body;
-        $this->setResourcePath($resource !== null ? Liste::split('/', $resource) : null);
     }
 
     /**
@@ -125,41 +130,17 @@ class Request {
     }
 
     /**
-     * @param \watoki\collections\Liste $resourcePath
+     * @param Path $resource
      */
-    public function setResourcePath($resourcePath) {
-        $this->resourcePath = $resourcePath;
+    public function setResource(Path $resource) {
+        $this->resource= $resource;
     }
 
     /**
-     * @return \watoki\collections\Liste
-     */
-    public function getResourcePath() {
-        return $this->resourcePath;
-    }
-
-    /**
-     * @return string
+     * @return Path
      */
     public function getResource() {
-        return $this->resourcePath->join('/');
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getResourceExtension() {
-        $baseExtension = explode('.', $this->getResourcePath()->last());
-        return count($baseExtension) == 1 ? null : end($baseExtension);
-    }
-
-    public function getResourceName() {
-        $last = $this->getResourcePath()->last();
-        if (strstr($last, '.') === false) {
-            return $last;
-        }
-        $baseExtension = explode('.', $last);
-        return $baseExtension[0];
+        return $this->resource;
     }
 
     /**
@@ -167,6 +148,10 @@ class Request {
      */
     public function setMethod($method) {
         $this->method = $method;
+    }
+
+    public function copy() {
+        return new Request($this->method, $this->resource->copy(), $this->parameters->deepCopy(), $this->headers->copy(), $this->body);
     }
 
 }

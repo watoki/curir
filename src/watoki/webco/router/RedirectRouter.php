@@ -2,6 +2,7 @@
 namespace watoki\webco\router;
  
 use watoki\webco\Controller;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Router;
 use watoki\webco\controller\RedirectController;
@@ -14,7 +15,7 @@ class RedirectRouter extends Router {
 
     private $redirect;
 
-    function __construct($route, $redirect) {
+    function __construct(Path $route, $redirect) {
         $this->route = $route;
         $this->redirect = $redirect;
     }
@@ -24,14 +25,14 @@ class RedirectRouter extends Router {
      * @return Controller
      */
     public function resolve(Request $request) {
-        return $this->createController(RedirectController::$CLASS, '', array('target' => $this->redirect));
+        return $this->createController(RedirectController::$CLASS, new Path(), array('target' => $this->redirect));
     }
 
     /**
-     * @param string $route
+     * @param \watoki\webco\Path $route
      * @return boolean
      */
-    public function matches($route) {
+    public function matches(Path $route) {
         return $route == $this->route;
     }
 }

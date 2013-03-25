@@ -186,11 +186,11 @@ class CompositeRequestTest extends Test {
         $this->given->theFolder_WithModule('subredirect');
         $this->given->theComponent_In_WithTheBody('subredirect\Sub', 'subredirect', '
         function doGet() {
-            return $this->redirect(new \watoki\webco\Url("somewhere/else?param[1]=a&param[2]=b#bar"));
+            return $this->redirect(\watoki\webco\Url::parse("somewhere/else?param[1]=a&param[2]=b#bar"));
         }');
         $this->given->theComponent_In_WithTheBody('subredirect\Sub2', 'subredirect', '
         function doGet() {
-            return $this->redirect(new \watoki\webco\Url("not/here?param=x#foo"));
+            return $this->redirect(\watoki\webco\Url::parse("not/here?param=x#foo"));
         }');
 
         $this->given->theSuperComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
@@ -217,7 +217,7 @@ class CompositeRequestTest extends Test {
         $this->given->theFolder_WithModule('primaryredirect');
         $this->given->theComponent_In_WithTheBody('primaryredirect\Sub', 'primaryredirect', '
         function doGet() {
-            return $this->redirect(new \watoki\webco\Url("somewhere/else?param[1]=a&param[2]=b#bar"));
+            return $this->redirect(\watoki\webco\Url::parse("somewhere/else?param[1]=a&param[2]=b#bar"));
         }');
         $this->given->theComponent_In_WithTheBody('primaryredirect\Sub2', 'primaryredirect', '
         function doGet() {

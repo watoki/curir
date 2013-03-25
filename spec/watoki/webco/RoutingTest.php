@@ -9,6 +9,7 @@ use spec\watoki\webco\steps\Then;
 use spec\watoki\webco\steps\When;
 use watoki\factory\Factory;
 use watoki\webco\Controller;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use \watoki\webco\controller\Module;
@@ -27,7 +28,7 @@ class RoutingTest extends Test {
         $this->given->theClass_In_Extending_WithTheBody('defaultcomp\inner\Inner', 'defaultcomp/inner', '\watoki\webco\controller\Module', '');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
-        $this->given->theRequestResourceIs('inner/');
+        $this->given->theRequestResourceIs('inner');
         $this->when->iTryToSendTheRequestTo('defaultcomp\Module');
 
         $this->then->anExceptionContaining_ShouldBeThrown('defaultcomp\inner\Inner');
@@ -54,7 +55,7 @@ class RoutingTest extends Test {
         $this->given->theFolder('siblings/sister');
 
         $this->given->theModule_In_WithAStaticRouterFrom_To('siblings\brother\Module', 'siblings/brother',
-            'adopted/', 'siblings\sister\Module');
+            'adopted', 'siblings\sister\Module');
         $this->given->theModule_In('siblings\sister\Module', 'siblings/sister');
         $this->given->theComponent_In_Returning('siblings\sister\Index', 'siblings/sister', '"hello world"');
 
@@ -150,7 +151,7 @@ class RoutingTest extends Test {
         $this->given->theClass_In_Extending_WithTheBody('reroute\Module', 'reroute', '\watoki\webco\controller\Module', '
             protected function createRouters() {
                 return new \watoki\collections\Liste(array(
-                    new \watoki\webco\router\RedirectRouter("notHere", "somewhere/else.html")
+                    new \watoki\webco\router\RedirectRouter(\watoki\webco\Path::parse("notHere"), "somewhere/else.html")
                 ));
             }
         ');
@@ -183,7 +184,7 @@ class RoutingTest_Given extends steps\Given {
     public function theModule_In_WithTheRouters($className, $folder, $routers) {
         $routerDefs = '';
         foreach ($routers as $route => $target) {
-            $routerDefs .= 'new \watoki\webco\router\StaticRouter("' . $route . '", \'' . $target . '\'),';
+            $routerDefs .= 'new \watoki\webco\router\StaticRouter(\watoki\webco\Path::parse("' . $route . '"), \'' . $target . '\'),';
         }
 
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\Module', '
@@ -206,7 +207,7 @@ class RoutingTest_When extends When {
     public function iAsk_ToFind($parentClass, $childClass) {
         $factory = new Factory();
         /** @var $parent Module */
-        $parent = $factory->getInstance($parentClass, array('route' => '/base/'));
+        $parent = $factory->getInstance($parentClass, array('route' => Path::parse('/base/')));
         $this->found = $parent->findController($childClass);
     }
 }
@@ -225,6 +226,6 @@ class RoutingTest_Then extends Then {
     }
 
     public function theRouteOfTheFoundControllerShouldBe($route) {
-        $this->test->assertEquals($route, $this->test->when->found->getRoute());
+        $this->test->assertEquals($route, $this->test->when->found->getRoute()->toString());
     }
 }

@@ -3,6 +3,7 @@ namespace watoki\webco\router;
  
 use watoki\collections\Liste;
 use watoki\webco\Controller;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Router;
 
@@ -11,45 +12,45 @@ class FileRouter extends Router {
     public static $CLASS = __CLASS__;
 
     /**
-     * @var null|Liste
+     * @var null|Path
      */
     private $nextPath;
 
     /**
-     * @param string $route
+     * @param Path $route
      * @return boolean
      */
-    public function matches($route) {
-        return $this->resolveClass(new Request('', $route)) != null;
+    public function matches(Path $route) {
+        return $this->resolveClass($route) != null;
     }
 
     public function resolve(Request $request) {
-        return $this->createController($this->resolveClass($request), $this->nextPath->join('/'));
+        return $this->createController($this->resolveClass($request->getResource()), $this->nextPath);
     }
 
-    private function resolveClass(Request $request) {
+    private function resolveClass(Path $route) {
         $classReflection = new \ReflectionClass($this->parent);
         $classNamespace = $classReflection->getNamespaceName();
 
         $i = 0;
         $currentNamespace = $classNamespace;
-        foreach ($request->getResourcePath()->slice(0, -1) as $module) {
+        foreach ($route as $module) {
             $i++;
 
-            $controllerClass = $currentNamespace . '\\' . $module . '\\' . $this->parent->makeControllerName($module);
-            $currentNamespace .= '\\' . $module;
-
-            if (class_exists($controllerClass)) {
-                $this->nextPath = $request->getResourcePath()->splice(0, $i);
-                $this->nextPath->append('');
-                return $controllerClass;
+            // TODO Somehow we need to find out if a module of component is targeted
+            $moduleClass = $currentNamespace . '\\' . $module . '\\' . $this->parent->makeControllerName($module);
+            if (class_exists($moduleClass)) {
+                $this->nextPath = $route->splice(0, $i);
+                return $moduleClass;
             }
-        }
 
-        $controllerClass = $currentNamespace . '\\' . $this->parent->makeControllerName($request->getResourceName());
-        if (class_exists($controllerClass)) {
-            $this->nextPath = $request->getResourcePath();
-            return $controllerClass;
+            $componentClass = $currentNamespace . '\\' . $this->parent->makeControllerName($module);
+            if (class_exists($componentClass)) {
+                $this->nextPath = $route->splice(0, $i);
+                return $componentClass;
+            }
+
+            $currentNamespace .= '\\' . $module;
         }
 
         return null;

@@ -155,7 +155,7 @@ class CompositionTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
         function doGet() {
             $sub = new \watoki\webco\controller\SubComponent($this, Not::$CLASS);
-            $sub->getRequest()->setResourcePath(\watoki\collections\Liste::split("/", $this->getBaseRoute() . "inner/sub.html"));
+            $sub->getRequest()->setResource(\watoki\webco\Path::parse($this->getBaseRoute()->toString() . "/inner/sub.html"));
             return array(
                 "sub" => $sub
             );

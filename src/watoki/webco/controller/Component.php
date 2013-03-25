@@ -6,7 +6,6 @@ use watoki\tempan\HtmlParser;
 use watoki\webco\Controller;
 use watoki\webco\Request;
 use watoki\webco\Response;
-use watoki\webco\controller\sub\HtmlSubComponent;
 
 abstract class Component extends Controller {
 
@@ -122,8 +121,11 @@ abstract class Component extends Controller {
         return strtolower($classReflection->getShortName()) . '.html';
     }
 
+    /**
+     * @return \watoki\webco\Path
+     */
     public function getBaseRoute() {
-        return substr($this->route, 0, strrpos($this->route, '/') + 1);
+        return $this->getRoute()->slice(0, -1);
     }
 
 }
