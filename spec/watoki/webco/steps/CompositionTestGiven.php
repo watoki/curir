@@ -33,7 +33,7 @@ class CompositionTestGiven extends Given {
     }
 
     public function theSuperComponent_In_WithTheBody($className, $folder, $body) {
-        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\controller\SuperComponent', '
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\webco\composition\SuperComponent', '
             protected function doRender($model, $template) {
                 foreach ($this->flattenModel($model) as $key => $value) {
                     $template = str_replace("%" . $key . "%", $value, $template);

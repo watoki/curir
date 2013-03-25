@@ -1,5 +1,5 @@
 <?php
-namespace watoki\webco\controller;
+namespace watoki\webco\composition;
 
 use watoki\collections\Liste;
 use watoki\collections\Map;
@@ -8,8 +8,10 @@ use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Url;
+use watoki\webco\composition\SuperComponent;
+use watoki\webco\controller\Component;
 
-class SubComponentPostProcessor {
+class PostProcessor {
 
     public static $CLASS = __CLASS__;
 

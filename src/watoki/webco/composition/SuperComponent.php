@@ -1,5 +1,5 @@
 <?php
-namespace watoki\webco\controller;
+namespace watoki\webco\composition;
 
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
@@ -7,6 +7,8 @@ use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 use watoki\webco\Url;
+use watoki\webco\composition\SubComponent;
+use watoki\webco\controller\Component;
 
 abstract class SuperComponent extends Component {
 

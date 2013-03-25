@@ -1,5 +1,5 @@
 <?php
-namespace watoki\webco\controller;
+namespace watoki\webco\composition;
 
 use watoki\collections\Liste;
 use watoki\collections\Map;
@@ -7,6 +7,9 @@ use watoki\webco\Controller;
 use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
+use watoki\webco\controller\Component;
+use watoki\webco\composition\PostProcessor;
+use watoki\webco\composition\SuperComponent;
 
 class SubComponent {
 
@@ -74,7 +77,7 @@ public $response;
     private function postProcess(Response $response, $name, Map $superParameters) {
         /** @var $component Component */
         $component = $this->super->getRoot()->resolve($this->request->getResource());
-        $postProcessor = new SubComponentPostProcessor($name, $superParameters, $component, $this->super);
+        $postProcessor = new PostProcessor($name, $superParameters, $component, $this->super);
         $this->headElements = $postProcessor->getHeadElements();
         return $postProcessor->postProcess($response);
     }
