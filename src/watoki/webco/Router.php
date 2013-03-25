@@ -44,7 +44,7 @@ abstract class Router {
      */
     protected function createController($controllerClass, Path $nextRoute, $additionalConstructorArguments = array()) {
         $nextRoute = $nextRoute->copy();
-        $nextRoute->insertAll($this->parent->getRoute(), 0);
+        $nextRoute->getNodes()->insertAll($this->parent->getRoute()->getNodes(), 0);
 
         $args = array_merge(array(
             'route' =>  $nextRoute,

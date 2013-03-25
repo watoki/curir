@@ -4,6 +4,7 @@ namespace watoki\webco\controller;
 use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Controller;
+use watoki\webco\Path;
 use watoki\webco\Request;
 use watoki\webco\Response;
 
@@ -125,7 +126,7 @@ abstract class Component extends Controller {
      * @return \watoki\webco\Path
      */
     public function getBaseRoute() {
-        return $this->getRoute()->slice(0, -1);
+        return new Path($this->getRoute()->getNodes()->slice(0, -1));
     }
 
 }

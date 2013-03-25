@@ -67,9 +67,8 @@ abstract class Module extends Controller {
     protected function resolveController(Request $request) {
         $resource = $request->getResource();
 
-        for ($i = $resource->count(); $i > 0; $i--) {
-            /** @var $route Path */
-            $route = $resource->slice(0, $i);
+        for ($i = $resource->getNodes()->count(); $i > 0; $i--) {
+            $route = new Path($resource->getNodes()->slice(0, $i));
             foreach ($this->getRouters() as $router) {
                 if ($router->matches($route)) {
                     try {
@@ -147,7 +146,7 @@ abstract class Module extends Controller {
     private function findInFolders($controllerClass) {
         $commonNamespace = $this->findCommonNamespace($controllerClass, get_class($this));
         if ($commonNamespace) {
-            $path = Path::split('\\', substr($controllerClass, strlen($commonNamespace) + 1));
+            $path = new Path(Liste::split('\\', substr($controllerClass, strlen($commonNamespace) + 1)));
             $request = new Request('', $path);
             try {
                 return $this->resolveController($request);
@@ -184,8 +183,8 @@ abstract class Module extends Controller {
 
     private function cutAbsoluteBase(Path $path) {
         $route = $this->getRoute();
-        if ($path->slice(0, $route->count()) == $route) {
-            $path->splice(0, $route->count());
+        if ($path->getNodes()->slice(0, $route->getNodes()->count()) == $route->getNodes()) {
+            $path->getNodes()->splice(0, $route->getNodes()->count());
         }
    }
 

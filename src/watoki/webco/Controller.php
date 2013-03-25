@@ -79,7 +79,7 @@ abstract class Controller {
 
     protected function redirect(Url $url) {
         if (!$url->getPath()->isAbsolute()) {
-            $url->getPath()->insertAll($this->getBaseRoute(), 0);
+            $url->getPath()->getNodes()->insertAll($this->getBaseRoute()->getNodes(), 0);
         }
         $this->getResponse()->getHeaders()->set(Response::HEADER_LOCATION, $url->toString());
         return null;

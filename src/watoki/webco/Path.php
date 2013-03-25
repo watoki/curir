@@ -3,17 +3,28 @@ namespace watoki\webco;
  
 use watoki\collections\Liste;
 
-class Path extends Liste {
+class Path {
+
+    const SEPARATOR = '/';
+
+    /**
+     * @var Liste
+     */
+    private $nodes;
+
+    function __construct(Liste $nodes = null) {
+        $this->nodes = $nodes ?: new Liste();
+    }
 
     public static function parse($string) {
-        if (substr($string, -1) == '/') {
+        if (substr($string, -1) == self::SEPARATOR) {
             $string = substr($string, 0, -1);
         }
-        return new Path(explode('/', $string));
+        return new Path(Liste::split(self::SEPARATOR, $string));
     }
 
     public function getLeaf() {
-        return $this->last();
+        return $this->nodes->last();
     }
 
     public function getLeafName() {
@@ -31,21 +42,28 @@ class Path extends Liste {
     }
 
     public function toString() {
-        return $this->join('/');
+        return $this->nodes->join(self::SEPARATOR);
     }
 
     /**
      * @return boolean
      */
     public function isAbsolute() {
-        return $this->first() == '';
+        return $this->nodes->first() == '';
     }
 
     /**
      * @return Path
      */
     public function copy() {
-        return parent::copy();
+        return new Path($this->nodes->copy());
+    }
+
+    /**
+     * @return \watoki\collections\Liste
+     */
+    public function getNodes() {
+        return $this->nodes;
     }
 
 }

@@ -34,19 +34,19 @@ class FileRouter extends Router {
 
         $i = 0;
         $currentNamespace = $classNamespace;
-        foreach ($route as $module) {
+        foreach ($route->getNodes() as $module) {
             $i++;
 
             // TODO Somehow we need to find out if a module of component is targeted
             $moduleClass = $currentNamespace . '\\' . $module . '\\' . $this->parent->makeControllerName($module);
             if (class_exists($moduleClass)) {
-                $this->nextPath = $route->splice(0, $i);
+                $this->nextPath = new Path($route->getNodes()->splice(0, $i));
                 return $moduleClass;
             }
 
             $componentClass = $currentNamespace . '\\' . $this->parent->makeControllerName($module);
             if (class_exists($componentClass)) {
-                $this->nextPath = $route->splice(0, $i);
+                $this->nextPath = new Path($route->getNodes()->splice(0, $i));
                 return $componentClass;
             }
 

@@ -156,7 +156,7 @@ class SubComponentPostProcessor {
         $url = Url::parse($value);
         if (!$url->getPath()->isAbsolute()) {
             $absolute = $route->copy();
-            $absolute->append($value);
+            $absolute->getNodes()->append($value);
             $element->setAttribute($attributeName, $absolute->toString());
         }
     }
@@ -204,11 +204,12 @@ class SubComponentPostProcessor {
      * @return bool
      */
     private function isUrlEqualsRoute(Url $url, Component $component) {
-        /** @var $urlPath Path */
-        $urlPath = $url->getPath()->slice(0, -1);
-        $urlPath->append($url->getPath()->getLeafName());
+        $urlPath = new Path($url->getPath()->getNodes()->slice(0, -1));
+        $urlPath->getNodes()->append($url->getPath()->getLeafName());
         $urlRoute = strtolower($urlPath->toString());
+
         $subRoute = strtolower($component->getRoute()->toString());
+
         return $urlRoute != $subRoute;
     }
 

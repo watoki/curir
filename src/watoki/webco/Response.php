@@ -16,7 +16,7 @@ class Response {
     const STATUS_NOT_FOUND = '404 Not Found';
     const STATUS_METHOD_NOT_ALLOWED = '405 Method Not Allowed';
     const STATUS_UNSUPPORTED_MEDIA_TYPE = '415 Unsupported Media Type';
-    const STAUTS_NOT_IMPLEMENTED = '501 Not Implemented';
+    const STATUS_NOT_IMPLEMENTED = '501 Not Implemented';
 
     public static $CLASS = __CLASS__;
 

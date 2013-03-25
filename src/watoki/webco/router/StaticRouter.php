@@ -28,7 +28,7 @@ class StaticRouter extends Router {
     }
 
     public function resolve(Request $request) {
-        $request->getResource()->splice(0, $this->route->count());
+        $request->getResource()->getNodes()->splice(0, $this->route->getNodes()->count());
         return $this->createController($this->controllerClass, $this->route);
     }
 
