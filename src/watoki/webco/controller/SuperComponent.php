@@ -208,7 +208,7 @@ abstract class SuperComponent extends Component {
 
         $subTarget = Url::parse(urldecode($subResponse->getHeaders()->get(Response::HEADER_LOCATION)));
         $subParams = $subTarget->getParameters()->copy();
-        $subParams->set(self::PARAMETER_TARGET, $subTarget->getResource()->toString());
+        $subParams->set(self::PARAMETER_TARGET, $subTarget->getPath()->toString());
         $target->setFragment($subTarget->getFragment());
         $requestParams->get(self::PARAMETER_SUB_REQUESTS)->set($subName, $subParams);
 

@@ -7,10 +7,22 @@ class Url {
 
     public static $CLASS = __CLASS__;
 
+    const hostPrefix = '//';
+
+    const SEPARATOR = '/';
+
+    const PORT_SEPARATOR = ':';
+
+    const SCHEME_SEPARATOR = ':';
+
+    const QUERY_STRING_SEPARATOR = '?';
+
+    const FRAGMENT_SEPARATOR = '#';
+
     /**
      * @var Path
      */
-    private $resource;
+    private $path;
 
     /**
      * @var \watoki\collections\Map
@@ -27,117 +39,30 @@ class Url {
      */
     private $scheme;
 
-    function __construct(Path $resource, Map $parameters = null, $fragment = null, $scheme = null) {
-        $this->resource = $resource;
+    /**
+     * @var null|string
+     */
+    private $host;
+
+    /**
+     * @var null|int
+     */
+    private $port;
+
+    function __construct(Path $resource, Map $parameters = null, $fragment = null, $host = null, $port = null, $scheme = null) {
+        $this->path = $resource;
         $this->parameters = $parameters ?: new Map();
         $this->fragment = $fragment;
         $this->scheme = $scheme;
-    }
-
-    static public function parse($string) {
-        $fragment = null;
-        $fragmentPos = strpos($string, '#');
-        if ($fragmentPos !== false) {
-            $fragment = substr($string, $fragmentPos + 1);
-            $string = substr($string, 0, $fragmentPos);
-        }
-
-        $scheme = null;
-        $schemeSepPos = strpos($string, ':');
-        if ($schemeSepPos !== false) {
-            $scheme = substr($string, 0, $schemeSepPos);
-            $string = substr($string, $schemeSepPos + 1);
-        }
-
-        $parameters = new Map();
-        $queryPos = strpos($string, '?');
-        if ($queryPos !== false) {
-            $query = substr($string, $queryPos + 1);
-            $string = substr($string, 0, $queryPos);
-
-            if ($query) {
-                foreach (explode('&', $query) as $pair) {
-                    if (strstr($pair, '=') !== false) {
-                        list($key, $value) = explode('=', $pair);
-                    } else {
-                        $key = $pair;
-                        $value = null;
-                    }
-                    if (preg_match('#\[.+\]#', $key)) {
-                        $paramsMap = $parameters;
-                        $mapKeys = explode('[', $key);
-                        foreach ($mapKeys as $mapKey) {
-                            if ($mapKey == end($mapKeys)) {
-                                $paramsMap->set(trim($mapKey, ']'), $value);
-                            } else {
-                                $mapKey = trim($mapKey, ']');
-                                if (!$paramsMap->has($mapKey)) {
-                                    $paramsMap->set($mapKey, new Map());
-                                }
-                                $paramsMap = $paramsMap->get($mapKey);
-                            }
-                        }
-                    } else {
-                        $parameters->set($key, $value);
-                    }
-                }
-            }
-        }
-
-        return new Url(Path::parse($string), $parameters, $fragment, $scheme);
-    }
-
-    public function isRelative() {
-        return !$this->resource->isAbsolute() && $this->isSameHost();
-    }
-
-    public function toString() {
-        $queries = array();
-        foreach ($this->flattenParams($this->parameters) as $key => $value) {
-            $queries[] = urlencode($key) . '=' . urlencode($value);
-        }
-
-        return $this->resource->toString()
-            . ($queries ? '?' . implode('&', $queries) : '')
-            . ($this->fragment ? '#' . $this->fragment : '');
-    }
-
-    public function isSameHost() {
-        return $this->resource->toString() != '//';
+        $this->host = $host;
+        $this->port = $port;
     }
 
     /**
      * @return Path
      */
-    public function getResource() {
-        return $this->resource;
-    }
-
-    // TODO This should all be done by Path
-    public function getResourceDir() {
-        return dirname($this->resource->toString()) . '/';
-    }
-
-    public function getResourceBase() {
-        return basename($this->resource->toString());
-    }
-
-    public function getResourceBaseName() {
-        $base = $this->getResourceBase();
-        $dotPos = strrpos($base, '.');
-        if ($dotPos === false || $dotPos == 0) {
-            return $base;
-        }
-        return substr($base, 0, $dotPos);
-    }
-
-    public function getResourceBaseExtension() {
-        $base = $this->getResourceBase();
-        $dotPos = strrpos($base, '.');
-        if ($dotPos === false || strlen($base) == $dotPos + 1) {
-            return $base;
-        }
-        return substr($base, $dotPos + 1);
+    public function getPath() {
+        return $this->path;
     }
 
     /**
@@ -156,6 +81,127 @@ class Url {
 
     public function setFragment($fragment) {
         $this->fragment = $fragment;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getHost() {
+        return $this->host;
+    }
+
+    /**
+     * @param null|string $host
+     */
+    public function setHost($host) {
+        $this->host = $host;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getPort() {
+        return $this->port;
+    }
+
+    /**
+     * @param int|null $port
+     */
+    public function setPort($port) {
+        $this->port = $port;
+    }
+
+    static public function parse($string) {
+        $fragment = null;
+        $fragmentPos = strpos($string, self::FRAGMENT_SEPARATOR);
+        if ($fragmentPos !== false) {
+            $fragment = substr($string, $fragmentPos + 1);
+            $string = substr($string, 0, $fragmentPos);
+        }
+
+        $scheme = null;
+        $schemeSepPos = strpos($string, self::SCHEME_SEPARATOR);
+        if ($schemeSepPos !== false) {
+            $scheme = substr($string, 0, $schemeSepPos);
+            $string = substr($string, $schemeSepPos + 1);
+
+            if (!in_array(strtolower($scheme), array('http', 'https', 'ftp', 'ftps'))) {
+                throw new \Exception("Can't parse given scheme [$scheme]");
+            }
+        }
+
+        $host = null;
+        $port = null;
+        if (substr($string, 0, 2) == self::hostPrefix) {
+            $string = substr($string, 2);
+            $hostPos = strpos($string, self::SEPARATOR);
+            $host = substr($string, 0, $hostPos);
+            $string = substr($string, $hostPos);
+
+            $portPos = strpos($host, self::PORT_SEPARATOR);
+            if ($portPos !== false) {
+                $port = intval(substr($host, $portPos + 1));
+                $host = substr($host, 0, $portPos);
+            }
+        }
+
+        $parameters = new Map();
+        $queryPos = strpos($string, self::QUERY_STRING_SEPARATOR);
+        if ($queryPos !== false) {
+            $query = substr($string, $queryPos + 1);
+            $string = substr($string, 0, $queryPos);
+
+            if ($query) {
+                $parameters = self::parseParameters($query);
+            }
+        }
+
+        return new Url(Path::parse($string), $parameters, $fragment, $host, $port, $scheme);
+    }
+
+    /**
+     * @param $query
+     * @return Map
+     */
+    private static function parseParameters($query) {
+        $parameters = new Map();
+        foreach (explode('&', $query) as $pair) {
+            if (strstr($pair, '=') !== false) {
+                list($key, $value) = explode('=', $pair);
+            } else {
+                $key = $pair;
+                $value = null;
+            }
+            if (preg_match('#\[.+\]#', $key)) {
+                $paramsMap = $parameters;
+                $mapKeys = explode('[', $key);
+                foreach ($mapKeys as $mapKey) {
+                    if ($mapKey == end($mapKeys)) {
+                        $paramsMap->set(trim($mapKey, ']'), $value);
+                    } else {
+                        $mapKey = trim($mapKey, ']');
+                        if (!$paramsMap->has($mapKey)) {
+                            $paramsMap->set($mapKey, new Map());
+                        }
+                        $paramsMap = $paramsMap->get($mapKey);
+                    }
+                }
+            } else {
+                $parameters->set($key, $value);
+            }
+        }
+        return $parameters;
+    }
+
+    public function toString() {
+        $queries = array();
+        foreach ($this->flattenParams($this->parameters) as $key => $value) {
+            $queries[] = urlencode($key) . '=' . urlencode($value);
+        }
+
+        return $this->path->toString()
+                . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
+                . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
     }
 
     private function flattenParams(Map $parameters, $i = 0) {

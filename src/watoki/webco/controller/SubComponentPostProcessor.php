@@ -154,25 +154,23 @@ class SubComponentPostProcessor {
         $route = $this->component->getBaseRoute();
         $value = $element->getAttribute($attributeName);
         $url = Url::parse($value);
-        if ($url->isRelative()) {
+        if (!$url->getPath()->isAbsolute()) {
             $absolute = $route->copy();
             $absolute->append($value);
             $element->setAttribute($attributeName, $absolute->toString());
         }
     }
 
-    // TODO (3) This whole strtolower logic should be somewhere central
     private function replaceLinkUrl(\DOMElement $element, $attributeName) {
         if (!$element->hasAttribute($attributeName)) {
             return;
         }
 
-        $subRoute = strtolower($this->component->getRoute()->toString());
         $route = $this->super->getRoute();
         $attributeValue = urldecode(html_entity_decode($element->getAttribute($attributeName)));
         $url = Url::parse($attributeValue);
 
-        if ($url->isSameHost()) {
+        if (!$url->getHost()) {
 
             $state = new Map();
             if ($this->getActionName($url, $element) != 'get'
@@ -182,9 +180,9 @@ class SubComponentPostProcessor {
             $state->merge($this->parameters);
 
             $subParams = new Map();
-            if (strtolower($url->getResourceDir() . $url->getResourceBaseName()) != $subRoute
+            if ($this->isUrlEqualsRoute($url, $this->component)
                     || $state->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
-                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getResource()->toString());
+                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getPath()->toString());
             }
             $subParams->merge($url->getParameters());
 
@@ -198,6 +196,20 @@ class SubComponentPostProcessor {
             $replace = new Url($route, $state, $url->getFragment());
             $element->setAttribute($attributeName, $replace->toString());
         }
+    }
+
+    /**
+     * @param \watoki\webco\Url $url
+     * @param Component $component
+     * @return bool
+     */
+    private function isUrlEqualsRoute(Url $url, Component $component) {
+        /** @var $urlPath Path */
+        $urlPath = $url->getPath()->slice(0, -1);
+        $urlPath->append($url->getPath()->getLeafName());
+        $urlRoute = strtolower($urlPath->toString());
+        $subRoute = strtolower($component->getRoute()->toString());
+        return $urlRoute != $subRoute;
     }
 
     private function replaceName(\DOMElement $child, $attributeName) {
