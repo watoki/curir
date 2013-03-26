@@ -5,19 +5,13 @@ use watoki\collections\Map;
 use watoki\tempan\HtmlParser;
 use watoki\webco\Controller;
 use watoki\webco\Path;
+use watoki\webco\Renderer;
 use watoki\webco\Request;
 use watoki\webco\Response;
 
 abstract class Component extends Controller {
 
     public static $CLASS = __CLASS__;
-
-    /**
-     * @param array|object $model
-     * @param string $template
-     * @return string The rendered template
-     */
-    abstract protected function doRender($model, $template);
 
     /**
      * @param Request $request
@@ -106,11 +100,27 @@ abstract class Component extends Controller {
     protected function render($model) {
         $templateFile = $this->getTemplateFile();
         if (!file_exists($templateFile)) {
-            return json_encode($model);
+            return $model;
         }
 
         $template = file_get_contents($templateFile);
-        return $this->doRender($model, $template);
+        return $this->doRender($template, $model);
+    }
+
+    /**
+     * @param string $template
+     * @param Map|object $model
+     * @return string The rendered template
+     */
+    protected function doRender($template, $model) {
+        return $this->createRenderer()->render($template, $model);
+    }
+
+    /**
+     * @return Renderer
+     */
+    protected function createRenderer() {
+        return $this->factory->getInstance(Renderer::CLASS_NAME);
     }
 
     protected function getTemplateFile() {

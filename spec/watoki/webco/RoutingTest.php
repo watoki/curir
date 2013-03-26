@@ -46,7 +46,7 @@ class RoutingTest extends Test {
         $this->given->theRequestResourceIs('child/index');
         $this->when->iSendTheRequestTo('childmodule\Module');
 
-        $this->then->theResponseBodyShouldBe('"hi there"');
+        $this->then->theResponseBodyShouldBe('hi there');
     }
 
     function testRouteToSister() {
@@ -63,7 +63,7 @@ class RoutingTest extends Test {
         $this->given->theRequestResourceIs('adopted/index');
         $this->when->iSendTheRequestTo('siblings\brother\Module');
 
-        $this->then->theResponseBodyShouldBe('"hello world"');
+        $this->then->theResponseBodyShouldBe('hello world');
     }
 
     function testSpecificOverridesGeneral() {
@@ -82,7 +82,7 @@ class RoutingTest extends Test {
         $this->given->theRequestResourceIs('adopted/yeah/index');
         $this->when->iSendTheRequestTo('override\brother\Module');
 
-        $this->then->theResponseBodyShouldBe('"hello world"');
+        $this->then->theResponseBodyShouldBe('hello world');
     }
 
     function testFindChild() {

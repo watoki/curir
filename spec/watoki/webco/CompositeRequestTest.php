@@ -200,6 +200,7 @@ class CompositeRequestTest extends Test {
                 "sub2" => $this->subComponent(Sub2::$CLASS),
             );
         }');
+        $this->given->theFile_In_WithContent('super.html', 'subredirect', '<html><body>%sub1% %sub2%</body></html>');
 
         $this->given->theRequestParameter_WithValue('param', 'Super');
         $this->given->theRequestParameterHasTheState(new Map(array(

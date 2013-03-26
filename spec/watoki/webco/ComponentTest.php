@@ -12,57 +12,57 @@ class ComponentTest extends Test {
     public function testGetMethod() {
         $this->given->theFolder('gettest');
         $this->given->theRequestMethodIs(Request::METHOD_GET);
-        $this->given->theComponent_In_WithTheMethod_ThatReturns('gettest\Component', 'gettest', 'doGet', '{"test":"found"}');
+        $this->given->theComponent_In_WithTheMethod_ThatReturns('gettest\Component', 'gettest', 'doGet', '"found"');
 
         $this->when->iSendTheRequestTo('gettest\Component');
 
-        $this->then->theResponseBodyShouldBe('{"test":"found"}');
+        $this->then->theResponseBodyShouldBe('found');
     }
 
     public function testPostMethod() {
         $this->given->theFolder('posttest');
         $this->given->theRequestMethodIs(Request::METHOD_POST);
-        $this->given->theComponent_In_WithTheMethod_ThatReturns('posttest\Component', 'posttest', 'doPost', '{"test":"post"}');
+        $this->given->theComponent_In_WithTheMethod_ThatReturns('posttest\Component', 'posttest', 'doPost', '"You have got mail."');
 
         $this->when->iSendTheRequestTo('posttest\Component');
 
-        $this->then->theResponseBodyShouldBe('{"test":"post"}');
+        $this->then->theResponseBodyShouldBe('You have got mail.');
     }
 
     public function testActionParameter() {
         $this->given->theFolder('actiontest');
         $this->given->theRequestParameter_WithValue('action', 'myAction');
         $this->given->theComponent_In_WithTheMethod_ThatReturns('actiontest\Component', 'actiontest',
-            'doMyAction', '{"test":"action"}');
+            'doMyAction', '"And action!"');
 
         $this->when->iSendTheRequestTo('actiontest\Component');
 
-        $this->then->theResponseBodyShouldBe('{"test":"action"}');
+        $this->then->theResponseBodyShouldBe('And action!');
     }
 
     public function testArguments() {
         $this->given->theFolder('parametertest');
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->given->theComponent_In_WithTheMethod_WithParameters_ThatReturns('parametertest\Component', 'parametertest',
-            'doGet', '$arg1, $arg2', '{ "$arg1" : "$arg2" }');
+            'doGet', '$arg1, $arg2', '"$arg1 $arg2"');
         $this->given->theRequestParameter_WithValue('arg1', 'hello');
         $this->given->theRequestParameter_WithValue('arg2', 'world');
 
         $this->when->iSendTheRequestTo('parametertest\Component');
 
-        $this->then->theResponseBodyShouldBe('{"hello":"world"}');
+        $this->then->theResponseBodyShouldBe('hello world');
     }
 
     public function testDefaultArguments() {
         $this->given->theFolder('defarg');
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->given->theComponent_In_WithTheMethod_WithParameters_ThatReturns('defarg\Component', 'defarg',
-            'doGet', '$arg1, $arg2 = "default"', '{ "$arg1" : "$arg2" }');
+            'doGet', '$arg1, $arg2 = "default"', '"$arg1 $arg2"');
         $this->given->theRequestParameter_WithValue('arg1', 'hello');
 
         $this->when->iTryToSendTheRequestTo('defarg\Component');
 
-        $this->then->theResponseBodyShouldBe('{"hello":"default"}');
+        $this->then->theResponseBodyShouldBe('hello default');
     }
 
     public function testMissingParameter() {
@@ -103,7 +103,7 @@ class ComponentTest_Given extends Given {
                 return json_decode(\"$returnJson\", true);
             }
 
-            protected function doRender(\$model, \$template) {
+            protected function doRender(\$template, \$model) {
                 foreach (\$model as \$key => \$value) {
                     \$template = str_replace('%' . \$key . '%', \$value, \$template);
                 }
