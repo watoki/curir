@@ -1,8 +1,8 @@
 {
-    "name": "watoki/webco",
-    "description": "Composable web components",
-    "keywords": ["controller", "watoki"],
-    "homepage": "http://github.com/watoki/webco",
+    "name": "watoki/curir",
+    "description": "Modular web delivery system for PHP applications.",
+    "keywords": ["MVC", "modular", "controller", "watoki"],
+    "homepage": "http://github.com/watoki/curir",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -19,8 +19,8 @@
     },
     "autoload": {
         "psr-0": {
-            "watoki\\webco": "src/",
-            "spec\\watoki\\webco": ""
+            "watoki\\curir": "src/",
+            "spec\\watoki\\curir": ""
         }
     },
     "minimum-stability": "dev"
