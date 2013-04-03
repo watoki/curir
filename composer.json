@@ -1,6 +1,6 @@
 {
     "name": "watoki/curir",
-    "description": "Modular web delivery system for PHP applications.",
+    "description": "Modular web delivery system for PHP applications",
     "keywords": ["MVC", "modular", "controller", "watoki"],
     "homepage": "http://github.com/watoki/curir",
     "type": "library",
