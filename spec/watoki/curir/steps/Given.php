@@ -106,4 +106,40 @@ class Given extends Step {
         $this->moduleRoute = Path::parse($route);
     }
 
+    public function aTestRenderer() {
+        if (class_exists('TestRenderer')) {
+            return;
+        }
+
+        eval('class TestRenderer implements \watoki\curir\Renderer {
+            public function __construct($template) {
+                $this->template = $template;
+            }
+
+            public function render($model) {
+                if (!$this->template) {
+                    return $model;
+                }
+
+                $template = $this->template;
+                foreach ($this->flattenModel($model) as $key => $value) {
+                    $template = str_replace("%" . $key . "%", $value, $template);
+                }
+                return $template;
+            }
+
+            private function flattenModel($model, $prefix = "") {
+                $flatten = array();
+                foreach ($model as $key => $value) {
+                    if (is_array($value)) {
+                        $flatten = array_merge($flatten, $this->flattenModel($value, $prefix . $key . "/"));
+                    } else if (is_string($value)) {
+                        $flatten[$prefix . $key] = $value;
+                    }
+                }
+                return $flatten;
+            }
+        }');
+    }
+
 }

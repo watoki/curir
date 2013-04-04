@@ -13,8 +13,9 @@ class CompositionTest extends Test {
     protected function setUp() {
         parent::setUp();
 
+        $this->given->aTestRenderer();
         $this->given->theRequestMethodIs(Request::METHOD_GET);
-        $this->given->theRequestResourceIs('super.html');
+        $this->given->theRequestResourceIs('super.test');
     }
 
     function testIncludeSimple() {
@@ -26,7 +27,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'snippet', 'Hello %sub%');
+        $this->given->theFile_In_WithContent('super.test', 'snippet', 'Hello %sub%');
 
         $this->when->iSendTheRequestTo('snippet\Module');
 
@@ -46,7 +47,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'document', '<html><head></head><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'document', '<html><head></head><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('document\Module');
 
@@ -68,7 +69,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'assets', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'assets', '<html><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('assets\Module');
 
@@ -101,7 +102,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(inner\Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'relative', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'relative', '<html><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('relative\Module');
 
@@ -123,7 +124,7 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('deeplink\Sub', 'deeplink',
             '<html>
                 <body>
-                    <a href="some/link.html?param1[map][map2]=val1&amp;param2=val2">%msg%</a>
+                    <a href="some/link.test?param1[map][map2]=val1&amp;param2=val2">%msg%</a>
                 </body>
             </html>');
         $this->given->theSuperComponent_In_WithTheBody('deeplink\Super', 'deeplink', '
@@ -132,14 +133,14 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'deeplink', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'deeplink', '<html><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('deeplink\Module');
 
         $this->then->theHtmlResponseBodyShouldBe(
             '<html>
                 <body>
-                    Hello <a href="/base/super.html?.[sub][~]=/base/some/link.html&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
+                    Hello <a href="/base/super.test?.[sub][~]=/base/some/link.test&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
                 </body>
             </html>');
     }
@@ -155,19 +156,19 @@ class CompositionTest extends Test {
         $this->given->theSuperComponent_In_WithTheBody('subtarget\Super', 'subtarget', '
         function doGet() {
             $sub = $this->subComponent(Not::$CLASS);
-            $sub->getRequest()->setResource(\watoki\curir\Path::parse($this->getBaseRoute()->toString() . "/inner/sub.html"));
+            $sub->getRequest()->setResource(\watoki\curir\Path::parse($this->getBaseRoute()->toString() . "/inner/sub.test"));
             return array(
                 "sub" => $sub
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'subtarget', '<html><body>Hello <a href="super.html">%sub%</a></body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'subtarget', '<html><body>Hello <a href="super.test">%sub%</a></body></html>');
 
         $this->when->iSendTheRequestTo('subtarget\Module');
 
         $this->then->theHtmlResponseBodyShouldBe(
             '<html>
                 <body>
-                    Hello <a href="super.html">World</a>
+                    Hello <a href="super.test">World</a>
                 </body>
             </html>');
     }
@@ -177,7 +178,7 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('formfields\Sub', 'formfields',
             '<html>
                 <body>
-                    <form action="sub.html" method="post">
+                    <form action="sub.test" method="post">
                         <input name="field[1]">
                         <textarea name="field[2]"></textarea>
                         <select name="field[3]"></select>
@@ -190,7 +191,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'formfields', '<html><body>Hello  %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'formfields', '<html><body>Hello  %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('formfields\Module');
 
@@ -198,7 +199,7 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     Hello
-                    <form action="/base/super.html?!=sub&.[sub][~]=/base/sub.html" method="post">
+                    <form action="/base/super.test?!=sub&.[sub][~]=/base/sub.test" method="post">
                         <input name=".[sub][field][1]">
                         <textarea name=".[sub][field][2]"></textarea>
                         <select name=".[sub][field][3]"></select>
@@ -212,8 +213,8 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('primaryactioncomp\Sub', 'primaryactioncomp',
             '<html>
                 <body>
-                    <form action="sub.html" method="post"></form>
-                    <a href="sub.html?action=myAction">%msg%</a>
+                    <form action="sub.test" method="post"></form>
+                    <a href="sub.test?action=myAction">%msg%</a>
                 </body>
             </html>');
         $this->given->theSuperComponent_In_WithTheBody('primaryactioncomp\Super', 'primaryactioncomp', '
@@ -222,7 +223,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'primaryactioncomp', '<html><body>Hello  %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'primaryactioncomp', '<html><body>Hello  %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('primaryactioncomp\Module');
 
@@ -230,8 +231,8 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     Hello
-                    <form action="/base/super.html?!=sub&.[sub][~]=/base/sub.html" method="post"></form>
-                    <a href="/base/super.html?!=sub&.[sub][~]=/base/sub.html&.[sub][action]=myAction">World</a>
+                    <form action="/base/super.test?!=sub&.[sub][~]=/base/sub.test" method="post"></form>
+                    <a href="/base/super.test?!=sub&.[sub][~]=/base/sub.test&.[sub][action]=myAction">World</a>
                 </body>
             </html>');
     }
@@ -241,8 +242,8 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('omitprimary\Sub', 'omitprimary',
             '<html>
                 <body>
-                    <form action="sub.html" method="get"></form>
-                    <a href="sub.html">%msg%</a>
+                    <form action="sub.test" method="get"></form>
+                    <a href="sub.test">%msg%</a>
                 </body>
             </html>');
         $this->given->theSuperComponent_In_WithTheBody('omitprimary\Super', 'omitprimary', '
@@ -251,7 +252,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'omitprimary', '<html><body>Hello  %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'omitprimary', '<html><body>Hello  %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('omitprimary\Module');
 
@@ -259,8 +260,8 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     Hello
-                    <form action="/base/super.html" method="get"></form>
-                    <a href="/base/super.html">World</a>
+                    <form action="/base/super.test" method="get"></form>
+                    <a href="/base/super.test">World</a>
                 </body>
             </html>');
     }
@@ -270,7 +271,7 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('defroute\Sub', 'defroute',
             '<html>
                 <body>
-                    <a href="sub.html?param1=val1">%msg%</a>
+                    <a href="sub.test?param1=val1">%msg%</a>
                 </body>
             </html>');
         $this->given->theSuperComponent_In_WithTheBody('defroute\Super', 'defroute', '
@@ -279,14 +280,14 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'defroute', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'defroute', '<html><body>Hello %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('defroute\Module');
 
         $this->then->theHtmlResponseBodyShouldBe(
             '<html>
                 <body>
-                    Hello <a href="/base/super.html?.[sub][param1]=val1">World</a>
+                    Hello <a href="/base/super.test?.[sub][param1]=val1">World</a>
                 </body>
             </html>');
     }
@@ -296,7 +297,7 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('colstate\Sub1', 'colstate',
             '<html><body>Sub1:%msg%</body></html>');
         $this->given->theComponent_In_WithTemplate('colstate\Sub2', 'colstate',
-            '<html><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
+            '<html><body><a href="sub2.test">Sub2</a>:%msg%</body></html>');
         $this->given->theSuperComponent_In_WithTheBody('colstate\Super', 'colstate', '
         function doGet() {
             $sub1 = $this->subComponent(Sub1::$CLASS);
@@ -308,14 +309,14 @@ class CompositionTest extends Test {
                 "sub2" => $sub2
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'colstate', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'colstate', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
 
         $this->when->iSendTheRequestTo('colstate\Module');
 
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><body>
                 Hello Sub1:World,
-                hello <a href="/base/super.html?.[sub1][param1]=val1">Sub2</a>:World
+                hello <a href="/base/super.test?.[sub1][param1]=val1">Sub2</a>:World
             </body></html>');
     }
 
@@ -324,7 +325,7 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('defbyconstr\Sub1', 'defbyconstr',
             '<html><body>Sub1:%msg%</body></html>');
         $this->given->theComponent_In_WithTemplate('defbyconstr\Sub2', 'defbyconstr',
-            '<html><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
+            '<html><body><a href="sub2.test">Sub2</a>:%msg%</body></html>');
         $this->given->theSuperComponent_In_WithTheBody('defbyconstr\Super', 'defbyconstr', '
         function doGet() {
             $sub1 = $this->subComponent(Sub1::$CLASS,
@@ -339,14 +340,14 @@ class CompositionTest extends Test {
                 "sub2" => $sub2
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'defbyconstr', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'defbyconstr', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
 
         $this->when->iSendTheRequestTo('defbyconstr\Module');
 
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><body>
                 Hello Sub1:World,
-                hello <a href="/base/super.html?.[sub1][param2]=other&.[sub1][param4]=new">Sub2</a>:World
+                hello <a href="/base/super.test?.[sub1][param2]=other&.[sub1][param4]=new">Sub2</a>:World
             </body></html>');
     }
 
@@ -356,10 +357,10 @@ class CompositionTest extends Test {
         function doGet($param1, $param2 = "default") {
             return array("msg" => $param1 . ":" . $param2);
         }');
-        $this->given->theFile_In_WithContent('sub1.html', 'defaultargs', '<html><body>Sub1:%msg%</body></html>');
+        $this->given->theFile_In_WithContent('sub1.test', 'defaultargs', '<html><body>Sub1:%msg%</body></html>');
 
         $this->given->theComponent_In_WithTemplate('defaultargs\Sub2', 'defaultargs',
-            '<html><body><a href="sub2.html">Sub2</a>:%msg%</body></html>');
+            '<html><body><a href="sub2.test">Sub2</a>:%msg%</body></html>');
         $this->given->theSuperComponent_In_WithTheBody('defaultargs\Super', 'defaultargs', '
         function doGet() {
             $sub1 = $this->subComponent(Sub1::$CLASS,
@@ -372,29 +373,29 @@ class CompositionTest extends Test {
                 "sub2" => $sub2
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'defaultargs', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'defaultargs', '<html><body>Hello %sub1%,  hello %sub2%</body></html>');
 
         $this->when->iSendTheRequestTo('defaultargs\Module');
 
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><body>
                 Hello Sub1:World:default,
-                hello <a href="/base/super.html">Sub2</a>:World
+                hello <a href="/base/super.test">Sub2</a>:World
             </body></html>');
     }
 
     function testSubInSubParameters() {
         $this->given->theFolder_WithModule('subsub');
         $this->given->theComponent_In_WithTemplate('subsub\Sub2', 'subsub',
-            '<html><body><a href="sub2.html?a=b">Sub2</a>');
+            '<html><body><a href="sub2.test?a=b">Sub2</a>');
         $this->given->theSuperComponent_In_WithTheBody('subsub\Sub1', 'subsub', '
         function doGet() {
             return array(
                 "sub" => $this->subComponent(Sub2::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('sub1.html', 'subsub',
-            '<html><body><a href="sub1.html?x=y">Sub1</a>  %sub%</body></html>');
+        $this->given->theFile_In_WithContent('sub1.test', 'subsub',
+            '<html><body><a href="sub1.test?x=y">Sub1</a>  %sub%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('subsub\Super', 'subsub', '
         function doGet() {
@@ -404,17 +405,17 @@ class CompositionTest extends Test {
                 "sub" => $sub
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'subsub',
-            '<html><body><a href="super.html?i=k">Super</a>  %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'subsub',
+            '<html><body><a href="super.test?i=k">Super</a>  %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('subsub\Module');
 
         $this->then->theHtmlResponseBodyShouldBe('
         <html>
             <body>
-                <a href="super.html?i=k">Super</a>
-                <a href="/base/super.html?.[sub][x]=y">Sub1</a>
-                <a href="/base/super.html?.[sub][p1]=v1&.[sub][.][sub][a]=b">Sub2</a>
+                <a href="super.test?i=k">Super</a>
+                <a href="/base/super.test?.[sub][x]=y">Sub1</a>
+                <a href="/base/super.test?.[sub][p1]=v1&.[sub][.][sub][a]=b">Sub2</a>
             </body>
         </html>');
     }
@@ -429,7 +430,7 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub2::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('sub1.html', 'primarysubsub',
+        $this->given->theFile_In_WithContent('sub1.test', 'primarysubsub',
             '<html><body>Sub1  %sub%</body></html>');
 
         $this->given->theSuperComponent_In_WithTheBody('primarysubsub\Super', 'primarysubsub', '
@@ -440,7 +441,7 @@ class CompositionTest extends Test {
                 "sub" => $sub
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'primarysubsub',
+        $this->given->theFile_In_WithContent('super.test', 'primarysubsub',
             '<html><body>Super  %sub%</body></html>');
 
         $this->when->iSendTheRequestTo('primarysubsub\Module');
@@ -450,7 +451,7 @@ class CompositionTest extends Test {
             <body>
                 Super
                 Sub1
-                <a href="/base/super.html
+                <a href="/base/super.test
                     ?!=sub
                     &.[sub][~]=/base/Sub1&.[sub][!]=sub&.[sub][p]=v
                     &.[sub][.][sub][~]=/base/sub2&.[sub][.][sub][action]=primary&.[sub][.][sub][z]=u">Sub2</a>
@@ -475,14 +476,14 @@ class CompositionTest extends Test {
                 "sub" => $this->subComponent(Sub::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('super.html', 'nested',
+        $this->given->theFile_In_WithContent('super.test', 'nested',
             '<html><body>%sub%</body></html>');
 
         $this->when->iSendTheRequestTo('nested\Module');
 
         $this->then->theHtmlResponseBodyShouldBe('<html>
             <body>
-                <a href="/base/super.html?.[list.0.item][x]=y">Sub</a>
+                <a href="/base/super.test?.[list.0.item][x]=y">Sub</a>
             </body>
         </html>');
     }

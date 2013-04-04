@@ -9,6 +9,11 @@ use watoki\curir\Request;
  */
 class ComponentTest extends Test {
 
+    protected function setUp() {
+        parent::setUp();
+        $this->given->aTestRenderer();
+    }
+
     public function testGetMethod() {
         $this->given->theFolder('gettest');
         $this->given->theRequestMethodIs(Request::METHOD_GET);
@@ -79,7 +84,7 @@ class ComponentTest extends Test {
     public function testComponentWithTemplate() {
         $this->given->theFolder('templatetest');
         $this->given->theComponent_In_WithTheMethod_ThatReturns('templatetest\Template', 'templatetest', 'doGet', '{"test":"World"}');
-        $this->given->theFile_In_WithContent('template.html', 'templatetest', 'Hello %test%');
+        $this->given->theFile_In_WithContent('template.test', 'templatetest', 'Hello %test%');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->when->iSendTheRequestTo('templatetest\Template');
@@ -103,12 +108,14 @@ class ComponentTest_Given extends Given {
                 return json_decode(\"$returnJson\", true);
             }
 
-            protected function doRender(\$template, \$model) {
-                foreach (\$model as \$key => \$value) {
-                    \$template = str_replace('%' . \$key . '%', \$value, \$template);
-                }
-                return \$template;
+            protected function getDefaultFormat() {
+                \$this->rendererFactory->setRenderer('test', 'TestRenderer');
+                return 'test';
             }
         ");
+    }
+
+    public function theDeaultFormatIs($string) {
+        $this->defaultFormat = $string;
     }
 }

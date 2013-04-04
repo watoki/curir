@@ -16,16 +16,18 @@ class CompositionTestGiven extends Given {
         function doGet() {
             return array("msg" => "World");
         }');
-        $this->theFile_In_WithContent(lcfirst($shortClassName) . '.html', $folder, $template);
+        $this->theFile_In_WithContent(lcfirst($shortClassName) . '.test', $folder, $template);
     }
 
     public function theComponent_In_WithTheBody($className, $folder, $body) {
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\curir\controller\Component', "
-            protected function doRender(\$template, \$model) {
-                foreach (\$model as \$key => \$value) {
-                    \$template = str_replace('%' . \$key . '%', \$value, \$template);
-                }
-                return \$template;
+            protected function getFormat() {
+                \$this->rendererFactory->setRenderer('test', 'TestRenderer');
+                return parent::getFormat();
+            }
+
+            protected function getDefaultFormat() {
+                return 'test';
             }
 
             $body
@@ -33,28 +35,18 @@ class CompositionTestGiven extends Given {
     }
 
     public function theSuperComponent_In_WithTheBody($className, $folder, $body) {
-        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\curir\composition\SuperComponent', '
-            protected function doRender($template, $model) {
-                foreach ($this->flattenModel($model) as $key => $value) {
-                    $template = str_replace("%" . $key . "%", $value, $template);
-                }
-                return $template;
+        $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\curir\composition\SuperComponent', "
+            protected function getFormat() {
+                \$this->rendererFactory->setRenderer('test', 'TestRenderer');
+                return parent::getFormat();
             }
 
-            private function flattenModel($model, $prefix = "") {
-                $flatten = array();
-                foreach ($model as $key => $value) {
-                    if (is_array($value)) {
-                        $flatten = array_merge($flatten, $this->flattenModel($value, $prefix . $key . "/"));
-                    } else if (is_string($value)) {
-                        $flatten[$prefix . $key] = $value;
-                    }
-                }
-                return $flatten;
+            protected function getDefaultFormat() {
+                return 'test';
             }
 
-            ' . $body . '
-        ');
+            $body
+        ");
     }
 
     public function theModule_In($moduleClass, $folder) {

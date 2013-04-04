@@ -2,6 +2,8 @@
 namespace watoki\curir\controller;
 
 use watoki\collections\Map;
+use watoki\curir\renderer\RendererFactory;
+use watoki\factory\Factory;
 use watoki\tempan\HtmlParser;
 use watoki\curir\Controller;
 use watoki\curir\Path;
@@ -12,6 +14,16 @@ use watoki\curir\Response;
 abstract class Component extends Controller {
 
     public static $CLASS = __CLASS__;
+
+    /**
+     * @var RendererFactory
+     */
+    protected $rendererFactory;
+
+    function __construct(Factory $factory, Path $route, Module $parent = null) {
+        parent::__construct($factory, $route, $parent);
+        $this->rendererFactory = $factory->getInstance(RendererFactory::$CLASS);
+    }
 
     /**
      * @param Request $request
@@ -98,38 +110,26 @@ abstract class Component extends Controller {
     }
 
     protected function render($model) {
-        $templateFile = $this->getTemplateFile();
-        if (!file_exists($templateFile)) {
-            return $model;
-        }
-
-        $template = file_get_contents($templateFile);
-        return $this->doRender($template, $model);
-    }
-
-    /**
-     * @param string $template
-     * @param Map|object $model
-     * @return string The rendered template
-     */
-    protected function doRender($template, $model) {
-        return $this->createRenderer()->render($template, $model);
+        return $this->getRenderer()->render($model);
     }
 
     /**
      * @return Renderer
      */
-    protected function createRenderer() {
-        return $this->factory->getInstance(Renderer::CLASS_NAME);
+    protected function getRenderer() {
+        return $this->rendererFactory->getRenderer($this, $this->getFormat());
     }
 
-    protected function getTemplateFile() {
-        return $this->getDirectory() . '/' . $this->getTemplateFileName();
+    protected function getFormat() {
+        $leafExtension = $this->getRoute()->getLeafExtension();
+        if ($leafExtension) {
+            return $leafExtension;
+        }
+        return $this->getDefaultFormat();
     }
 
-    protected function getTemplateFileName() {
-        $classReflection = new \ReflectionClass($this);
-        return strtolower($classReflection->getShortName()) . '.html';
+    protected function getDefaultFormat() {
+        return 'html';
     }
 
     /**

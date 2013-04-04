@@ -173,7 +173,9 @@ class RoutingTest_Given extends steps\Given {
     public function theComponent_In_Returning($className, $folder, $retval) {
         $this->theClass_In_Extending_WithTheBody($className, $folder, '\watoki\curir\controller\Component', '
             public function doGet() {return ' . $retval . ';}
-            public function doRender($model, $template) {}
+            protected function getFormat() {
+                return "none";
+            }
         ');
     }
 
