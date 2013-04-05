@@ -84,7 +84,7 @@ class ComponentTest extends Test {
     public function testComponentWithTemplate() {
         $this->given->theFolder('templatetest');
         $this->given->theComponent_In_WithTheMethod_ThatReturns('templatetest\Template', 'templatetest', 'doGet', '{"test":"World"}');
-        $this->given->theFile_In_WithContent('template.test', 'templatetest', 'Hello %test%');
+        $this->given->theFile_In_WithContent('Template.test', 'templatetest', 'Hello %test%');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->when->iSendTheRequestTo('templatetest\Template');

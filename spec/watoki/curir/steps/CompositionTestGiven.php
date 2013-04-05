@@ -16,7 +16,7 @@ class CompositionTestGiven extends Given {
         function doGet() {
             return array("msg" => "World");
         }');
-        $this->theFile_In_WithContent(lcfirst($shortClassName) . '.test', $folder, $template);
+        $this->theFile_In_WithContent($shortClassName . '.test', $folder, $template);
     }
 
     public function theComponent_In_WithTheBody($className, $folder, $body) {
