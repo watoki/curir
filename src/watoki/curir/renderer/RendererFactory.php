@@ -66,8 +66,7 @@ class RendererFactory {
 
     protected function getTemplateFile(Component $component, $format) {
         $classReflection = new \ReflectionClass($component);
-        return dirname($classReflection->getFileName()) . '/'
-                . strtolower($classReflection->getShortName() . '.' . $format);
+        return dirname($classReflection->getFileName()) . '/' . $classReflection->getShortName() . '.' . $format;
     }
 
 }
