@@ -77,7 +77,7 @@ class Given extends Step {
         do {
             $items = glob(rtrim($folder, '/') . '/' . '*');
             foreach ($items as $item) {
-                is_dir($item) ? $this->cleanDir($item) : unlink($item);
+                is_dir($item) ? $this->cleanDir($item) : @unlink($item);
             }
         } while ($items);
 

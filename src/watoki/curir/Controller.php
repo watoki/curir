@@ -48,7 +48,7 @@ abstract class Controller {
         return $this->route->copy();
     }
 
-    protected function getResponse() {
+    public function getResponse() {
         if (!$this->response) {
             $this->response = new Response();
         }
