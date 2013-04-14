@@ -58,8 +58,8 @@ public $response;
      * @return Response
      */
     public function execute($name, Map $superParameters) {
-        $this->response = $this->postProcess($this->super->getRoot()->respond($this->request->copy()),
-            $name, $superParameters);
+        $response = $this->super->getRoot()->respond($this->request->copy());
+        $this->response = $this->postProcess($response, $name, $superParameters);
         return $this->response;
     }
 

@@ -24,19 +24,19 @@ class CompositeRequestTest extends Test {
 
     function testRestoreSubComponents() {
         $this->given->theFolder_WithModule('restoresubs');
-        $this->given->theComponent_In_WithTheBody('restoresubs\Sub', 'restoresubs', '
+        $this->given->theComponent_In_WithTheBody('restoresubs\SubComponent', 'restoresubs', '
         function doGet($param1, $param2) {
             return array("msg" => $param1 . ":" . $param2);
         }');
-        $this->given->theFile_In_WithContent('Sub.test', 'restoresubs', '<html><head></head><body>%msg%</body></html>');
+        $this->given->theFile_In_WithContent('sub.test', 'restoresubs', '<html><head></head><body>%msg%</body></html>');
 
-        $this->given->theSuperComponent_In_WithTheBody('restoresubs\Super', 'restoresubs', '
+        $this->given->theSuperComponent_In_WithTheBody('restoresubs\SuperComponent', 'restoresubs', '
         function doGet() {
             return array(
-                "sub" => $this->subComponent(Sub::$CLASS)
+                "sub" => $this->subComponent(SubComponent::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'restoresubs', '<html><body>Hello %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'restoresubs', '<html><body>Hello %sub%</body></html>');
 
         $this->given->theRequestParameterHasTheState(new Map(array(
             'sub' => new Map(array(
@@ -51,21 +51,21 @@ class CompositeRequestTest extends Test {
 
     function testPrimaryActionFirst() {
         $this->given->theFolder_WithModule('primaryaction');
-        $this->given->theComponent_In_WithTheBody('primaryaction\Sub', 'primaryaction', '
+        $this->given->theComponent_In_WithTheBody('primaryaction\SubComponent', 'primaryaction', '
         function doMyAction($param1, $param2) {
-            return array("msg" => $param1 . " " . $param2 . ":" . ++Super::$executed);
+            return array("msg" => $param1 . " " . $param2 . ":" . ++SuperComponent::$executed);
         }');
-        $this->given->theFile_In_WithContent('Sub.test', 'primaryaction', '<html><body>%msg%</body></html>');
+        $this->given->theFile_In_WithContent('sub.test', 'primaryaction', '<html><body>%msg%</body></html>');
 
-        $this->given->theSuperComponent_In_WithTheBody('primaryaction\Super', 'primaryaction', '
+        $this->given->theSuperComponent_In_WithTheBody('primaryaction\SuperComponent', 'primaryaction', '
         public static $executed = 0;
         function doGet($param) {
             return array(
                 "msg" => ++self::$executed . ":" . $param,
-                "sub" => $this->subComponent(Sub::$CLASS)
+                "sub" => $this->subComponent(SubComponent::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'primaryaction', '<html><body>%msg% %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'primaryaction', '<html><body>%msg% %sub%</body></html>');
 
         $this->given->theRequestParameter_WithValue('param', 'Greetings');
         $this->given->thePrimaryRequestIsFor('sub');
@@ -84,22 +84,22 @@ class CompositeRequestTest extends Test {
 
     function testPrimaryActionOnlyOnce() {
         $this->given->theFolder_WithModule('primaryfirst');
-        $this->given->theComponent_In_WithTheBody('primaryfirst\Sub', 'primaryfirst', '
+        $this->given->theComponent_In_WithTheBody('primaryfirst\SubComponent', 'primaryfirst', '
         public static $called = 0;
         function doGet($param1, $param2) {
             self::$called++;
             return array("msg" => $param1 . " " . $param2 . " " . self::$called);
         }');
-        $this->given->theFile_In_WithContent('Sub.test', 'primaryfirst', '<html><body>%msg%</body></html>');
+        $this->given->theFile_In_WithContent('sub.test', 'primaryfirst', '<html><body>%msg%</body></html>');
 
-        $this->given->theSuperComponent_In_WithTheBody('primaryfirst\Super', 'primaryfirst', '
+        $this->given->theSuperComponent_In_WithTheBody('primaryfirst\SuperComponent', 'primaryfirst', '
         function doGet($param) {
             return array(
                 "msg" => $param,
-                "sub" => $this->subComponent(Sub::$CLASS)
+                "sub" => $this->subComponent(SubComponent::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'primaryfirst', '<html><body>%msg% %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'primaryfirst', '<html><body>%msg% %sub%</body></html>');
 
         $this->given->theRequestParameter_WithValue('param', 'Super');
         $this->given->thePrimaryRequestIsFor('sub');
@@ -117,19 +117,19 @@ class CompositeRequestTest extends Test {
 
     function testPrimaryRequestWithState() {
         $this->given->theFolder_WithModule('primarystate');
-        $this->given->theComponent_In_WithTemplate('primarystate\Sub1', 'primarystate',
+        $this->given->theComponent_In_WithTemplate('primarystate\Sub1Component', 'primarystate',
             '<html><body>Sub1</body></html>');
-        $this->given->theComponent_In_WithTemplate('primarystate\Sub2', 'primarystate',
+        $this->given->theComponent_In_WithTemplate('primarystate\Sub2Component', 'primarystate',
             '<html><body><a href="sub2?x=y">Sub2</a></body></html>');
 
-        $this->given->theSuperComponent_In_WithTheBody('primarystate\Super', 'primarystate', '
+        $this->given->theSuperComponent_In_WithTheBody('primarystate\SuperComponent', 'primarystate', '
         function doGet() {
             return array(
-                "sub1" => $this->subComponent(Sub1::$CLASS),
-                "sub2" => $this->subComponent(Sub2::$CLASS),
+                "sub1" => $this->subComponent(Sub1Component::$CLASS),
+                "sub2" => $this->subComponent(Sub2Component::$CLASS),
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'primarystate', '<html><body>%sub1% %sub2%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'primarystate', '<html><body>%sub1% %sub2%</body></html>');
 
         $this->given->thePrimaryRequestIsFor('sub2');
         $this->given->theRequestParameterHasTheState(new Map(array(
@@ -156,20 +156,20 @@ class CompositeRequestTest extends Test {
 
     function testSubTarget() {
         $this->given->theFolder_WithModule('subtargetrequest');
-        $this->given->theComponent_In_WithTemplate('subtargetrequest\Sub1', 'subtargetrequest',
+        $this->given->theComponent_In_WithTemplate('subtargetrequest\Sub1Component', 'subtargetrequest',
             '<html><body>%msg% of Sub1</body></html>');
-        $this->given->theComponent_In_WithTemplate('subtargetrequest\Sub2', 'subtargetrequest',
+        $this->given->theComponent_In_WithTemplate('subtargetrequest\Sub2Component', 'subtargetrequest',
             '<html><body>%msg% of Sub2</body></html>');#
 
 
-        $this->given->theSuperComponent_In_WithTheBody('subtargetrequest\Super', 'subtargetrequest', '
+        $this->given->theSuperComponent_In_WithTheBody('subtargetrequest\SuperComponent', 'subtargetrequest', '
         function doGet() {
             return array(
                 "msg" => "Hello",
-                "sub" => $this->subComponent(Sub1::$CLASS),
+                "sub" => $this->subComponent(Sub1Component::$CLASS),
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'subtargetrequest', '<html><body>%msg% %sub%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'subtargetrequest', '<html><body>%msg% %sub%</body></html>');
 
         $this->given->theRequestParameterHasTheState(new Map(array(
             'sub' => new Map(array(
@@ -185,23 +185,23 @@ class CompositeRequestTest extends Test {
 
     function testSubRedirect() {
         $this->given->theFolder_WithModule('subredirect');
-        $this->given->theComponent_In_WithTheBody('subredirect\Sub', 'subredirect', '
+        $this->given->theComponent_In_WithTheBody('subredirect\SubComponent', 'subredirect', '
         function doGet() {
             return $this->redirect(\watoki\curir\Url::parse("somewhere/else?param[1]=a&param[2]=b#bar"));
         }');
-        $this->given->theComponent_In_WithTheBody('subredirect\Sub2', 'subredirect', '
+        $this->given->theComponent_In_WithTheBody('subredirect\Sub2Component', 'subredirect', '
         function doGet() {
             return $this->redirect(\watoki\curir\Url::parse("not/here?param=x#foo"));
         }');
 
-        $this->given->theSuperComponent_In_WithTheBody('subredirect\Super', 'subredirect', '
+        $this->given->theSuperComponent_In_WithTheBody('subredirect\SuperComponent', 'subredirect', '
         function doGet() {
             return array(
-                "sub1" => $this->subComponent(Sub::$CLASS),
-                "sub2" => $this->subComponent(Sub2::$CLASS),
+                "sub1" => $this->subComponent(SubComponent::$CLASS),
+                "sub2" => $this->subComponent(Sub2Component::$CLASS),
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'subredirect', '<html><body>%sub1% %sub2%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'subredirect', '<html><body>%sub1% %sub2%</body></html>');
 
         $this->given->theRequestParameter_WithValue('param', 'Super');
         $this->given->theRequestParameterHasTheState(new Map(array(
@@ -217,20 +217,20 @@ class CompositeRequestTest extends Test {
 
     function testPrimaryRedirect() {
         $this->given->theFolder_WithModule('primaryredirect');
-        $this->given->theComponent_In_WithTheBody('primaryredirect\Sub', 'primaryredirect', '
+        $this->given->theComponent_In_WithTheBody('primaryredirect\SubComponent', 'primaryredirect', '
         function doGet() {
             return $this->redirect(\watoki\curir\Url::parse("somewhere/else?param[1]=a&param[2]=b#bar"));
         }');
-        $this->given->theComponent_In_WithTheBody('primaryredirect\Sub2', 'primaryredirect', '
+        $this->given->theComponent_In_WithTheBody('primaryredirect\Sub2Component', 'primaryredirect', '
         function doGet() {
             throw new \Exception("Should not be called");
         }');
 
-        $this->given->theSuperComponent_In_WithTheBody('primaryredirect\Super', 'primaryredirect', '
+        $this->given->theSuperComponent_In_WithTheBody('primaryredirect\SuperComponent', 'primaryredirect', '
         function doGet() {
             return array(
-                "sub1" => $this->subComponent(Sub::$CLASS),
-                "sub2" => $this->subComponent(Sub2::$CLASS),
+                "sub1" => $this->subComponent(SubComponent::$CLASS),
+                "sub2" => $this->subComponent(Sub2Component::$CLASS),
             );
         }');
 
@@ -250,29 +250,29 @@ class CompositeRequestTest extends Test {
 
     function testPrimaryActionInsideSub() {
         $this->given->theFolder_WithModule('nestedprimary');
-        $this->given->theComponent_In_WithTheBody('nestedprimary\Sub2', 'nestedprimary', '
+        $this->given->theComponent_In_WithTheBody('nestedprimary\Sub2Component', 'nestedprimary', '
         static $executed = "No";
         function doMyAction($a) {
             self::$executed = "Yes";
         }');
-        $this->given->theSuperComponent_In_WithTheBody('nestedprimary\Sub1', 'nestedprimary', '
+        $this->given->theSuperComponent_In_WithTheBody('nestedprimary\Sub1Component', 'nestedprimary', '
         function doGet($x) {
             return array(
-                "sub" => $this->subComponent(Sub2::$CLASS),
-                "msg" => Sub2::$executed,
+                "sub" => $this->subComponent(Sub2Component::$CLASS),
+                "msg" => Sub2Component::$executed,
                 "x" => $x
             );
         }');
-        $this->given->theFile_In_WithContent('Sub1.test', 'nestedprimary',
+        $this->given->theFile_In_WithContent('sub1.test', 'nestedprimary',
             '<html><body>Sub2 %x% - %msg%</body></html>');
 
-        $this->given->theSuperComponent_In_WithTheBody('nestedprimary\Super', 'nestedprimary', '
+        $this->given->theSuperComponent_In_WithTheBody('nestedprimary\SuperComponent', 'nestedprimary', '
         function doGet() {
             return array(
-                "sub" => $this->subComponent(Sub1::$CLASS)
+                "sub" => $this->subComponent(Sub1Component::$CLASS)
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'nestedprimary',
+        $this->given->theFile_In_WithContent('super.test', 'nestedprimary',
             '<html><body>%sub%</body></html>');
 
         $this->given->thePrimaryRequestIsFor('sub');
@@ -297,17 +297,17 @@ class CompositeRequestTest extends Test {
 
     function testNestedSubComponent() {
         $this->given->theFolder_WithModule('nestedSub');
-        $this->given->theComponent_In_WithTheBody('nestedSub\Sub', 'nestedSub', '
+        $this->given->theComponent_In_WithTheBody('nestedSub\SubComponent', 'nestedSub', '
         function doGet($a) {
             return array(
                 "a" => $a
             );
         }');
-        $this->given->theFile_In_WithContent('Sub.test', 'nestedSub', '<html><body>%a% Sub</body></html>');
+        $this->given->theFile_In_WithContent('sub.test', 'nestedSub', '<html><body>%a% Sub</body></html>');
 
-        $this->given->theSuperComponent_In_WithTheBody('nestedSub\Super', 'nestedSub', '
+        $this->given->theSuperComponent_In_WithTheBody('nestedSub\SuperComponent', 'nestedSub', '
         function doGet() {
-            $item = $this->subComponent(Sub::$CLASS);
+            $item = $this->subComponent(SubComponent::$CLASS);
             return array(
                 "list" => array(
                     array(
@@ -316,7 +316,7 @@ class CompositeRequestTest extends Test {
                 )
             );
         }');
-        $this->given->theFile_In_WithContent('Super.test', 'nestedSub', '<html><body>%list/0/item%</body></html>');
+        $this->given->theFile_In_WithContent('super.test', 'nestedSub', '<html><body>%list/0/item%</body></html>');
 
         $this->given->theRequestParameterHasTheState(new Map(array(
             'list.0.item' => new Map(array(

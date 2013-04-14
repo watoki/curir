@@ -25,7 +25,7 @@ class RoutingTest extends Test {
         $this->given->theFolder('defaultcomp');
         $this->given->theFolder('defaultcomp/inner');
         $this->given->theClass_In_Extending_WithTheBody('defaultcomp\Module', 'defaultcomp', '\watoki\curir\controller\Module', '');
-        $this->given->theClass_In_Extending_WithTheBody('defaultcomp\inner\Inner', 'defaultcomp/inner', '\watoki\curir\controller\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('defaultcomp\inner\InnerModule', 'defaultcomp/inner', '\watoki\curir\controller\Module', '');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->given->theRequestResourceIs('inner');
@@ -39,8 +39,8 @@ class RoutingTest extends Test {
         $this->given->theFolder('childmodule/child');
 
         $this->given->theModule_In('childmodule\Module', 'childmodule');
-        $this->given->theModule_In('childmodule\child\Child', 'childmodule/child');
-        $this->given->theComponent_In_Returning('childmodule\child\Index', 'childmodule/child', '"hi there"');
+        $this->given->theModule_In('childmodule\child\ChildModule', 'childmodule/child');
+        $this->given->theComponent_In_Returning('childmodule\child\IndexComponent', 'childmodule/child', '"hi there"');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->given->theRequestResourceIs('child/index');
@@ -57,7 +57,7 @@ class RoutingTest extends Test {
         $this->given->theModule_In_WithAStaticRouterFrom_To('siblings\brother\Module', 'siblings/brother',
             'adopted', 'siblings\sister\Module');
         $this->given->theModule_In('siblings\sister\Module', 'siblings/sister');
-        $this->given->theComponent_In_Returning('siblings\sister\Index', 'siblings/sister', '"hello world"');
+        $this->given->theComponent_In_Returning('siblings\sister\IndexComponent', 'siblings/sister', '"hello world"');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->given->theRequestResourceIs('adopted/index');
@@ -76,7 +76,7 @@ class RoutingTest extends Test {
             'adopted/yeah/' => 'override\sister\Module'
         ));
         $this->given->theModule_In('override\sister\Module', 'override/sister');
-        $this->given->theComponent_In_Returning('override\sister\Index', 'override/sister', '"hello world"');
+        $this->given->theComponent_In_Returning('override\sister\IndexComponent', 'override/sister', '"hello world"');
 
         $this->given->theRequestMethodIs(Request::METHOD_GET);
         $this->given->theRequestResourceIs('adopted/yeah/index');
@@ -87,30 +87,37 @@ class RoutingTest extends Test {
 
     function testFindChild() {
         $this->given->theFolder('findchild');
-        $this->given->theClass_In_Extending_WithTheBody('findchild\ParentModule', 'findchild', '\watoki\curir\controller\Module', '');
-        $this->given->theClass_In_Extending_WithTheBody('findchild\ChildModule', 'findchild', '\watoki\curir\controller\Module', '');
+        $this->given->theFolder('findchild/child');
+        $this->given->theClass_In_Extending_WithTheBody('findchild\ParentModule', 'findchild',
+            '\watoki\curir\controller\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findchild\child\ChildModule', 'findchild/child',
+            '\watoki\curir\controller\Module', '');
 
-        $this->when->iAsk_ToFind('findchild\ParentModule', 'findchild\ChildModule');
+        $this->when->iAsk_ToFind('findchild\ParentModule', 'findchild\child\ChildModule');
 
-        $this->then->itShouldReturnAnInstanceOf('findchild\ChildModule');
+        $this->then->itShouldReturnAnInstanceOf('findchild\child\ChildModule');
     }
 
     function testFindGrandChild() {
         $this->given->theFolder('findgrand');
         $this->given->theFolder('findgrand/grand');
-        $this->given->theClass_In_Extending_WithTheBody('findgrand\ParentModule', 'findgrand', '\watoki\curir\controller\Module', '');
-        $this->given->theClass_In_Extending_WithTheBody('findgrand\grand\ChildModule', 'findgrand/grand', '\watoki\curir\controller\Module', '');
+        $this->given->theFolder('findgrand/grand/child');
+        $this->given->theClass_In_Extending_WithTheBody('findgrand\ParentModule', 'findgrand',
+            '\watoki\curir\controller\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findgrand\grand\child\ChildModule', 'findgrand/grand/child',
+            '\watoki\curir\controller\Module', '');
 
-        $this->when->iAsk_ToFind('findgrand\ParentModule', 'findgrand\grand\ChildModule');
+        $this->when->iAsk_ToFind('findgrand\ParentModule', 'findgrand\grand\child\ChildModule');
 
-        $this->then->itShouldReturnAnInstanceOf('findgrand\grand\ChildModule');
+        $this->then->itShouldReturnAnInstanceOf('findgrand\grand\child\ChildModule');
     }
 
     function testNonExistingChild() {
         $this->given->theFolder('findnone');
-        $this->given->theClass_In_Extending_WithTheBody('findnone\ParentModule', 'findnone', '\watoki\curir\controller\Module', '');
+        $this->given->theClass_In_Extending_WithTheBody('findnone\ParentModule', 'findnone',
+            '\watoki\curir\controller\Module', '');
 
-        $this->when->iAsk_ToFind('findnone\ParentModule', 'findnone\grand\ChildModule');
+        $this->when->iAsk_ToFind('findnone\ParentModule', 'findnone\NoneModule');
 
         $this->then->itShouldNotFindIt();
     }
@@ -121,12 +128,12 @@ class RoutingTest extends Test {
         $this->given->theFolder('findadopted/sister');
 
         $this->given->theModule_In_WithAStaticRouterFrom_To('findadopted\brother\Module', 'findadopted/brother',
-            'adopted', 'findadopted\sister\Index');
-        $this->given->theComponent_In_Returning('findadopted\sister\Index', 'findadopted/sister', '"hello you"');
+            'adopted', 'findadopted\sister\IndexComponent');
+        $this->given->theComponent_In_Returning('findadopted\sister\IndexComponent', 'findadopted/sister', '"hello you"');
 
-        $this->when->iAsk_ToFind('findadopted\brother\Module', 'findadopted\sister\Index');
+        $this->when->iAsk_ToFind('findadopted\brother\Module', 'findadopted\sister\IndexComponent');
 
-        $this->then->itShouldReturnAnInstanceOf('findadopted\sister\Index');
+        $this->then->itShouldReturnAnInstanceOf('findadopted\sister\IndexComponent');
         $this->then->theRouteOfTheFoundControllerShouldBe('/base/adopted');
     }
 
@@ -138,11 +145,11 @@ class RoutingTest extends Test {
         $this->given->theModule_In('findadoptedgrand\sister\Module', 'findadoptedgrand/sister');
         $this->given->theModule_In_WithAStaticRouterFrom_To('findadoptedgrand\brother\Module', 'findadoptedgrand/brother',
             'adopted/', 'findadoptedgrand\sister\Module');
-        $this->given->theComponent_In_Returning('findadoptedgrand\sister\Index', 'findadoptedgrand/sister', '"hello you"');
+        $this->given->theComponent_In_Returning('findadoptedgrand\sister\IndexComponent', 'findadoptedgrand/sister', '"hello you"');
 
-        $this->when->iAsk_ToFind('findadoptedgrand\brother\Module', 'findadoptedgrand\sister\Index');
+        $this->when->iAsk_ToFind('findadoptedgrand\brother\Module', 'findadoptedgrand\sister\IndexComponent');
 
-        $this->then->itShouldReturnAnInstanceOf('findadoptedgrand\sister\Index');
+        $this->then->itShouldReturnAnInstanceOf('findadoptedgrand\sister\IndexComponent');
         $this->then->theRouteOfTheFoundControllerShouldBe('/base/adopted/Index');
     }
 

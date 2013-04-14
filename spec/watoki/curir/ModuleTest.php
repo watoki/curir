@@ -41,11 +41,27 @@ class ModuleTest extends Test {
     public function testComponent() {
         $this->given->theFolder('component');
         $this->given->theModule_In('component\ComponentModule', 'component');
-        $this->given->theComponent_In('component\Index', 'component');
+        $this->given->theComponent_In('component\IndexComponent', 'component');
 
         $this->when->iRequest_From('index.html', 'component\ComponentModule');
 
-        $this->then->theResponseBodyShouldBe('Found component\Index');
+        $this->then->theResponseBodyShouldBe('Found component\IndexComponent');
+    }
+
+    public function testInnerModule() {
+        $this->given->theFolder('innerModule');
+        $this->given->theModule_In('innerModule\OuterModule', 'innerModule');
+        $this->given->theFolder('innerModule/inside');
+        $this->given->theModule_In_WithTheBody('innerModule\inside\InsideModule', 'innerModule/inside', '
+        public function respond(\watoki\curir\Request $request) {
+            $response = new \watoki\curir\Response();
+            $response->setBody("Found me");
+            return $response;
+        }');
+
+        $this->when->iRequest_From('inside/test.txt', 'innerModule\OuterModule');
+
+        $this->then->theResponseBodyShouldBe('Found me');
     }
 
     public function testComponentInFolder() {
@@ -54,7 +70,7 @@ class ModuleTest extends Test {
         $this->given->theModule_In('outer\InnerModule', 'outer');
         $this->given->theComponent_In('outer\inner\InnerComponent', 'outer/inner');
 
-        $this->when->iRequest_From('inner/InnerComponent.php', 'outer\InnerModule');
+        $this->when->iRequest_From('inner/inner.php', 'outer\InnerModule');
 
         $this->then->theResponseBodyShouldBe('Found outer\inner\InnerComponent');
     }
@@ -62,11 +78,11 @@ class ModuleTest extends Test {
     public function testAbsoluteResource() {
         $this->given->theFolder('isAbsolute');
         $this->given->theModule_In('isAbsolute\Module', 'isAbsolute');
-        $this->given->theComponent_In('isAbsolute\Component', 'isAbsolute');
+        $this->given->theComponent_In('isAbsolute\AbsoluteComponent', 'isAbsolute');
 
-        $this->when->iRequest_From('/base/Component', 'isAbsolute\Module');
+        $this->when->iRequest_From('/base/Absolute', 'isAbsolute\Module');
 
-        $this->then->theResponseBodyShouldBe('Found isAbsolute\Component');
+        $this->then->theResponseBodyShouldBe('Found isAbsolute\AbsoluteComponent');
     }
 
     public function testNonExistingComponent() {
@@ -93,7 +109,7 @@ class ModuleTest extends Test {
         $this->given->theFolder('redirectcomponent');
         $this->given->theModule_In('redirectcomponent\Module', 'redirectcomponent');
         $this->given->theFolder('redirectcomponent/inner');
-        $this->given->theComponent_In_ThatRedirectsTo('redirectcomponent\inner\Component', 'redirectcomponent/inner', 'some/path');
+        $this->given->theComponent_In_ThatRedirectsTo('redirectcomponent\inner\ComponentComponent', 'redirectcomponent/inner', 'some/path');
 
         $this->when->iRequest_From('inner/component.html', 'redirectcomponent\Module');
 
@@ -105,7 +121,11 @@ class ModuleTest extends Test {
 class ModuleTest_Given extends Given {
 
     public function theModule_In($moduleName, $folder) {
-        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\curir\controller\Module', '');
+        $this->theModule_In_WithTheBody($moduleName, $folder, '');
+    }
+
+    public function theModule_In_WithTheBody($moduleName, $folder, $body) {
+        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\curir\controller\Module', $body);
     }
 
     public function theModule_InThatRedirectsTo($moduleName, $folder, $target) {

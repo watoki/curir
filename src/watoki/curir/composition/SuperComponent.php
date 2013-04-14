@@ -31,7 +31,13 @@ abstract class SuperComponent extends Component {
     public $primaryRequestSubName;
 
     protected function subComponent($componentClass, Map $parameters = null) {
-        $route = $this->getRoot()->findController($componentClass)->getRoute();
+        $foundController = $this->getRoot()->findController($componentClass);
+
+        if (!$foundController) {
+            throw new \Exception('Could not find a route to ' . $componentClass);
+        }
+
+        $route = $foundController->getRoute();
         return new SubComponent($this, $route, $parameters);
     }
 

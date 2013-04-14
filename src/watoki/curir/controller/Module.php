@@ -158,7 +158,8 @@ abstract class Module extends Controller {
     private function findInFolders($controllerClass) {
         $commonNamespace = $this->findCommonNamespace($controllerClass, get_class($this));
         if ($commonNamespace) {
-            $path = new Path(Liste::split('\\', substr($controllerClass, strlen($commonNamespace) + 1)));
+            $strippedClass = FileRouter::stripControllerName($controllerClass);
+            $path = new Path(Liste::split('\\', substr($strippedClass, strlen($commonNamespace) + 1)));
             $request = new Request('', $path);
             try {
                 return $this->resolveController($request);

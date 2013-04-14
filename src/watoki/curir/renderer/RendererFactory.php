@@ -3,6 +3,7 @@ namespace watoki\curir\renderer;
 
 use watoki\curir\Renderer;
 use watoki\curir\controller\Component;
+use watoki\curir\router\FileRouter;
 use watoki\factory\Factory;
 
 class RendererFactory {
@@ -66,7 +67,8 @@ class RendererFactory {
 
     protected function getTemplateFile(Component $component, $format) {
         $classReflection = new \ReflectionClass($component);
-        return dirname($classReflection->getFileName()) . '/' . $classReflection->getShortName() . '.' . $format;
+        $componentName = FileRouter::stripControllerName($classReflection->getShortName());
+        return dirname($classReflection->getFileName()) . '/' . lcfirst($componentName) . '.' . $format;
     }
 
 }

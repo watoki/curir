@@ -2,6 +2,7 @@
 namespace spec\watoki\curir\steps;
 
 use watoki\collections\Liste;
+use watoki\curir\router\FileRouter;
 
 class CompositionTestGiven extends Given {
 
@@ -11,12 +12,12 @@ class CompositionTestGiven extends Given {
     }
 
     public function theComponent_In_WithTemplate($className, $folder, $template) {
-        $shortClassName = Liste::split('\\', $className)->pop();
+        $shortClassName = Liste::split('\\', FileRouter::stripControllerName($className))->pop();
         $this->theComponent_In_WithTheBody($className, $folder, '
         function doGet() {
             return array("msg" => "World");
         }');
-        $this->theFile_In_WithContent($shortClassName . '.test', $folder, $template);
+        $this->theFile_In_WithContent(lcfirst($shortClassName) . '.test', $folder, $template);
     }
 
     public function theComponent_In_WithTheBody($className, $folder, $body) {
