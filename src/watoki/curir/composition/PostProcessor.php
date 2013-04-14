@@ -168,43 +168,52 @@ class PostProcessor {
             return;
         }
 
-        $route = $this->super->getRoute();
         $attributeValue = urldecode(html_entity_decode($element->getAttribute($attributeName)));
         $url = Url::parse($attributeValue);
 
         if (!$url->getHost()) {
-
-            $state = new Map();
-            if ($this->getActionName($url, $element) != 'get'
-                    || $url->getParameters()->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
-                $state->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
-            }
-            $state->merge($this->parameters);
-
-            $subParams = new Map();
-            if ($this->isUrlEqualsRoute($url, $this->component)
-                    || $state->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)) {
-                $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getPath()->toString());
-            }
-            $subParams->merge($url->getParameters());
-
-            if (!$state->has(SuperComponent::PARAMETER_SUB_REQUESTS)) {
-                $state->set(SuperComponent::PARAMETER_SUB_REQUESTS, new Map());
-            }
-
-            $subState = $state->get(SuperComponent::PARAMETER_SUB_REQUESTS);
-            $subState->set($this->name, $subParams);
-
-            $replace = new Url($route, $state, $url->getFragment());
-            $element->setAttribute($attributeName, $replace->toString());
+            $this->replaceWithDeepUrl($element, $attributeName, $url);
         }
     }
 
-    /**
-     * @param \watoki\curir\Url $url
-     * @param Component $component
-     * @return bool
-     */
+    private function replaceWithDeepUrl(\DOMElement $element, $attributeName, Url $url) {
+        $state = $this->createState($element, $url);
+        $subParams = $this->createSubParams($url, $state);
+        $this->getSubState($state)->set($this->name, $subParams);
+
+        $replace = new Url($this->super->getRoute(), $state, $url->getFragment());
+        $element->setAttribute($attributeName, $replace->toString());
+    }
+
+    private function createSubParams(Url $url, Map $state) {
+        $subParams = new Map();
+        if ($this->isUrlEqualsRoute($url, $this->component)
+                || $state->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)
+        ) {
+            $subParams->set(SuperComponent::PARAMETER_TARGET, $url->getPath()->toString());
+        }
+        $subParams->merge($url->getParameters());
+        return $subParams;
+    }
+
+    private function createState(\DOMElement $element, Url $url) {
+        $state = new Map();
+        if ($this->getActionName($url, $element) != 'get'
+                || $url->getParameters()->has(SuperComponent::PARAMETER_PRIMARY_REQUEST)
+        ) {
+            $state->set(SuperComponent::PARAMETER_PRIMARY_REQUEST, $this->name);
+        }
+        $state->merge($this->parameters);
+        return $state;
+    }
+
+    private function getSubState(Map $state) {
+        if (!$state->has(SuperComponent::PARAMETER_SUB_REQUESTS)) {
+            $state->set(SuperComponent::PARAMETER_SUB_REQUESTS, new Map());
+        }
+        return $state->get(SuperComponent::PARAMETER_SUB_REQUESTS);
+    }
+
     private function isUrlEqualsRoute(Url $url, Component $component) {
         $urlPath = new Path($url->getPath()->getNodes()->slice(0, -1));
         $urlPath->getNodes()->append($url->getPath()->getLeafName());
