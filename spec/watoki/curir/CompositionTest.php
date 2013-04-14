@@ -119,6 +119,37 @@ class CompositionTest extends Test {
             </html>');
     }
 
+    function testDeepLinkTarget() {
+        $this->given->theFolder_WithModule('target');
+        $this->given->theComponent_In_WithTemplate('target\Sub', 'target',
+            '<html>
+                <body>
+                    <a href="top.html" target="_top">top</a>
+                    <a href="self.html" target="_self">self</a>
+                    <a href="blank.html" target="_blank">blank</a>
+                </body>
+            </html>');
+        $this->given->theSuperComponent_In_WithTheBody('target\Super', 'target', '
+        function doGet() {
+            return array(
+                "sub" => $this->subComponent(Sub::$CLASS)
+            );
+        }');
+        $this->given->theFile_In_WithContent('Super.test', 'target', '<html><body>Links:  %sub%</body></html>');
+
+        $this->when->iSendTheRequestTo('target\Module');
+
+        $this->then->theHtmlResponseBodyShouldBe(
+            '<html>
+                <body>
+                    Links:
+                    <a href="/base/top.html">top</a>
+                    <a href="/base/super.test?.[sub][~]=/base/self.html">self</a>
+                    <a href="/base/blank.html" target="_blank">blank</a>
+                </body>
+            </html>');
+    }
+
     function testDeepLinkReplacement() {
         $this->given->theFolder_WithModule('deeplink');
         $this->given->theComponent_In_WithTemplate('deeplink\Sub', 'deeplink',

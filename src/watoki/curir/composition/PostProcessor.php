@@ -168,10 +168,25 @@ class PostProcessor {
             return;
         }
 
-        $attributeValue = urldecode(html_entity_decode($element->getAttribute($attributeName)));
+        $attributeValue = $this->decode($element->getAttribute($attributeName));
         $url = Url::parse($attributeValue);
 
-        if (!$url->getHost()) {
+        $this->replaceUrlConsideringTarget($element, $attributeName, $url);
+    }
+
+    private function decode($string) {
+        return urldecode(html_entity_decode($string));
+    }
+
+    private function replaceUrlConsideringTarget(\DOMElement $element, $attributeName, Url $url) {
+        $target = $element->getAttribute('target');
+
+        if ($target == '_top') {
+            $element->removeAttribute('target');
+        } else if (!$url->getHost() && $target != '_blank') {
+            if ($target == '_self') {
+                $element->removeAttribute('target');
+            }
             $this->replaceWithDeepUrl($element, $attributeName, $url);
         }
     }
