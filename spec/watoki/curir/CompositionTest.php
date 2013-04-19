@@ -59,7 +59,7 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('assets\SubComponent', 'assets',
             '<html>
                 <head>
-                    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+                    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet"/>
                 </head>
                 <body><i>%msg%</i></body>
             </html>');
@@ -76,7 +76,7 @@ class CompositionTest extends Test {
         $this->then->theResponseBodyShouldBe(
             '<html>
                 <head>
-                    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+                    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet"/>
                 </head>
                 <body>Hello <i>World</i></body>
             </html>');
@@ -88,12 +88,12 @@ class CompositionTest extends Test {
         $this->given->theComponent_In_WithTemplate('relative\inner\SubComponent', 'relative/inner',
             '<html>
                 <head>
-                    <link href="relative/path/file.css" rel="stylesheet">
+                    <link href="relative/path/file.css" rel="stylesheet"/>
                 </head>
                 <body>
                     <p>%msg%</p>
-                    <img src="also/relative.png">
-                    <img src="/not/relative.png">
+                    <img src="also/relative.png"/>
+                    <img src="/not/relative.png"/>
                 </body>
             </html>');
         $this->given->theSuperComponent_In_WithTheBody('relative\SuperComponent', 'relative', '
@@ -109,12 +109,12 @@ class CompositionTest extends Test {
         $this->then->theResponseBodyShouldBe(
             '<html>
                 <head>
-                    <link href="/base/inner/relative/path/file.css" rel="stylesheet">
+                    <link href="/base/inner/relative/path/file.css" rel="stylesheet"/>
                 </head>
                 <body>
                     Hello <p>World</p>
-                    <img src="/base/inner/also/relative.png">
-                    <img src="/not/relative.png">
+                    <img src="/base/inner/also/relative.png"/>
+                    <img src="/not/relative.png"/>
                 </body>
             </html>');
     }
@@ -210,7 +210,7 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     <form action="sub.test" method="post">
-                        <input name="field[1]">
+                        <input name="field[1]"/>
                         <textarea name="field[2]"></textarea>
                         <select name="field[3]"></select>
                     </form>
@@ -231,7 +231,7 @@ class CompositionTest extends Test {
                 <body>
                     Hello
                     <form action="/base/super.test?!=sub&.[sub][~]=/base/sub.test" method="post">
-                        <input name=".[sub][field][1]">
+                        <input name=".[sub][field][1]"/>
                         <textarea name=".[sub][field][2]"></textarea>
                         <select name=".[sub][field][3]"></select>
                     </form>

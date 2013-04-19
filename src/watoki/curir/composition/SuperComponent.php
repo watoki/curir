@@ -2,6 +2,9 @@
 namespace watoki\curir\composition;
 
 use watoki\collections\Map;
+use watoki\dom\Element;
+use watoki\dom\Parser;
+use watoki\dom\Printer;
 use watoki\tempan\HtmlParser;
 use watoki\curir\Path;
 use watoki\curir\Request;
@@ -172,28 +175,28 @@ abstract class SuperComponent extends Component {
     /**
      * @param string $body
      * @param array|SubComponent[] $subs
-     * @return \DOMElement|mixed|string
+     * @return Element|mixed|string
      */
     private function mergeSubHeaders($body, array $subs) {
-        $parser = new HtmlParser($body);
+        $parser = new Parser($body);
         $head = null;
 
         foreach ($subs as $sub) {
             foreach ($sub->getHeadElements('link') as $element) {
                 if (!$head) {
-                    $head = $parser->getRoot()->firstChild;
-                    if ($head->nodeName != 'head') {
-                        $body = $head;
-                        $head = $parser->getDocument()->createElement('head');
-                        $parser->getRoot()->insertBefore($head, $body);
+                    $root = $parser->findElement('html');
+                    $head = $parser->findElement('head');
+                    if (!$head) {
+                        $head = new Element('head');
+                        $root->getChildren()->insert($head, 0);
                     }
                 }
-
-                $head->appendChild($parser->getDocument()->importNode($element, true));
+                $head->getChildren()->append($element);
             }
         }
 
-        return isset($parser) ? $parser->toString() : $body;
+        $printer = new Printer();
+        return $head ? $printer->printNodes($parser->getNodes()) : $body;
     }
 
     /**

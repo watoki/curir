@@ -10,6 +10,8 @@ use watoki\curir\Response;
 use watoki\curir\controller\Component;
 use watoki\curir\composition\PostProcessor;
 use watoki\curir\composition\SuperComponent;
+use watoki\dom\Element;
+use watoki\dom\Node;
 
 class SubComponent {
 
@@ -90,8 +92,8 @@ public $response;
         if (!$nodeName) {
             return $this->headElements;
         } else {
-            return $this->headElements->filter(function (\DOMNode $element) use ($nodeName) {
-                return $element->nodeName == $nodeName;
+            return $this->headElements->filter(function (Element $element) use ($nodeName) {
+                return $element->getName() == $nodeName;
             });
         }
     }
