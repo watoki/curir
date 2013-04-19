@@ -5,7 +5,6 @@ use watoki\collections\Map;
 use watoki\dom\Element;
 use watoki\dom\Parser;
 use watoki\dom\Printer;
-use watoki\tempan\HtmlParser;
 use watoki\curir\Path;
 use watoki\curir\Request;
 use watoki\curir\Response;

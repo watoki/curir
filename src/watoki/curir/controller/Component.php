@@ -4,7 +4,6 @@ namespace watoki\curir\controller;
 use watoki\collections\Map;
 use watoki\curir\renderer\RendererFactory;
 use watoki\factory\Factory;
-use watoki\tempan\HtmlParser;
 use watoki\curir\Controller;
 use watoki\curir\Path;
 use watoki\curir\Renderer;

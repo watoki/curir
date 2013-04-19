@@ -16,7 +16,6 @@
         "php": ">=5.3.8",
         "watoki/collections": "*",
 		"watoki/factory": "*",
-		"watoki/tempan": "*",
 		"watoki/dom": "*"
     },
     "autoload": {
