@@ -252,7 +252,7 @@ class PostProcessor {
 
         $url = Url::parse('?' . urldecode(html_entity_decode($child->getAttribute($attributeName)->getValue())));
         $replace = new Url(new Path());
-        $replace->getParameters()->set('.', new Map(array($this->name => $url->getParameters())));
+        $replace->getParameters()->set(SuperComponent::PARAMETER_SUB_REQUESTS, new Map(array($this->name => $url->getParameters())));
 
         $replaceName = substr($replace->toString(), 1, -1);
         $child->setAttribute($attributeName, $replaceName);

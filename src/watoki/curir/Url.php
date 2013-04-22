@@ -119,6 +119,17 @@ class Url {
             $string = substr($string, 0, $fragmentPos);
         }
 
+        $parameters = new Map();
+        $queryPos = strpos($string, self::QUERY_STRING_SEPARATOR);
+        if ($queryPos !== false) {
+            $query = substr($string, $queryPos + 1);
+            $string = substr($string, 0, $queryPos);
+
+            if ($query) {
+                $parameters = self::parseParameters($query);
+            }
+        }
+
         $scheme = null;
         $schemeSepPos = strpos($string, self::SCHEME_SEPARATOR);
         if ($schemeSepPos !== false) {
@@ -142,17 +153,6 @@ class Url {
             if ($portPos !== false) {
                 $port = intval(substr($host, $portPos + 1));
                 $host = substr($host, 0, $portPos);
-            }
-        }
-
-        $parameters = new Map();
-        $queryPos = strpos($string, self::QUERY_STRING_SEPARATOR);
-        if ($queryPos !== false) {
-            $query = substr($string, $queryPos + 1);
-            $string = substr($string, 0, $queryPos);
-
-            if ($query) {
-                $parameters = self::parseParameters($query);
             }
         }
 

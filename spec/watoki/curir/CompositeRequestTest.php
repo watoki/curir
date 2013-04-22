@@ -148,7 +148,7 @@ class CompositeRequestTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe('
             <html>
                 <body>
-                    Sub1 <a href="/base/super.test?.[sub2][x]=y&.[sub1][~]=/base/sub1&.[sub1][param1]=val1&.[sub1][param2]=val2">Sub2</a>
+                    Sub1 <a href="/base/super.test?:[sub2][x]=y&:[sub1][~]=/base/sub1&:[sub1][param1]=val1&:[sub1][param2]=val2">Sub2</a>
                 </body>
             </html>
         ');
@@ -212,7 +212,7 @@ class CompositeRequestTest extends Test {
         $this->when->iSendTheRequestTo('subredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super.test?param=Super&.[sub1][param][1]=a&.[sub1][param][2]=b&.[sub1][~]=/base/somewhere/else&.[sub2][param]=x&.[sub2][~]=/base/not/here#foo');
+            '/base/super.test?param=Super&:[sub1][param][1]=a&:[sub1][param][2]=b&:[sub1][~]=/base/somewhere/else&:[sub2][param]=x&:[sub2][~]=/base/not/here#foo');
     }
 
     function testPrimaryRedirect() {
@@ -245,7 +245,7 @@ class CompositeRequestTest extends Test {
         $this->when->iSendTheRequestTo('primaryredirect\Module');
 
         $this->then->theUrlDecodedResponseHeader_ShouldBe(Response::HEADER_LOCATION,
-            '/base/super.test?param=Super&.[sub1][param][1]=a&.[sub1][param][2]=b&.[sub1][~]=/base/somewhere/else#bar');
+            '/base/super.test?param=Super&:[sub1][param][1]=a&:[sub1][param][2]=b&:[sub1][~]=/base/somewhere/else#bar');
     }
 
     function testPrimaryActionInsideSub() {
@@ -281,7 +281,7 @@ class CompositeRequestTest extends Test {
                 '!' => 'sub',
                 '~' => '/base/sub1',
                 'x' => 'hi',
-                '.' => new Map(array(
+                ':' => new Map(array(
                     'sub' => new Map(array(
                         '~' => '/base/sub2',
                         'action' => 'myAction',
@@ -333,7 +333,7 @@ class CompositeRequestTest extends Test {
 class CompositeRequestTest_Given extends CompositionTestGiven {
 
     public function theRequestParameterHasTheState($param) {
-        $this->theRequestParameter_WithValue('.', $param);
+        $this->theRequestParameter_WithValue(':', $param);
     }
 
     public function thePrimaryRequestIsFor($subName) {

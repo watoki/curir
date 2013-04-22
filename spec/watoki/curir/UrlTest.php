@@ -30,7 +30,12 @@ class UrlTest extends Test {
             )
         )));
 
-        $this->assertEquals('test.html?a[b]=1&a[c][d]=2&b[c]=3&b[d]=4', urldecode($url->toString()));
+        $this->assertEquals('test.html?a[b]=1&a[c][d]=2&b[c]=3&b[d]=4', $url->toString());
+    }
+
+    function testSpecialCharactersInQuery() {
+        $url = Url::parse('some?special:=char');
+        $this->assertEquals('some?special:=char', $url->toString());
     }
 
 }

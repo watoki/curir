@@ -18,7 +18,7 @@ abstract class SuperComponent extends Component {
 
     const PARAMETER_PRIMARY_REQUEST = '!';
 
-    const PARAMETER_SUB_REQUESTS = '.';
+    const PARAMETER_SUB_REQUESTS = ':';
 
     const PARAMETER_TARGET = '~';
 

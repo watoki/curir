@@ -144,7 +144,7 @@ class CompositionTest extends Test {
                 <body>
                     Links:
                     <a href="/base/top.html">top</a>
-                    <a href="/base/super.test?.[sub][~]=/base/self.html">self</a>
+                    <a href="/base/super.test?:[sub][~]=/base/self.html">self</a>
                     <a href="/base/blank.html" target="_blank">blank</a>
                 </body>
             </html>');
@@ -171,7 +171,7 @@ class CompositionTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe(
             '<html>
                 <body>
-                    Hello <a href="/base/super.test?.[sub][~]=/base/some/link.test&.[sub][param1][map][map2]=val1&.[sub][param2]=val2">World</a>
+                    Hello <a href="/base/super.test?:[sub][~]=/base/some/link.test&:[sub][param1][map][map2]=val1&:[sub][param2]=val2">World</a>
                 </body>
             </html>');
     }
@@ -230,10 +230,10 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     Hello
-                    <form action="/base/super.test?!=sub&.[sub][~]=/base/sub.test" method="post">
-                        <input name=".[sub][field][1]"/>
-                        <textarea name=".[sub][field][2]"></textarea>
-                        <select name=".[sub][field][3]"></select>
+                    <form action="/base/super.test?!=sub&:[sub][~]=/base/sub.test" method="post">
+                        <input name=":[sub][field][1]"/>
+                        <textarea name=":[sub][field][2]"></textarea>
+                        <select name=":[sub][field][3]"></select>
                     </form>
                 </body>
             </html>');
@@ -262,8 +262,8 @@ class CompositionTest extends Test {
             '<html>
                 <body>
                     Hello
-                    <form action="/base/super.test?!=sub&.[sub][~]=/base/sub.test" method="post"></form>
-                    <a href="/base/super.test?!=sub&.[sub][~]=/base/sub.test&.[sub][action]=myAction">World</a>
+                    <form action="/base/super.test?!=sub&:[sub][~]=/base/sub.test" method="post"></form>
+                    <a href="/base/super.test?!=sub&:[sub][~]=/base/sub.test&:[sub][action]=myAction">World</a>
                 </body>
             </html>');
     }
@@ -318,7 +318,7 @@ class CompositionTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe(
             '<html>
                 <body>
-                    Hello <a href="/base/super.test?.[sub][param1]=val1">World</a>
+                    Hello <a href="/base/super.test?:[sub][param1]=val1">World</a>
                 </body>
             </html>');
     }
@@ -347,7 +347,7 @@ class CompositionTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><body>
                 Hello Sub1:World,
-                hello <a href="/base/super.test?.[sub1][param1]=val1">Sub2</a>:World
+                hello <a href="/base/super.test?:[sub1][param1]=val1">Sub2</a>:World
             </body></html>');
     }
 
@@ -378,7 +378,7 @@ class CompositionTest extends Test {
         $this->then->theHtmlResponseBodyShouldBe(
             '<html><body>
                 Hello Sub1:World,
-                hello <a href="/base/super.test?.[sub1][param2]=other&.[sub1][param4]=new">Sub2</a>:World
+                hello <a href="/base/super.test?:[sub1][param2]=other&:[sub1][param4]=new">Sub2</a>:World
             </body></html>');
     }
 
@@ -445,8 +445,8 @@ class CompositionTest extends Test {
         <html>
             <body>
                 <a href="super.test?i=k">Super</a>
-                <a href="/base/super.test?.[sub][x]=y">Sub1</a>
-                <a href="/base/super.test?.[sub][p1]=v1&.[sub][.][sub][a]=b">Sub2</a>
+                <a href="/base/super.test?:[sub][x]=y">Sub1</a>
+                <a href="/base/super.test?:[sub][p1]=v1&:[sub][:][sub][a]=b">Sub2</a>
             </body>
         </html>');
     }
@@ -484,8 +484,8 @@ class CompositionTest extends Test {
                 Sub1
                 <a href="/base/super.test
                     ?!=sub
-                    &.[sub][~]=/base/Sub1&.[sub][!]=sub&.[sub][p]=v
-                    &.[sub][.][sub][~]=/base/sub2&.[sub][.][sub][action]=primary&.[sub][.][sub][z]=u">Sub2</a>
+                    &:[sub][~]=/base/Sub1&:[sub][!]=sub&:[sub][p]=v
+                    &:[sub][:][sub][~]=/base/sub2&:[sub][:][sub][action]=primary&:[sub][:][sub][z]=u">Sub2</a>
             </body>
         </html>');
     }
@@ -514,7 +514,7 @@ class CompositionTest extends Test {
 
         $this->then->theHtmlResponseBodyShouldBe('<html>
             <body>
-                <a href="/base/super.test?.[list.0.item][x]=y">Sub</a>
+                <a href="/base/super.test?:[list.0.item][x]=y">Sub</a>
             </body>
         </html>');
     }
