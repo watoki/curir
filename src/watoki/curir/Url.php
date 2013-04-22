@@ -196,7 +196,7 @@ class Url {
     public function toString() {
         $queries = array();
         foreach ($this->flattenParams($this->parameters) as $key => $value) {
-            $queries[] = urlencode($key) . '=' . urlencode($value);
+            $queries[] = $key . '=' . urlencode($value);
         }
 
         return $this->path->toString()
