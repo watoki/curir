@@ -32,7 +32,10 @@ abstract class Component extends Controller {
     public function respond(Request $request) {
         $response = $this->getResponse();
         $methodName = $this->makeMethodName($this->getActionName($request));
-        $response->setBody($this->renderAction($methodName, $request->getParameters()));
+        $rendered = $this->renderAction($methodName, $request->getParameters());
+        if ($rendered) {
+            $response->setBody($rendered);
+        }
 
         return $response;
     }
