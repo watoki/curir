@@ -58,17 +58,21 @@ class RendererFactory {
      * @return null|string
      */
     protected function getTemplate(Component $component, $format) {
-        $templateFile = $this->getTemplateFile($component, $format);
+        $reflection = new \ReflectionClass($component);
+        do {
+            $templateFile = $this->getTemplateFile($reflection, $format);
+            $reflection = $reflection->getParentClass();
+        } while (!file_exists($templateFile) && $reflection);
+
         if (!file_exists($templateFile)) {
             return null;
         }
         return file_get_contents($templateFile);
     }
 
-    protected function getTemplateFile(Component $component, $format) {
-        $classReflection = new \ReflectionClass($component);
-        $componentName = FileRouter::stripControllerName($classReflection->getShortName());
-        return dirname($classReflection->getFileName()) . '/' . lcfirst($componentName) . '.' . $format;
+    protected function getTemplateFile(\ReflectionClass $componentReflection, $format) {
+        $componentName = FileRouter::stripControllerName($componentReflection->getShortName());
+        return dirname($componentReflection->getFileName()) . '/' . lcfirst($componentName) . '.' . $format;
     }
 
 }
