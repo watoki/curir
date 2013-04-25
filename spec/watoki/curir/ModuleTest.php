@@ -116,6 +116,30 @@ class ModuleTest extends Test {
         $this->then->theResponseHeader_ShouldBe(Response::HEADER_LOCATION, '/base/inner/some/path');
     }
 
+    public function testInheritFile() {
+        $this->given->theFolder('base');
+        $this->given->theModule_In('base\BaseModule', 'base');
+        $this->given->theFile_In_WithContent('test.txt', 'base', 'Hello World');
+        $this->given->theFolder('extended');
+        $this->given->theModule_In_Extending('extended\ExtendedModule', 'extended', '\base\BaseModule');
+
+        $this->when->iRequest_From('test.txt', 'extended\ExtendedModule');
+
+        $this->then->theResponseBodyShouldBe('Hello World');
+    }
+
+    public function testInheritComponent() {
+        $this->given->theFolder('base2');
+        $this->given->theModule_In('base2\BaseModule', 'base2');
+        $this->given->theComponent_In('base2\TestComponent', 'base2');
+        $this->given->theFolder('extended2');
+        $this->given->theModule_In_Extending('extended2\ExtendedModule', 'extended2', '\base2\BaseModule');
+
+        $this->when->iRequest_From('test.html', 'extended2\ExtendedModule');
+
+        $this->then->theResponseBodyShouldBe('Found base2\TestComponent');
+    }
+
 }
 
 class ModuleTest_Given extends Given {
@@ -125,7 +149,15 @@ class ModuleTest_Given extends Given {
     }
 
     public function theModule_In_WithTheBody($moduleName, $folder, $body) {
-        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, '\watoki\curir\controller\Module', $body);
+        $this->theModule_In_WithTheBody_Extending($moduleName, $folder, $body, '\watoki\curir\controller\Module');
+    }
+
+    public function theModule_In_Extending($moduleName, $folder, $baseClass) {
+        $this->theModule_In_WithTheBody_Extending($moduleName, $folder, '', $baseClass);
+    }
+
+    public function theModule_In_WithTheBody_Extending($moduleName, $folder, $body, $baseClass) {
+        $this->theClass_In_Extending_WithTheBody($moduleName, $folder, $baseClass, $body);
     }
 
     public function theModule_InThatRedirectsTo($moduleName, $folder, $target) {

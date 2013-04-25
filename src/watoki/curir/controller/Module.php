@@ -52,27 +52,23 @@ abstract class Module extends Controller {
         }
 
         if ($request->getResource()) {
-            $file = $this->getDirectory() . '/' . $request->getResource()->toString();
-            if (file_exists($file) && is_file($file) && $request->getResource()->getLeafExtension() != 'php') {
-                return $this->createFileResponse($request);
+            $file = $this->resolveFile($request);
+            if ($file) {
+                return $this->createFileResponse($file, $request->getResource()->getLeafExtension());
             }
         }
 
         throw new \Exception('Could not resolve request [' . $request->getResource()->toString() . '] in [' . get_class($this) . ']');
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
-    protected function createFileResponse(Request $request) {
+    protected function createFileResponse($file, $extension) {
         $response = $this->getResponse();
-        $mimeType = MimeTypes::getType($request->getResource()->getLeafExtension());
+        $mimeType = MimeTypes::getType($extension);
         if ($mimeType) {
             $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, $mimeType);
         }
 
-        $response->setBody(file_get_contents($this->getDirectory() . '/' . $request->getResource()->toString()));
+        $response->setBody(file_get_contents($file));
         return $response;
     }
 
@@ -100,6 +96,18 @@ abstract class Module extends Controller {
             }
         }
         return $this->routers;
+    }
+
+    private function resolveFile(Request $request) {
+        $class = new \ReflectionClass($this);
+        while ($class) {
+            $file = dirname($class->getFileName()) . '/' . $request->getResource()->toString();
+            if (file_exists($file) && is_file($file) && $request->getResource()->getLeafExtension() != 'php') {
+                return $file;
+            }
+            $class = $class->getParentClass();
+        }
+        return null;
     }
 
     /**

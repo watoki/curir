@@ -24,14 +24,28 @@ class FileRouter extends Router {
     }
 
     private function resolveController(Path $route) {
-        $classReflection = new \ReflectionClass($this->parent);
-        $classNamespace = $classReflection->getNamespaceName();
+
+        $class = new \ReflectionClass($this->parent);
+        while ($class) {
+            $resolved = $this->resolveAlongTheRoute($route, $class);
+            if ($resolved) {
+                return $resolved;
+            }
+            $class = $class->getParentClass();
+        }
+
+        return null;
+    }
+
+    private function resolveAlongTheRoute(Path $route, \ReflectionClass $class) {
+        $classNamespace = $class->getNamespaceName();
 
         $classPath = new Path(Liste::split('\\', $classNamespace));
         foreach ($route->getNodes() as $i => $module) {
             $classPath->getNodes()->append($module);
             $classPath->getNodes()->append($this->getModuleName($module));
             $className = $classPath->getNodes()->join('\\');
+
             if (class_exists($className)) {
                 return $this->createController($className, new Path($route->getNodes()->splice(0, $i + 1)));
             }
@@ -42,6 +56,7 @@ class FileRouter extends Router {
         $classPath->getNodes()->pop();
         $classPath->getNodes()->append($componentName);
         $className = $classPath->getNodes()->join('\\');
+
         if (class_exists($className)) {
             return $this->createController($className, $route);
         }

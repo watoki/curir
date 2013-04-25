@@ -72,11 +72,6 @@ abstract class Controller {
         return $this;
     }
 
-    protected function getDirectory() {
-        $class = new \ReflectionClass($this);
-        return dirname($class->getFileName());
-    }
-
     protected function redirect(Url $url) {
         if (!$url->getPath()->isAbsolute()) {
             $url->getPath()->getNodes()->insertAll($this->getBaseRoute()->getNodes(), 0);
