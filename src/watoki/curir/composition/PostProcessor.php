@@ -37,8 +37,6 @@ class PostProcessor {
         'button' => 'name'
     );
 
-    const HEADER_HTML_HEAD = 'x-html-head';
-
     /**
      * @var Map
      */
@@ -94,14 +92,7 @@ class PostProcessor {
      */
     private function postProcessHtml(Response $response, $html) {
         $printer = new Printer();
-
         $response->setBody($printer->printNodes($this->extractBody($html)->getChildren()));
-
-        $elements = array();
-        foreach ($this->headElements as $element) {
-            $elements[] = $printer->printNode($element);
-        }
-        $response->getHeaders()->set(self::HEADER_HTML_HEAD, implode("", $elements));
     }
 
     /**
