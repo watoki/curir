@@ -111,7 +111,7 @@ abstract class Component extends Controller {
         return 'do' . ucfirst($actionName);
     }
 
-    protected function render($model) {
+    public function render($model) {
         return $this->getRenderer()->render($model);
     }
 
