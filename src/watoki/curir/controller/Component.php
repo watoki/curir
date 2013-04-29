@@ -2,6 +2,7 @@
 namespace watoki\curir\controller;
 
 use watoki\collections\Map;
+use watoki\curir\MimeTypes;
 use watoki\curir\renderer\RendererFactory;
 use watoki\factory\Factory;
 use watoki\curir\Controller;
@@ -35,8 +36,10 @@ abstract class Component extends Controller {
         $rendered = $this->renderAction($methodName, $request->getParameters());
         if ($rendered) {
             $response->setBody($rendered);
-            $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE,
-                $this->rendererFactory->getContentType($this->getFormat()));
+            $contentType = MimeTypes::getType($this->getFormat());
+            if ($contentType) {
+                $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, $contentType);
+            }
         }
 
         return $response;
