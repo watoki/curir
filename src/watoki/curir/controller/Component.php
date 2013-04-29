@@ -35,6 +35,8 @@ abstract class Component extends Controller {
         $rendered = $this->renderAction($methodName, $request->getParameters());
         if ($rendered) {
             $response->setBody($rendered);
+            $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE,
+                $this->rendererFactory->getContentType($this->getFormat()));
         }
 
         return $response;

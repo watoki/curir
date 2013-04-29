@@ -17,6 +17,8 @@ class RendererFactory {
 
     private $renderers = array();
 
+    private $contentTypes = array();
+
     function __construct(Factory $factory) {
         $this->factory = $factory;
 
@@ -39,17 +41,27 @@ class RendererFactory {
         ));
     }
 
+    public function getContentType($format) {
+        if (!array_key_exists($format, $this->contentTypes)) {
+            throw new \Exception("No content type set for format [$format].");
+        }
+
+        return $this->contentTypes[$format];
+    }
+
     /**
      * @param string $format
      * @param string $rendererClass
+     * @param string $contentType
      */
-    public function setRenderer($format, $rendererClass) {
+    public function setRenderer($format, $rendererClass, $contentType = 'text/plain') {
         $this->renderers[$format] = $rendererClass;
+        $this->contentTypes[$format] = $contentType;
     }
 
     protected function setDefaultRenderers() {
-        $this->setRenderer('json', JsonRenderer::$CLASS);
-        $this->setRenderer('none', NoneRenderer::$CLASS);
+        $this->setRenderer('json', JsonRenderer::$CLASS, 'text/json');
+        $this->setRenderer('none', NoneRenderer::$CLASS, 'text/plain');
     }
 
     /**
