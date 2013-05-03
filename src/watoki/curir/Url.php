@@ -135,10 +135,6 @@ class Url {
         if ($schemeSepPos !== false) {
             $scheme = substr($string, 0, $schemeSepPos);
             $string = substr($string, $schemeSepPos + 1);
-
-            if (!in_array(strtolower($scheme), array('http', 'https', 'ftp', 'ftps'))) {
-                throw new \Exception("Can't parse given scheme [$scheme]");
-            }
         }
 
         $host = null;
