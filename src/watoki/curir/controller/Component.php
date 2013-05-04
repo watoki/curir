@@ -15,11 +15,14 @@ abstract class Component extends Controller {
 
     public static $CLASS = __CLASS__;
 
-    /**
-     * @var RendererFactory
-     */
+    /** @var RendererFactory */
     protected $rendererFactory;
 
+    /**
+     * @param Factory $factory
+     * @param Path $route
+     * @param Module|null $parent
+     */
     function __construct(Factory $factory, Path $route, Module $parent = null) {
         parent::__construct($factory, $route, $parent);
         $this->rendererFactory = $factory->getInstance(RendererFactory::$CLASS);
@@ -27,7 +30,6 @@ abstract class Component extends Controller {
 
     /**
      * @param Request $request
-     * @throws \Exception
      * @return Response
      */
     public function respond(Request $request) {
@@ -46,7 +48,7 @@ abstract class Component extends Controller {
     }
 
     /**
-     * @param string $action
+     * @param $action
      * @param Map $parameters
      * @return null|string
      */
@@ -60,10 +62,10 @@ abstract class Component extends Controller {
     }
 
     /**
-     * @param $action
+     * @param string $action
      * @param Map $parameters
+     * @return mixed The view model
      * @throws \Exception
-     * @return mixed
      */
     protected function invokeAction($action, Map $parameters) {
         if (!method_exists($this, $action)) {
@@ -77,12 +79,12 @@ abstract class Component extends Controller {
     }
 
     /**
-     * @param \watoki\collections\Map $parameters
+     * @param Map $parameters
      * @param \ReflectionMethod $method
-     * @throws \Exception If a parameter is missing
-     * @return array
+     * @return array Of values for the method's arguments
+     * @throws \Exception
      */
-    private function collectArguments(Map $parameters, \ReflectionMethod $method) {
+    protected function collectArguments(Map $parameters, \ReflectionMethod $method) {
         $args = array();
         foreach ($method->getParameters() as $param) {
             if ($parameters->has($param->getName())) {
@@ -109,13 +111,17 @@ abstract class Component extends Controller {
     }
 
     /**
-     * @param $actionName
+     * @param string $actionName
      * @return string
      */
     public function makeMethodName($actionName) {
         return 'do' . ucfirst($actionName);
     }
 
+    /**
+     * @param mixed $model
+     * @return string
+     */
     public function render($model) {
         return $this->getRenderer()->render($model);
     }
@@ -127,6 +133,9 @@ abstract class Component extends Controller {
         return $this->rendererFactory->getRenderer($this, $this->getFormat());
     }
 
+    /**
+     * @return string
+     */
     protected function getFormat() {
         $leafExtension = $this->getRoute()->getLeafExtension();
         if ($leafExtension) {
@@ -135,12 +144,15 @@ abstract class Component extends Controller {
         return $this->getDefaultFormat();
     }
 
+    /**
+     * @return string
+     */
     protected function getDefaultFormat() {
         return 'html';
     }
 
     /**
-     * @return \watoki\curir\Path
+     * @return Path
      */
     public function getBaseRoute() {
         return new Path($this->getRoute()->getNodes()->slice(0, -1));

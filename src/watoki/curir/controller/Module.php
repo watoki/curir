@@ -17,16 +17,17 @@ abstract class Module extends Controller {
 
     public static $CLASS = __CLASS__;
 
-    /**
-     * @var Map Runtime cache for resolved controllers
-     */
+    /** @var Map Runtime cache for resolved controllers */
     public $resolved;
 
-    /**
-     * @var Liste|Router[]
-     */
+    /** @var Liste|Router[] */
     private $routers;
 
+    /**
+     * @param Factory $factory
+     * @param Path $route
+     * @param Module|null $parent
+     */
     function __construct(Factory $factory, Path $route, Module $parent = null) {
         parent::__construct($factory, $route, $parent);
         $this->resolved = new Map();
@@ -61,6 +62,11 @@ abstract class Module extends Controller {
         throw new \Exception('Could not resolve request [' . $request->getResource()->toString() . '] in [' . get_class($this) . ']');
     }
 
+    /**
+     * @param string $file
+     * @param string $extension
+     * @return Response
+     */
     protected function createFileResponse($file, $extension) {
         $response = $this->getResponse();
         $mimeType = MimeTypes::getType($extension);
@@ -72,6 +78,10 @@ abstract class Module extends Controller {
         return $response;
     }
 
+    /**
+     * @param Request $request
+     * @return null|Controller
+     */
     protected function resolveController(Request $request) {
         $resource = $request->getResource();
 
@@ -86,6 +96,9 @@ abstract class Module extends Controller {
         return null;
     }
 
+    /**
+     * @return Liste|\watoki\curir\Router[]
+     */
     private function getRouters() {
         if (!$this->routers) {
             $this->routers = $this->createRouters();
@@ -98,6 +111,10 @@ abstract class Module extends Controller {
         return $this->routers;
     }
 
+    /**
+     * @param Request $request
+     * @return null|string
+     */
     private function resolveFile(Request $request) {
         $class = new \ReflectionClass($this);
         while ($class) {
@@ -135,7 +152,7 @@ abstract class Module extends Controller {
 
     /**
      * @param $controllerClass
-     * @return null|\watoki\curir\Controller
+     * @return null|Controller
      */
     private function findInRouters($controllerClass) {
         foreach ($this->getRouters() as $router) {
@@ -161,7 +178,7 @@ abstract class Module extends Controller {
 
     /**
      * @param $controllerClass
-     * @return null|\watoki\curir\Controller
+     * @return null|Controller
      */
     private function findInFolders($controllerClass) {
         $commonNamespace = $this->findCommonNamespace($controllerClass, get_class($this));
@@ -178,6 +195,11 @@ abstract class Module extends Controller {
         return null;
     }
 
+    /**
+     * @param string $class1
+     * @param string $class2
+     * @return string
+     */
     private function findCommonNamespace($class1, $class2) {
         $namespace1 = explode('\\', $class1);
         $namespace2 = explode('\\', $class2);
@@ -194,6 +216,10 @@ abstract class Module extends Controller {
         return $common;
     }
 
+    /**
+     * @param Path $path
+     * @return void
+     */
     private function cutAbsoluteBase(Path $path) {
         $route = $this->getRoute();
         if ($path->getNodes()->slice(0, $route->getNodes()->count()) == $route->getNodes()) {
