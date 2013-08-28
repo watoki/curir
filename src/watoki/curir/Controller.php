@@ -39,7 +39,7 @@ abstract class Controller {
     abstract public function respond(Request $request);
 
     /**
-     * @return Path
+     * @return \watoki\curir\Path
      */
     public function getRoute() {
         return $this->route->copy();
