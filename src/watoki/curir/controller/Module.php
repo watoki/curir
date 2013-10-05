@@ -15,8 +15,6 @@ use watoki\curir\router\StaticRouter;
 
 abstract class Module extends Controller {
 
-    public static $CLASS = __CLASS__;
-
     /** @var Map Runtime cache for resolved controllers */
     public $resolved;
 
