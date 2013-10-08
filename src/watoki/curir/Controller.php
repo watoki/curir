@@ -1,13 +1,10 @@
 <?php
 namespace watoki\curir;
- 
-use watoki\factory\Factory;
-use watoki\collections\Liste;
+
 use watoki\curir\controller\Module;
+use watoki\factory\Factory;
 
 abstract class Controller {
-
-    public static $CLASS = __CLASS__;
 
     /** @var \watoki\factory\Factory */
     protected $factory;

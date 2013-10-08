@@ -13,8 +13,6 @@ use watoki\curir\Response;
 
 abstract class Component extends Controller {
 
-    public static $CLASS = __CLASS__;
-
     /** @var RendererFactory */
     protected $rendererFactory;
 
