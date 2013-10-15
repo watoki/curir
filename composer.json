@@ -1,7 +1,7 @@
 {
     "name": "watoki/curir",
-    "description": "Modular web delivery system for PHP applications",
-    "keywords": ["MVC", "modular", "controller", "watoki"],
+    "description": "Web delivery system for PHP applications",
+    "keywords": ["MVC", "routing", "router", "watoki"],
     "homepage": "http://github.com/watoki/curir",
     "type": "library",
     "license": "MIT",
@@ -15,8 +15,11 @@
     "require": {
         "php": ">=5.3.8",
         "watoki/collections": "*",
-		"watoki/factory": "*",
-		"watoki/dom": "*"
+		"watoki/factory": "*"
+    },
+    "require-dev": {
+        "watoki/scrut": "*",
+        "rtens/mockster": "*"
     },
     "autoload": {
         "psr-0": {

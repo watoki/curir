@@ -1,5 +1,5 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\http;
  
 use watoki\collections\Map;
 
@@ -7,7 +7,7 @@ class Url {
 
     public static $CLASS = __CLASS__;
 
-    const hostPrefix = '//';
+    const HOST_PREFIX = '//';
 
     const SEPARATOR = '/';
 
@@ -139,7 +139,7 @@ class Url {
 
         $host = null;
         $port = null;
-        if (substr($string, 0, 2) == self::hostPrefix) {
+        if (substr($string, 0, 2) == self::HOST_PREFIX) {
             $string = substr($string, 2);
             $hostPos = strpos($string, self::SEPARATOR);
             $host = substr($string, 0, $hostPos);
@@ -195,9 +195,17 @@ class Url {
             $queries[] = $key . '=' . urlencode($value);
         }
 
-        return $this->path->toString()
+        $port = $this->port ? self::PORT_SEPARATOR . $this->port : '';
+        $scheme = $this->scheme ? $this->scheme . self::SCHEME_SEPARATOR : '';
+
+        return $scheme . self::HOST_PREFIX . $this->host . $port
+                . $this->path->toString()
                 . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
                 . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
+    }
+
+    public function __toString() {
+        return $this->toString();
     }
 
     private function flattenParams(Map $parameters, $i = 0) {

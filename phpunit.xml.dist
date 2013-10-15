@@ -4,9 +4,4 @@
          backupStaticAttributes="false"
          strict="false"
          verbose="true">
-    <testsuites>
-        <testsuite name="all">
-            <directory suffix="Test.php">spec</directory>
-        </testsuite>
-    </testsuites>
 </phpunit>

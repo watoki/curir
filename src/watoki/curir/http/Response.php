@@ -1,5 +1,5 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\http;
  
 use watoki\collections\Map;
 
@@ -30,8 +30,9 @@ class Response {
      */
     private $body;
 
-    function __construct() {
+    function __construct($body = null) {
         $this->headers = new Map();
+        $this->body = $body;
     }
 
     /**

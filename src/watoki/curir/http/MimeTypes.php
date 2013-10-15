@@ -1,9 +1,7 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\http;
 
 class MimeTypes {
-
-    public static $CLASS = __CLASS__;
 
     private static $map = array(
         'x-world/x-3dmf' => array('3dmf', '3dm', 'qd3d', 'qd3'),
