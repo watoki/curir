@@ -15,7 +15,7 @@ class ResourceFixture extends Fixture {
     private $response;
 
     public function whenIRequestAResponseFromTheStaticResource($target) {
-        $resource = new StaticResource($target, null, $this->file->tmp. $target);
+        $resource = new StaticResource($this->file->tmp, $target);
         $this->response = $resource->respond(new Request());
     }
 

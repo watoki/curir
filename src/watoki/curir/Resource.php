@@ -11,12 +11,21 @@ use watoki\curir\resource\Container;
 abstract class Resource {
 
     /** @var string */
+    private $directory;
+
+    /** @var string */
     private $name;
 
     /** @var Container|null */
     private $parent;
 
-    public function __construct($name, Container $parent = null) {
+    /**
+     * @param string $directory
+     * @param string $name
+     * @param Container|null $parent
+     */
+    public function __construct($directory, $name, Container $parent = null) {
+        $this->directory = rtrim($directory, DIRECTORY_SEPARATOR);
         $this->parent = $parent;
         $this->name = $name;
     }
@@ -26,6 +35,13 @@ abstract class Resource {
      * @return Response
      */
     abstract public function respond(Request $request);
+
+    /**
+     * @return string
+     */
+    public function getDirectory() {
+        return $this->directory;
+    }
 
     /**
      * @return string

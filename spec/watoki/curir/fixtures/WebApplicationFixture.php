@@ -102,8 +102,8 @@ class WebApplicationFixture_Resource extends Resource {
 
     static $CLASS = __CLASS__;
 
-    public function __construct($name, Container $parent = null) {
-        parent::__construct($name, $parent);
+    public function __construct($directory, $name, Container $parent = null) {
+        parent::__construct($directory, $name, $parent);
         WebApplicationFixture::$root = $this;
     }
 

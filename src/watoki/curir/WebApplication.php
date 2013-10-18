@@ -26,7 +26,10 @@ class WebApplication {
     public function __construct($rootResourceClass) {
         $factory = new Factory();
 
+        $reflection = new \ReflectionClass($rootResourceClass);
+
         $this->root = $factory->getInstance($rootResourceClass, array(
+            'directory' => dirname($reflection->getFileName()),
             'name' => $this->buildName()
         ));
     }

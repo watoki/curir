@@ -3,21 +3,13 @@ namespace watoki\curir\resource;
 
 use watoki\curir\http\MimeTypes;
 use watoki\curir\http\Request;
-use watoki\curir\Resource;
 use watoki\curir\http\Response;
+use watoki\curir\Resource;
 
 /**
  * A StaticResource is the implicit Resource associated with a static file.
  */
 class StaticResource extends Resource {
-
-    /** @var string */
-    private $file;
-
-    public function __construct($name, Container $parent = null, $file) {
-        parent::__construct($name, $parent);
-        $this->file = $file;
-    }
 
     /**
      * @param Request $request
@@ -26,17 +18,23 @@ class StaticResource extends Resource {
     public function respond(Request $request) {
         $response = new Response();
 
-        $extension = 'txt';
-        $basename = basename($this->file);
-        $pos = strrpos($basename, '.');
+        $extension = null;
+        $pos = strrpos($this->getName(), '.');
         if ($pos) {
-            $extension = substr($basename, $pos + 1);
+            $extension = substr($this->getName(), $pos + 1);
         }
 
-        $response->setBody(file_get_contents($this->file));
-        $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, MimeTypes::getType($extension));
+        $file = $this->getDirectory() . DIRECTORY_SEPARATOR . $this->getName();
+        $contentType = $extension ? MimeTypes::getType($extension) : $this->getDefaultContentType();
+
+        $response->setBody(file_get_contents($file));
+        $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, $contentType);
 
         return $response;
+    }
+
+    protected function getDefaultContentType() {
+        return MimeTypes::getType('txt');
     }
 }
  
