@@ -5,7 +5,7 @@ use watoki\collections\Map;
 use watoki\curir\http\Request;
 use watoki\curir\renderer\RendererFactory;
 use watoki\curir\Resource;
-use watoki\curir\http\Response;
+use watoki\curir\Responder;
 
 /**
  * The Response of a DynamicResource is rendered by translating the Request into a method invocation.
@@ -21,15 +21,15 @@ abstract class DynamicResource extends Resource {
     }
 
     public function respond(Request $request) {
-        return new Response($this->renderBody($request));
+        $responder = $this->invokeMethod($request->getMethod(), $request->getParameters());
+        return $responder->createResponse($this, $request);
     }
 
-    private function renderBody(Request $request) {
-        $model = $this->invokeMethod($request->getMethod(), $request->getParameters());
-        $renderer = $this->rendererFactory->getRenderer($request->getFormat());
-        return $renderer->render($this->getTemplate($request), $model);
-    }
-
+    /**
+     * @param string $method
+     * @param Map $parameters
+     * @return Responder
+     */
     private function invokeMethod($method, Map $parameters) {
         $reflection = new \ReflectionMethod($this, $this->buildMethodName($method));
         return $reflection->invokeArgs($this, $this->collectArguments($parameters, $reflection));
@@ -53,10 +53,6 @@ abstract class DynamicResource extends Resource {
 
     private function buildMethodName($method) {
         return 'do' . ucfirst($method);
-    }
-
-    protected function getTemplate(Request $request) {
-        return '';
     }
 
 }

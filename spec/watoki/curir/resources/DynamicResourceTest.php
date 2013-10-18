@@ -17,9 +17,19 @@ class DynamicResourceTest extends Specification {
 
     function testRenderFormatNotRegistered() {
         $this->resource->givenTheRequestHasTheFormat('nothing');
-        $this->resource->givenTheDynamicResource_WithTheBody('NoFormat', 'function doGet() {return array();}');
+        $this->resource->givenTheDynamicResource_WithTheBody('NoFormat', 'function doGet() {
+            return new \watoki\curir\responder\Presenter();
+        }');
         $this->resource->whenITryToRequestAResponseFromThatResource();
         $this->resource->thenTheRequestShouldFailWith('No Renderer set for format [nothing].');
+    }
+
+    function testRedirectRequest() {
+        $this->resource->givenTheDynamicResource_WithTheBody('RedirectMe', 'function doGet() {
+            return new \watoki\curir\responder\Redirecter(\watoki\curir\http\Path::parse("redirect/me/here"));
+        }');
+        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->thenIShouldBeRedirectedTo('redirect/me/here');
     }
 
     function testInvokeMethodAndRenderModel() {
@@ -27,10 +37,6 @@ class DynamicResourceTest extends Specification {
     }
 
     function testUnSerializeParameters() {
-        $this->markTestIncomplete();
-    }
-
-    function testRedirectRequest() {
         $this->markTestIncomplete();
     }
 

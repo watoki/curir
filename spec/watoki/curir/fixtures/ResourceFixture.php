@@ -27,6 +27,7 @@ class ResourceFixture extends Fixture {
     private function getRequest() {
         if (!$this->request) {
             $this->request = new Request();
+            $this->request->setFormat('none');
         }
         return $this->request;
     }
@@ -76,5 +77,10 @@ class ResourceFixture extends Fixture {
 
     public function givenTheRequestHasTheFormat($format) {
         $this->getRequest()->setFormat($format);
+    }
+
+    public function thenIShouldBeRedirectedTo($target) {
+        $this->spec->assertTrue($this->response->getHeaders()->has(Response::HEADER_LOCATION), 'No Location header set');
+        $this->spec->assertEquals($target, $this->response->getHeaders()->get(Response::HEADER_LOCATION));
     }
 }
