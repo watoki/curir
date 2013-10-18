@@ -6,6 +6,15 @@ class InflaterRepository {
     /** @var array|Inflater[] indexed by types */
     private $inflaters = array();
 
+    function __construct() {
+        $this->setInflater('boolean', new BooleanInflater());
+        $this->setInflater('integer', new IntegerInflater());
+        $this->setInflater('float', new FloatInflater());
+        $this->setInflater('array', new ArrayInflater());
+        $this->setInflater('string', new StringInflater());
+        $this->setInflater('DateTime', new DateTimeInflater());
+    }
+
     /**
      * @param $type
      * @throws \Exception

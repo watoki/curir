@@ -6,13 +6,7 @@ use watoki\collections\Map;
 use watoki\curir\http\Request;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
-use watoki\curir\serialization\ArrayInflater;
-use watoki\curir\serialization\BooleanInflater;
-use watoki\curir\serialization\DateTimeInflater;
-use watoki\curir\serialization\FloatInflater;
 use watoki\curir\serialization\InflaterRepository;
-use watoki\curir\serialization\IntegerInflater;
-use watoki\curir\serialization\StringInflater;
 use watoki\factory\ClassResolver;
 
 /**
@@ -23,8 +17,12 @@ abstract class DynamicResource extends Resource {
     /** @var ClassResolver */
     private $resolver;
 
-    public function __construct($directory, $name, Container $parent = null) {
+    /** @var InflaterRepository */
+    private $repository;
+
+    public function __construct($directory, $name, Container $parent = null, InflaterRepository $repository) {
         parent::__construct($directory, $name, $parent);
+        $this->repository = $repository;
         $this->resolver = new ClassResolver(new \ReflectionClass($this));
     }
 
@@ -72,15 +70,7 @@ abstract class DynamicResource extends Resource {
     }
 
     private function inflate($value, $type) {
-        $repository = new InflaterRepository();
-        $repository->setInflater('boolean', new BooleanInflater());
-        $repository->setInflater('integer', new IntegerInflater());
-        $repository->setInflater('float', new FloatInflater());
-        $repository->setInflater('array', new ArrayInflater());
-        $repository->setInflater('string', new StringInflater());
-        $repository->setInflater('DateTime', new DateTimeInflater());
-
-        return $repository->getInflater($type)->inflate($value);
+        return $this->repository->getInflater($type)->inflate($value);
     }
 
     private function findTypeHint(\ReflectionMethod $method, \ReflectionParameter $param) {
