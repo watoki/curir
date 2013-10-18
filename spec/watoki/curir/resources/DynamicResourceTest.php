@@ -23,5 +23,9 @@ class DynamicResourceTest extends Specification {
         $this->markTestIncomplete();
     }
 
+    function testDeSerializeParameters() {
+        $this->markTestIncomplete();
+    }
+
 }
  
