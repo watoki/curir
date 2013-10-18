@@ -21,9 +21,28 @@ class ResourceFixture extends Fixture {
     /** @var \watoki\curir\Resource */
     private $resource;
 
+    /** @var Request|null */
+    private $request;
+
+    private function getRequest() {
+        if (!$this->request) {
+            $this->request = new Request();
+        }
+        return $this->request;
+    }
+
     public function givenTheDynamicResource($resource) {
-        eval("class $resource extends \\watoki\\curir\\resource\\DynamicResource {}");
-        $this->resource = new $resource($this->file->tmp, $resource);
+        $this->givenTheDynamicResource_WithTheBody($resource, '');
+    }
+
+    public function givenTheDynamicResource_WithTheBody($resource, $body) {
+        eval("class $resource extends \\watoki\\curir\\resource\\DynamicResource {
+            $body
+        }");
+        $this->resource = $this->spec->factory->getInstance($resource, array(
+            'directory' => $this->file->tmp,
+            'name' => $resource
+        ));
     }
 
     public function givenTheStaticResourceFor($file) {
@@ -31,7 +50,7 @@ class ResourceFixture extends Fixture {
     }
 
     public function whenIRequestAResponseFromThatResource() {
-        $this->response = $this->resource->respond(new Request());
+        $this->response = $this->resource->respond($this->getRequest());
     }
 
     public function whenITryToRequestAResponseFromThatResource() {
@@ -53,5 +72,9 @@ class ResourceFixture extends Fixture {
 
     public function thenTheResponseShouldHaveTheBody($body) {
         $this->spec->assertEquals($body, $this->response->getBody());
+    }
+
+    public function givenTheRequestHasTheFormat($format) {
+        $this->getRequest()->setFormat($format);
     }
 }

@@ -16,7 +16,10 @@ class DynamicResourceTest extends Specification {
     }
 
     function testRenderFormatNotRegistered() {
-        $this->markTestIncomplete();
+        $this->resource->givenTheRequestHasTheFormat('nothing');
+        $this->resource->givenTheDynamicResource_WithTheBody('NoFormat', 'function doGet() {return array();}');
+        $this->resource->whenITryToRequestAResponseFromThatResource();
+        $this->resource->thenTheRequestShouldFailWith('No Renderer set for format [nothing].');
     }
 
     function testInvokeMethodAndRenderModel() {
@@ -24,6 +27,10 @@ class DynamicResourceTest extends Specification {
     }
 
     function testUnSerializeParameters() {
+        $this->markTestIncomplete();
+    }
+
+    function testRedirectRequest() {
         $this->markTestIncomplete();
     }
 

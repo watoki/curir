@@ -3,6 +3,7 @@ namespace watoki\curir\resource;
 
 use watoki\collections\Map;
 use watoki\curir\http\Request;
+use watoki\curir\renderer\RendererFactory;
 use watoki\curir\Resource;
 use watoki\curir\http\Response;
 
@@ -11,12 +12,22 @@ use watoki\curir\http\Response;
  */
 abstract class DynamicResource extends Resource {
 
-    public function respond(Request $request) {
-        return new Response($this->renderBody($request->getMethod(), $request->getParameters()));
+    /** @var \watoki\curir\renderer\RendererFactory */
+    private $rendererFactory;
+
+    public function __construct($directory, $name, Container $parent = null, RendererFactory $rendererFactory) {
+        parent::__construct($directory, $name, $parent);
+        $this->rendererFactory = $rendererFactory;
     }
 
-    private function renderBody($method, Map $parameters) {
-        return $this->invokeMethod($method, $parameters);
+    public function respond(Request $request) {
+        return new Response($this->renderBody($request));
+    }
+
+    private function renderBody(Request $request) {
+        $model = $this->invokeMethod($request->getMethod(), $request->getParameters());
+        $renderer = $this->rendererFactory->getRenderer($request->getFormat());
+        return $renderer->render($this->getTemplate($request), $model);
     }
 
     private function invokeMethod($method, Map $parameters) {
@@ -44,6 +55,9 @@ abstract class DynamicResource extends Resource {
         return 'do' . ucfirst($method);
     }
 
+    protected function getTemplate(Request $request) {
+        return '';
+    }
 
 }
  
