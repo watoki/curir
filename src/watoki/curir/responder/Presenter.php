@@ -12,6 +12,9 @@ class Presenter extends Responder {
     /** @var mixed */
     private $viewModel;
 
+    /** @var null|RendererFactory */
+    private $rendererFactory;
+
     function __construct($viewModel = array()) {
         $this->viewModel = $viewModel;
     }
@@ -22,14 +25,32 @@ class Presenter extends Responder {
      * @return \watoki\curir\http\Response
      */
     public function createResponse(Resource $resource, Request $request) {
-        $factory = new RendererFactory();
-        $renderer = $factory->getRenderer($request->getFormat());
-        $template = $this->getTemplate($resource);
+        $renderer = $this->getRendererFactory()->getRenderer($request->getFormat());
+
+        if ($renderer->needsTemplate()) {
+            $template = $this->getTemplate($resource, $request->getFormat());
+        } else {
+            $template = null;
+        }
 
         return new Response($renderer->render($template, $this->viewModel));
     }
 
-    private function getTemplate($resource) {
-        return '';
+    private function getTemplate(Resource $resource, $format) {
+        $templateFile = $resource->getDirectory() . DIRECTORY_SEPARATOR . lcfirst($resource->getName()) . '.' . $format;
+        if (!file_exists($templateFile)) {
+            throw new \Exception("Could not find template [$templateFile]");
+        }
+        return file_get_contents($templateFile);
+    }
+
+    /**
+     * @return RendererFactory
+     */
+    public function getRendererFactory() {
+        if (!$this->rendererFactory) {
+            $this->rendererFactory = new RendererFactory();
+        }
+        return $this->rendererFactory;
     }
 }

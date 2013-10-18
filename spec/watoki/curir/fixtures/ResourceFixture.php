@@ -37,17 +37,37 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenTheDynamicResource_WithTheBody($resource, $body) {
-        eval("class $resource extends \\watoki\\curir\\resource\\DynamicResource {
-            $body
-        }");
+        $file = $resource . '.php';
+        $this->file->givenTheFile_WithTheContent($file, "<?php
+            class $resource extends \\watoki\\curir\\resource\\DynamicResource {
+                $body
+            }");
+
+        /** @noinspection PhpIncludeInspection */
+        require_once($this->file->getFullPathOf($file));
+
         $this->resource = $this->spec->factory->getInstance($resource, array(
-            'directory' => $this->file->tmp,
+            'directory' => substr($this->file->tmp, 0, -1),
             'name' => $resource
         ));
     }
 
     public function givenTheStaticResourceFor($file) {
         $this->resource = new StaticResource($this->file->tmp, $file);
+    }
+
+    public function givenATestRenderer($rendererName) {
+        eval('class ' . $rendererName . ' implements \\watoki\\curir\\Renderer {
+            public function needsTemplate() {
+                return true;
+            }
+            public function render($template, $model) {
+                foreach ($model as $key => $value) {
+                    $template = str_replace("%{$key}%", $value, $template);
+                }
+                return $template;
+            }
+        }');
     }
 
     public function whenIRequestAResponseFromThatResource() {

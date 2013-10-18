@@ -14,4 +14,6 @@ interface Renderer {
      */
     public function render($template, $model);
 
+    public function needsTemplate();
+
 }

@@ -20,7 +20,7 @@ class FileFixture extends Fixture {
     }
 
     public function givenTheFile_WithTheContent($name, $content) {
-        $fullPath = $this->tmp . $name;
+        $fullPath = $this->getFullPathOf($name);
         @mkdir(dirname($fullPath), 0777, true);
         file_put_contents($fullPath, $content);
 
@@ -40,5 +40,13 @@ class FileFixture extends Fixture {
             }
         }
         @rmdir($dir);
+    }
+
+    /**
+     * @param $name
+     * @return string
+     */
+    public function getFullPathOf($name) {
+        return $this->tmp . $name;
     }
 }

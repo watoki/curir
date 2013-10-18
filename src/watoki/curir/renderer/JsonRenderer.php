@@ -16,4 +16,8 @@ class JsonRenderer implements Renderer {
     public function render($template, $model) {
         return json_encode($model);
     }
+
+    public function needsTemplate() {
+        return false;
+    }
 }

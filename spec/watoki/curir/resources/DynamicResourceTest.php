@@ -1,11 +1,13 @@
 <?php
 namespace spec\watoki\curir\resources;
  
+use spec\watoki\curir\fixtures\FileFixture;
 use spec\watoki\curir\fixtures\ResourceFixture;
 use watoki\scrut\Specification;
 
 /**
  * @property ResourceFixture resource <-
+ * @property FileFixture file <-
  */
 class DynamicResourceTest extends Specification {
 
@@ -43,7 +45,18 @@ class DynamicResourceTest extends Specification {
     }
 
     function testRenderTemplate() {
-        $this->markTestIncomplete();
+        $this->resource->givenATestRenderer('TestRenderer');
+        $this->resource->givenTheDynamicResource_WithTheBody('RenderTemplate', 'function doGet() {
+            $presenter = new \watoki\curir\responder\Presenter(array("foo" => "Hello", "bar" => "World"));
+            $presenter->getRendererFactory()->setRenderer("test", new TestRenderer());
+            return $presenter;
+        }');
+        $this->resource->givenIRequestTheFormat('test');
+        $this->file->givenTheFile_WithTheContent('renderTemplate.test', '%foo% %bar%');
+
+        $this->resource->whenIRequestAResponseFromThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
     function testUnSerializeParameters() {

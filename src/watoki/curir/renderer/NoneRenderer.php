@@ -16,4 +16,8 @@ class NoneRenderer implements Renderer {
     public function render($template, $model) {
         return $model;
     }
+
+    public function needsTemplate() {
+        return false;
+    }
 }
