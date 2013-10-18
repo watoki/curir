@@ -34,13 +34,16 @@ abstract class DynamicResource extends Resource {
         $args = array();
         foreach ($method->getParameters() as $param) {
             if ($parameters->has($param->getName())) {
-                $args[] = $parameters->get($param->getName());
-            } else if (!$param->isOptional()) {
+                $type = $this->findTypeHint($method, $param);
+                $value = $parameters->get($param->getName());
+
+                $args[] = $this->inflate($value, $type);
+            } else if ($param->isDefaultValueAvailable()) {
+                $args[] = $param->getDefaultValue();
+            } else {
                 $class = get_class($this);
                 throw new \Exception(
-                    "Invalid request: Missing Parameter [{$param->getName()}] for method [{$method->getName()}] in component [$class]");
-            } else {
-                $args[] = $param->getDefaultValue();
+                    "Invalid request: Missing parameter [{$param->getName()}] for method [{$method->getName()}] in component [$class]");
             }
         }
         return $args;
@@ -48,6 +51,13 @@ abstract class DynamicResource extends Resource {
 
     private function buildMethodName($method) {
         return 'do' . ucfirst($method);
+    }
+
+    private function inflate($value, $type) {
+        return $value;
+    }
+
+    private function findTypeHint($method, $param) {
     }
 
 }

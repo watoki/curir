@@ -27,7 +27,7 @@ class ResourceFixture extends Fixture {
     private function getRequest() {
         if (!$this->request) {
             $this->request = new Request();
-            $this->request->setFormat('none');
+            $this->request->setFormat('json');
         }
         return $this->request;
     }
@@ -65,6 +65,10 @@ class ResourceFixture extends Fixture {
                 return $template;
             }
         }');
+    }
+
+    public function givenTheRequestParameter_Is($key, $value) {
+        $this->getRequest()->getParameters()->set($key, $value);
     }
 
     public function whenIRequestAResponseFromThatResource() {

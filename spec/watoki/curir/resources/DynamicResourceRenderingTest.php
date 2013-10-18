@@ -9,7 +9,7 @@ use watoki\scrut\Specification;
  * @property ResourceFixture resource <-
  * @property FileFixture file <-
  */
-class DynamicResourceTest extends Specification {
+class DynamicResourceRenderingTest extends Specification {
 
     function testMethodNotExisting() {
         $this->resource->givenTheDynamicResource('NoMethods');
@@ -55,10 +55,6 @@ class DynamicResourceTest extends Specification {
         $this->resource->whenIRequestAResponseFromThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
-    }
-
-    function testUnSerializeParameters() {
-        $this->markTestIncomplete();
     }
 
 }
