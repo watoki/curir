@@ -50,7 +50,12 @@ abstract class DynamicResource extends Resource {
                 $type = $this->findTypeHint($method, $param);
                 $value = $parameters->get($param->getName());
 
-                $args[] = $this->inflate($value, $type);
+                try {
+                    $args[] = $this->inflate($value, $type);
+                } catch (\Exception $e) {
+                    throw new \Exception('Error while inflating parameter [' . $param->getName()
+                    . '] of [' . $method->getDeclaringClass()->getName() . '::' . $method->getName() . '()]: ' . $e->getMessage());
+                }
             } else if ($param->isDefaultValueAvailable()) {
                 $args[] = $param->getDefaultValue();
             } else {
@@ -74,6 +79,7 @@ abstract class DynamicResource extends Resource {
         $repository->setInflater('array', new ArrayInflater());
         $repository->setInflater('string', new StringInflater());
         $repository->setInflater('DateTime', new DateTimeInflater());
+
         return $repository->getInflater($type)->inflate($value);
     }
 

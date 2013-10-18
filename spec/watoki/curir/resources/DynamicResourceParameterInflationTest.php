@@ -61,4 +61,16 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('[1,false,3.1415,"test",{"date":"2000-01-01 00:00:00","timezone_type":3,"timezone":"UTC"}]');
     }
 
+    function testInvalidTypeHint() {
+        $this->resource->givenTheDynamicResource_WithTheBody('InvalidTypeHint', '
+            /**
+             * @param invalid $one
+             */
+            function doGet($one) {}');
+        $this->resource->givenTheRequestParameter_Is('one', 'not');
+
+        $this->resource->whenITryToRequestAResponseFromThatResource();
+        $this->resource->thenTheRequestShouldFailWith('Error while inflating parameter [one] of [InvalidTypeHint::doGet()]: Could not find inflater for type [invalid]');
+    }
+
 } 
