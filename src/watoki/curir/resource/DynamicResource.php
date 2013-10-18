@@ -3,7 +3,6 @@ namespace watoki\curir\resource;
 
 use watoki\collections\Map;
 use watoki\curir\http\Request;
-use watoki\curir\renderer\RendererFactory;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
 
@@ -12,12 +11,8 @@ use watoki\curir\Responder;
  */
 abstract class DynamicResource extends Resource {
 
-    /** @var \watoki\curir\renderer\RendererFactory */
-    private $rendererFactory;
-
-    public function __construct($directory, $name, Container $parent = null, RendererFactory $rendererFactory) {
+    public function __construct($directory, $name, Container $parent = null) {
         parent::__construct($directory, $name, $parent);
-        $this->rendererFactory = $rendererFactory;
     }
 
     public function respond(Request $request) {

@@ -56,13 +56,10 @@ class ResourceFixture extends Fixture {
         $this->resource = new StaticResource($this->file->tmp, $file);
     }
 
-    public function givenATestRenderer($rendererName) {
-        eval('class ' . $rendererName . ' implements \\watoki\\curir\\Renderer {
-            public function needsTemplate() {
-                return true;
-            }
-            public function render($template, $model) {
-                foreach ($model as $key => $value) {
+    public function givenThePresenter($presenterName) {
+        eval('class ' . $presenterName . ' extends \watoki\curir\responder\Presenter {
+            public function renderTest($template) {
+                foreach ($this->getModel() as $key => $value) {
                     $template = str_replace("%{$key}%", $value, $template);
                 }
                 return $template;

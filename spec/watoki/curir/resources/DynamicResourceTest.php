@@ -23,7 +23,7 @@ class DynamicResourceTest extends Specification {
             return new \watoki\curir\responder\Presenter();
         }');
         $this->resource->whenITryToRequestAResponseFromThatResource();
-        $this->resource->thenTheRequestShouldFailWith('No Renderer set for format [nothing].');
+        $this->resource->thenTheRequestShouldFailWith("renderNothing() does not exist");
     }
 
     function testRedirectRequest() {
@@ -36,7 +36,7 @@ class DynamicResourceTest extends Specification {
 
     function testRenderModel() {
         $this->resource->givenTheDynamicResource_WithTheBody('RenderMe', 'function doGet() {
-            return new \watoki\curir\responder\Presenter(array("foo" => "Hello", "bar" => "World"));
+            return new \watoki\curir\responder\DefaultPresenter(array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('json');
         $this->resource->whenIRequestAResponseFromThatResource();
@@ -45,11 +45,9 @@ class DynamicResourceTest extends Specification {
     }
 
     function testRenderTemplate() {
-        $this->resource->givenATestRenderer('TestRenderer');
+        $this->resource->givenThePresenter('TestPresenter');
         $this->resource->givenTheDynamicResource_WithTheBody('RenderTemplate', 'function doGet() {
-            $presenter = new \watoki\curir\responder\Presenter(array("foo" => "Hello", "bar" => "World"));
-            $presenter->getRendererFactory()->setRenderer("test", new TestRenderer());
-            return $presenter;
+            return new TestPresenter(array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('test');
         $this->file->givenTheFile_WithTheContent('renderTemplate.test', '%foo% %bar%');

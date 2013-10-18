@@ -3,20 +3,16 @@ namespace watoki\curir\responder;
 
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
-use watoki\curir\renderer\RendererFactory;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
 
 class Presenter extends Responder {
 
     /** @var mixed */
-    private $viewModel;
-
-    /** @var null|RendererFactory */
-    private $rendererFactory;
+    private $model;
 
     function __construct($viewModel = array()) {
-        $this->viewModel = $viewModel;
+        $this->model = $viewModel;
     }
 
     /**
@@ -25,32 +21,35 @@ class Presenter extends Responder {
      * @return \watoki\curir\http\Response
      */
     public function createResponse(Resource $resource, Request $request) {
-        $renderer = $this->getRendererFactory()->getRenderer($request->getFormat());
-
-        if ($renderer->needsTemplate()) {
-            $template = $this->getTemplate($resource, $request->getFormat());
-        } else {
-            $template = null;
-        }
-
-        return new Response($renderer->render($template, $this->viewModel));
+        $templateFile = $this->getTemplateFile($resource, $request->getFormat());
+        return new Response($this->render($templateFile, $request->getFormat()));
     }
 
-    private function getTemplate(Resource $resource, $format) {
-        $templateFile = $resource->getDirectory() . DIRECTORY_SEPARATOR . lcfirst($resource->getName()) . '.' . $format;
+    private function render($templateFile, $format) {
+        $method = new \ReflectionMethod($this, 'render' . ucfirst($format));
+
+        if (count($method->getParameters())) {
+            return $method->invoke($this, $this->getTemplate($templateFile));
+        } else {
+            return $method->invoke($this);
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModel() {
+        return $this->model;
+    }
+
+    private function getTemplate($templateFile) {
         if (!file_exists($templateFile)) {
             throw new \Exception("Could not find template [$templateFile]");
         }
         return file_get_contents($templateFile);
     }
 
-    /**
-     * @return RendererFactory
-     */
-    public function getRendererFactory() {
-        if (!$this->rendererFactory) {
-            $this->rendererFactory = new RendererFactory();
-        }
-        return $this->rendererFactory;
+    protected function getTemplateFile(Resource $resource, $format) {
+        return $resource->getDirectory() . DIRECTORY_SEPARATOR . lcfirst($resource->getName()) . '.' . $format;
     }
 }
