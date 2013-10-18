@@ -27,17 +27,15 @@ class DynamicResourceParameterInflationTest extends Specification {
     }
 
     function testInflateParameters() {
-        $this->markTestIncomplete();
-
         $this->resource->givenTheDynamicResource_WithTheBody('InflateParameters', 'function doGet(\DateTime $d) {
             return new \watoki\curir\responder\DefaultPresenter($d);
         }');
-        $this->resource->givenTheRequestParameter_Is('d', '2000-01-01');
+        $this->resource->givenTheRequestParameter_Is('d', '2011-12-13 14:15:16 UTC');
         $this->resource->givenIRequestTheFormat('json');
 
         $this->resource->whenIRequestAResponseFromThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('');
+        $this->resource->thenTheResponseShouldHaveTheBody('{"date":"2011-12-13 14:15:16","timezone_type":3,"timezone":"UTC"}');
     }
 
 } 

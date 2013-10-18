@@ -1,10 +1,14 @@
 <?php
 namespace watoki\curir\resource;
 
+use rtens\mockster\Method;
 use watoki\collections\Map;
 use watoki\curir\http\Request;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
+use watoki\curir\serialization\DateTimeInflater;
+use watoki\curir\serialization\InflaterRepository;
+use watoki\curir\serialization\StringInflater;
 
 /**
  * The Response of a DynamicResource is rendered by translating the Request into a method invocation.
@@ -54,10 +58,14 @@ abstract class DynamicResource extends Resource {
     }
 
     private function inflate($value, $type) {
-        return $value;
+        $repository = new InflaterRepository();
+        $repository->setInflater('string', new StringInflater());
+        $repository->setInflater('DateTime', new DateTimeInflater());
+        return $repository->getInflater($type)->inflate($value);
     }
 
-    private function findTypeHint($method, $param) {
+    private function findTypeHint(\ReflectionMethod $method, \ReflectionParameter $param) {
+        return $param->getClass() ? $param->getClass()->getName() : "string";
     }
 
 }
