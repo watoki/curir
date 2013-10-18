@@ -16,7 +16,7 @@ class DynamicResourceTest extends Specification {
     }
 
     function testRenderFormatNotRegistered() {
-        $this->resource->givenTheRequestHasTheFormat('nothing');
+        $this->resource->givenIRequestTheFormat('nothing');
         $this->resource->givenTheDynamicResource_WithTheBody('NoFormat', 'function doGet() {
             return new \watoki\curir\responder\Presenter();
         }');
@@ -32,7 +32,17 @@ class DynamicResourceTest extends Specification {
         $this->resource->thenIShouldBeRedirectedTo('redirect/me/here');
     }
 
-    function testInvokeMethodAndRenderModel() {
+    function testRenderModel() {
+        $this->resource->givenTheDynamicResource_WithTheBody('RenderMe', 'function doGet() {
+            return new \watoki\curir\responder\Presenter(array("foo" => "Hello", "bar" => "World"));
+        }');
+        $this->resource->givenIRequestTheFormat('json');
+        $this->resource->whenIRequestAResponseFromThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('{"foo":"Hello","bar":"World"}');
+    }
+
+    function testRenderTemplate() {
         $this->markTestIncomplete();
     }
 

@@ -29,7 +29,7 @@ class RendererFactory {
             throw new \Exception("Could not render model. No Renderer set for format [$format].");
         }
 
-        $this->renderers[$format];
+        return $this->renderers[$format];
     }
 
     /**

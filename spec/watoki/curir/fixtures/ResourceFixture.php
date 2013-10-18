@@ -75,7 +75,7 @@ class ResourceFixture extends Fixture {
         $this->spec->assertEquals($body, $this->response->getBody());
     }
 
-    public function givenTheRequestHasTheFormat($format) {
+    public function givenIRequestTheFormat($format) {
         $this->getRequest()->setFormat($format);
     }
 
