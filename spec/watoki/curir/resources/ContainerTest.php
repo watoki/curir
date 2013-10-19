@@ -73,6 +73,18 @@ class ContainerTest extends Specification {
     }
 
     function testDynamicChildIsPreferred() {
+        $this->file->givenTheFile_WithTheContent('Test.json', 'The file');
+        $this->resource->givenTheDynamicResource_WithTheBody('TestResource', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter("Dynamic content");
+        }');
+        $this->resource->givenTheContainer('PrefersDynamicChild');
+        $this->resource->givenTheRequestHasTheTarget('Test');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('"Dynamic content"');
+    }
+
+    function testDynamicContainerIsPreferred() {
         $this->markTestIncomplete();
     }
 
