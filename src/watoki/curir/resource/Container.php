@@ -1,6 +1,6 @@
 <?php
 namespace watoki\curir\resource;
- 
+
 use watoki\curir\http\Request;
 use watoki\curir\Resource;
 use watoki\curir\serialization\InflaterRepository;
@@ -33,11 +33,11 @@ abstract class Container extends DynamicResource {
             return $found->respond($nextRequest);
         }
 
-        throw new \Exception("Resource [$child] not found in container [" . get_class($this). "]");
+        throw new \Exception("Resource [$child] not found in container [" . get_class($this) . "]");
     }
 
     public function getContainerDirectory() {
-        return $this->getDirectory()  . DIRECTORY_SEPARATOR . $this->realName;
+        return $this->getDirectory() . DIRECTORY_SEPARATOR . $this->realName;
     }
 
     private function findInSuperClasses($child, $format) {
@@ -82,6 +82,11 @@ abstract class Container extends DynamicResource {
             return $container;
         }
 
+        $placeholder = $this->findPlaceholder($child);
+        if ($placeholder) {
+            return $placeholder;
+        }
+
         return null;
     }
 
@@ -124,18 +129,32 @@ abstract class Container extends DynamicResource {
      * @return null|\watoki\curir\Resource
      */
     private function findStaticContainer($child) {
-        $dir = $this->getContainerDirectory();
+        $dir = $this->getContainerDirectory() . DIRECTORY_SEPARATOR . $child;
         if (file_exists($dir) && is_dir($dir)) {
             $namespace = $this->getNamespace() . '\\' . $this->realName;
             /** @var Container $container */
             $container = $this->factory->getInstance(StaticContainer::$CLASS, array(
                 'namespace' => $namespace,
-                'directory' => $dir,
+                'directory' => $this->getContainerDirectory(),
                 'name' => $child,
                 'parent' => $this
             ));
             $container->realName = $child;
             return $container;
+        }
+        return null;
+    }
+
+    private function findPlaceholder($child) {
+        foreach (glob($this->getContainerDirectory() . '/_*.php') as $file) {
+            $class = substr(basename($file), 0, -4);
+            $fqn = $this->getNamespace() . '\\' . $this->realName . '\\' . $class;
+
+            return $this->factory->getInstance($fqn, array(
+                'directory' => $this->getContainerDirectory(),
+                'name' => $child,
+                'parent' => $this
+            ));
         }
         return null;
     }

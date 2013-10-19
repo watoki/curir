@@ -21,11 +21,11 @@ class ContainerTest extends Specification {
     }
 
     function testNotExistingChild() {
-        $this->resource->givenTheRequestHasTheTarget('notexisting');
+        $this->resource->givenTheRequestHasTheTarget('notExisting');
         $this->resource->givenTheContainer('Childless');
 
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith('Resource [notexisting] not found in container [ChildlessResource]');
+        $this->resource->thenTheRequestShouldFailWith('Resource [notExisting] not found in container [ChildlessResource]');
     }
 
     function testForwardToStaticChild() {
