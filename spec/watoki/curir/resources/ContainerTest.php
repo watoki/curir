@@ -85,7 +85,14 @@ class ContainerTest extends Specification {
     }
 
     function testDynamicContainerIsPreferred() {
-        $this->markTestIncomplete();
+        $this->resource->givenTheDynamicResource_In_WithTheBody('NeglectedResource', 'Test', 'function doGet() {}');
+        $this->resource->givenTheContainer_In_WithTheBody('Test', '', 'public function respond(\watoki\curir\http\Request $r) {
+            return new \watoki\curir\http\Response("Me first");
+        }');
+        $this->resource->givenTheRequestHasTheTarget('Test/Neglected');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('Me first');
     }
 
     function testForwardToInheritedChild() {
