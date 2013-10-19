@@ -13,7 +13,7 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testMethodNotExisting() {
         $this->resource->givenTheDynamicResource('NoMethods');
-        $this->resource->whenITryToRequestAResponseFromThatResource();
+        $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith('Method NoMethods::doGet() does not exist');
     }
 
@@ -22,7 +22,7 @@ class DynamicResourceRenderingTest extends Specification {
         $this->resource->givenTheDynamicResource_WithTheBody('NoFormat', 'function doGet() {
             return new \watoki\curir\responder\Presenter();
         }');
-        $this->resource->whenITryToRequestAResponseFromThatResource();
+        $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith("renderNothing() does not exist");
     }
 
@@ -30,7 +30,7 @@ class DynamicResourceRenderingTest extends Specification {
         $this->resource->givenTheDynamicResource_WithTheBody('RedirectMe', 'function doGet() {
             return new \watoki\curir\responder\Redirecter(\watoki\curir\http\Path::parse("redirect/me/here"));
         }');
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
         $this->resource->thenIShouldBeRedirectedTo('redirect/me/here');
     }
 
@@ -39,7 +39,7 @@ class DynamicResourceRenderingTest extends Specification {
             return new \watoki\curir\responder\DefaultPresenter(array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('json');
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('{"foo":"Hello","bar":"World"}');
     }
@@ -52,7 +52,7 @@ class DynamicResourceRenderingTest extends Specification {
         $this->resource->givenIRequestTheFormat('test');
         $this->file->givenTheFile_WithTheContent('renderTemplate.test', '%foo% %bar%');
 
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }

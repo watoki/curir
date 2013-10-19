@@ -15,7 +15,7 @@ class StaticResourceTest extends Specification {
         $this->file->givenTheFile_WithTheContent('someFile.txt', 'Hello World');
         $this->resource->givenTheStaticResourceFor('someFile.txt');
 
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
         $this->resource->thenTheResponseShouldHaveTheContentType('text/plain');
@@ -25,7 +25,7 @@ class StaticResourceTest extends Specification {
         $this->file->givenTheFile_WithTheContent('someFile', 'Hello World');
         $this->resource->givenTheStaticResourceFor('someFile');
 
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
         $this->resource->thenTheResponseShouldHaveTheContentType('text/plain');
@@ -35,7 +35,7 @@ class StaticResourceTest extends Specification {
         $this->file->givenTheFile_WithTheContent('.someFile', 'Hello World');
         $this->resource->givenTheStaticResourceFor('.someFile');
 
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
         $this->resource->thenTheResponseShouldHaveTheContentType('text/plain');

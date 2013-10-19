@@ -16,13 +16,13 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->givenTheRequestParameter_Is('one', 'uno');
         $this->resource->givenTheRequestParameter_Is('two', 'dos');
 
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
         $this->resource->thenTheResponseShouldHaveTheBody('["uno","dos"]');
     }
 
     function testMissingParameter() {
         $this->resource->givenTheDynamicResource_WithTheBody('MissingParameter', 'function doGet($default = "yay", $notThere) {}');
-        $this->resource->whenITryToRequestAResponseFromThatResource();
+        $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith('Missing parameter [notThere] for method [doGet]');
     }
 
@@ -33,7 +33,7 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->givenTheRequestParameter_Is('d', '2011-12-13 14:15:16 UTC');
         $this->resource->givenIRequestTheFormat('json');
 
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('{"date":"2011-12-13 14:15:16","timezone_type":3,"timezone":"UTC"}');
     }
@@ -56,7 +56,7 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->givenTheRequestParameter_Is('string', 'test');
         $this->resource->givenTheRequestParameter_Is('date', '2000-01-01 UTC');
 
-        $this->resource->whenIRequestAResponseFromThatResource();
+        $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('[1,false,3.1415,"test",{"date":"2000-01-01 00:00:00","timezone_type":3,"timezone":"UTC"}]');
     }
@@ -69,7 +69,7 @@ class DynamicResourceParameterInflationTest extends Specification {
             function doGet($one) {}');
         $this->resource->givenTheRequestParameter_Is('one', 'not');
 
-        $this->resource->whenITryToRequestAResponseFromThatResource();
+        $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith('Error while inflating parameter [one] of [InvalidTypeHint::doGet()]: Could not find inflater for type [invalid]');
     }
 

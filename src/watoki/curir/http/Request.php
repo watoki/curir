@@ -97,6 +97,13 @@ class Request {
     }
 
     /**
+     * @param \watoki\curir\http\Path $target
+     */
+    public function setTarget($target) {
+        $this->target = $target;
+    }
+
+    /**
      * @return string
      */
     public function getFormat() {

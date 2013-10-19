@@ -1,6 +1,7 @@
 <?php
 namespace spec\watoki\curir\fixtures;
 
+use watoki\curir\http\Path;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
 use watoki\curir\resource\StaticResource;
@@ -37,23 +38,31 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenTheDynamicResource_WithTheBody($resource, $body) {
-        $file = $resource . '.php';
+        $this->givenThe__In_WithTheBody('DynamicResource', $resource, '', $body);
+    }
+
+    public function givenTheStaticResourceFor($file) {
+        $this->resource = new StaticResource($this->file->tmp, $file);
+    }
+
+    public function givenTheContainer($containerName) {
+        $this->givenThe__In_WithTheBody('Container', $containerName, '', '');
+    }
+
+    private function givenThe__In_WithTheBody($baseClass, $name, $dir, $body) {
+        $file = $dir . DIRECTORY_SEPARATOR . $name . '.php';
         $this->file->givenTheFile_WithTheContent($file, "<?php
-            class $resource extends \\watoki\\curir\\resource\\DynamicResource {
+            class $name extends \\watoki\\curir\\resource\\$baseClass {
                 $body
             }");
 
         /** @noinspection PhpIncludeInspection */
         require_once($this->file->getFullPathOf($file));
 
-        $this->resource = $this->spec->factory->getInstance($resource, array(
+        $this->resource = $this->spec->factory->getInstance($name, array(
             'directory' => substr($this->file->tmp, 0, -1),
-            'name' => $resource
+            'name' => $name
         ));
-    }
-
-    public function givenTheStaticResourceFor($file) {
-        $this->resource = new StaticResource($this->file->tmp, $file);
     }
 
     public function givenThePresenter($presenterName) {
@@ -71,13 +80,17 @@ class ResourceFixture extends Fixture {
         $this->getRequest()->getParameters()->set($key, $value);
     }
 
-    public function whenIRequestAResponseFromThatResource() {
+    public function givenTheRequestHasTheTarget($target) {
+        $this->getRequest()->setTarget(Path::parse($target));
+    }
+
+    public function whenISendTheRequestToThatResource() {
         $this->response = $this->resource->respond($this->getRequest());
     }
 
-    public function whenITryToRequestAResponseFromThatResource() {
+    public function whenITryToSendTheRequestToThatResource() {
         try {
-            $this->whenIRequestAResponseFromThatResource();
+            $this->whenISendTheRequestToThatResource();
         } catch (\Exception $e) {
             $this->caught = $e;
         }
