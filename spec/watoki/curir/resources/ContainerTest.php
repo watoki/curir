@@ -61,6 +61,17 @@ class ContainerTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('"Found me"');
     }
 
+    function testForwardToDynamicContainer() {
+        $this->resource->givenTheContainer_WithTheBody('DynamicContainer', 'public function respond(\watoki\curir\http\Request $r) {
+            return new \watoki\curir\http\Response("Found");
+        }');
+        $this->resource->givenTheContainer('ParentOfDynamicContainer');
+        $this->resource->givenTheRequestHasTheTarget('Dynamic');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('Found');
+    }
+
     function testDynamicChildIsPreferred() {
         $this->markTestIncomplete();
     }
