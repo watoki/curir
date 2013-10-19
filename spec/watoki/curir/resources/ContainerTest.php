@@ -40,18 +40,25 @@ class ContainerTest extends Specification {
     }
 
     function testForwardToDynamicChild() {
-        $this->resource->givenTheDynamicResource_WithTheBody('ChildResource', 'function doGet() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('ChildResource', 'test', 'function doGet() {
             return new \watoki\curir\responder\DefaultPresenter("Found it");
         }');
-        $this->resource->givenTheContainer('WithDynamicChild');
+        $this->resource->givenTheContainer_In('WithDynamicChild', 'test');
         $this->resource->givenTheRequestHasTheTarget('Child');
 
         $this->resource->whenISendTheRequestToThatResource();
         $this->resource->thenTheResponseShouldHaveTheBody('"Found it"');
     }
 
-    function testForwardToDynamicChildWithNamespace() {
-        $this->markTestIncomplete();
+    function testForwardToGrandChild() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('ChildResource', 'test/folder', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter("Found me");
+        }');
+        $this->resource->givenTheContainer('WithGrandChild');
+        $this->resource->givenTheRequestHasTheTarget('test/folder/Child');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('"Found me"');
     }
 
     function testDynamicChildIsPreferred() {

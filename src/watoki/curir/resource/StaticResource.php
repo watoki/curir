@@ -11,6 +11,8 @@ use watoki\curir\Resource;
  */
 class StaticResource extends Resource {
 
+    public static $CLASS = __CLASS__;
+
     /**
      * @param Request $request
      * @return Response

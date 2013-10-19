@@ -38,7 +38,11 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenTheDynamicResource_WithTheBody($resource, $body) {
-        $this->givenThe__In_WithTheBody('DynamicResource', $resource, '', $body);
+        $this->givenTheDynamicResource_In_WithTheBody($resource, '', $body);
+    }
+
+    public function givenTheDynamicResource_In_WithTheBody($name, $dir, $body) {
+        $this->givenThe__In_WithTheBody('DynamicResource', $name, $dir, $body);
     }
 
     public function givenTheStaticResourceFor($file) {
@@ -53,9 +57,17 @@ class ResourceFixture extends Fixture {
         $this->givenThe__In_WithTheBody('Container', $name, '', $body);
     }
 
+    public function givenTheContainer_In($name, $dir) {
+        $this->givenThe__In_WithTheBody('Container', $name, $dir, '');
+    }
+
     private function givenThe__In_WithTheBody($baseClass, $name, $dir, $body) {
         $file = $dir . DIRECTORY_SEPARATOR . $name . '.php';
+        $namespace = str_replace(array('/', '\\'), '\\', $dir);
+        $namespaceStatement = $dir ? 'namespace ' . $namespace . ';' : '';
+
         $this->file->givenTheFile_WithTheContent($file, "<?php
+            $namespaceStatement
             class $name extends \\watoki\\curir\\resource\\$baseClass {
                 $body
             }");
@@ -63,8 +75,8 @@ class ResourceFixture extends Fixture {
         /** @noinspection PhpIncludeInspection */
         require_once($this->file->getFullPathOf($file));
 
-        $this->resource = $this->spec->factory->getInstance($name, array(
-            'directory' => substr($this->file->tmp, 0, -1),
+        $this->resource = $this->spec->factory->getInstance($namespace . '\\' . $name, array(
+            'directory' => rtrim($this->file->tmp . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR) . $dir,
             'name' => $name
         ));
     }
