@@ -61,6 +61,17 @@ class ContainerTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('"Found me"');
     }
 
+    function testCaseInsensitive() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('InsensitiveChild', 'CaseInsensitive/test/folder', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter("Gotcha");
+        }');
+        $this->resource->givenTheRequestHasTheTarget('TeSt/fOlder/insEnsitivEchIld');
+        $this->resource->givenTheContainer('CaseInsensitive');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('"Gotcha"');
+    }
+
     function testForwardToDynamicContainer() {
         $this->resource->givenTheContainer_In_WithTheBody('Dynamic', 'DynamicParent',
             'public function respond(\watoki\curir\http\Request $r) {
