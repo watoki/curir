@@ -10,7 +10,7 @@ class FileFixture extends Fixture {
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
 
-        $this->tmp = __DIR__ . '/tmp/';
+        $this->tmp = __DIR__ . DIRECTORY_SEPARATOR . 'tmp';
         @mkdir($this->tmp);
 
         $that = $this;
@@ -47,6 +47,6 @@ class FileFixture extends Fixture {
      * @return string
      */
     public function getFullPathOf($name) {
-        return $this->tmp . $name;
+        return $this->tmp . DIRECTORY_SEPARATOR . $name;
     }
 }

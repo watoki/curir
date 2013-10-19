@@ -43,14 +43,18 @@ abstract class Container extends DynamicResource {
         throw new \Exception("Resource [$child] not found in container [" . get_class($this). "]");
     }
 
+    public function getContainerDirectory() {
+        return $this->getDirectory()  . DIRECTORY_SEPARATOR . $this->getName();
+    }
+
     /**
      * @param string $child
      * @return null|\watoki\curir\Resource
      */
     private function findStaticChild($child) {
-        if (file_exists($this->getDirectory() . DIRECTORY_SEPARATOR . $child)) {
+        if (file_exists($this->getContainerDirectory() . DIRECTORY_SEPARATOR . $child)) {
             return $this->factory->getInstance(StaticResource::$CLASS, array(
-                'directory' => $this->getDirectory(),
+                'directory' => $this->getContainerDirectory(),
                 'name' => $child,
                 'parent' => $this
             ));
@@ -64,12 +68,12 @@ abstract class Container extends DynamicResource {
      */
     private function findDynamicChild($child) {
         $class = $child . 'Resource';
-        $fileName = $this->getDirectory() . DIRECTORY_SEPARATOR . $class . '.php';
+        $fileName = $this->getContainerDirectory() . DIRECTORY_SEPARATOR . $class . '.php';
 
         if (file_exists($fileName)) {
-            $fqn = $this->getNamespace() . '\\' . $class;
+            $fqn = $this->getNamespace() . '\\' . $this->getName() . '\\' . $class;
             return $this->factory->getInstance($fqn, array(
-                'directory' => $this->getDirectory(),
+                'directory' => $this->getContainerDirectory(),
                 'name' => $child,
                 'parent' => $this
             ));
@@ -82,11 +86,11 @@ abstract class Container extends DynamicResource {
      * @return null|\watoki\curir\Resource
      */
     private function findStaticContainer($child) {
-        $dir = $this->getDirectory() . DIRECTORY_SEPARATOR . $child;
+        $dir = $this->getContainerDirectory();
         if (file_exists($dir) && is_dir($dir)) {
-            $nextNamespace = $this->getNamespace() . '\\' . $child;
+            $namespace = $this->getNamespace() . '\\' . $this->getName();
             return $this->factory->getInstance(StaticContainer::$CLASS, array(
-                'namespace' => $nextNamespace,
+                'namespace' => $namespace,
                 'directory' => $dir,
                 'name' => $child,
                 'parent' => $this

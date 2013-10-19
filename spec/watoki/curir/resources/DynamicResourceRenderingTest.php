@@ -14,7 +14,7 @@ class DynamicResourceRenderingTest extends Specification {
     function testMethodNotExisting() {
         $this->resource->givenTheDynamicResource('NoMethods');
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith('Method NoMethods::doGet() does not exist');
+        $this->resource->thenTheRequestShouldFailWith('Method NoMethodsResource::doGet() does not exist');
     }
 
     function testRenderFormatNotRegistered() {
