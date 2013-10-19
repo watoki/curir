@@ -28,9 +28,22 @@ abstract class Container extends DynamicResource {
         $nextRequest->setTarget($request->getTarget()->copy());
         $child = $nextRequest->getTarget()->shift();
 
+        $found = $this->findInSuperClasses($child, $request->getFormat());
+        if ($found) {
+            return $found->respond($nextRequest);
+        }
+
+        throw new \Exception("Resource [$child] not found in container [" . get_class($this). "]");
+    }
+
+    public function getContainerDirectory() {
+        return $this->getDirectory()  . DIRECTORY_SEPARATOR . $this->realName;
+    }
+
+    private function findInSuperClasses($child, $format) {
         $container = $this;
         while (true) {
-            $found = $container->findChild($request, $child, $nextRequest);
+            $found = $container->findChild($child, $format);
             if ($found) {
                 return $found;
             }
@@ -39,7 +52,7 @@ abstract class Container extends DynamicResource {
             $parent = $reflection->getParentClass();
 
             if ($parent->isAbstract()) {
-                break;
+                return null;
             }
 
             /** @var Container $container */
@@ -50,31 +63,26 @@ abstract class Container extends DynamicResource {
             ));
             $container->realName = substr($parent->getShortName(), 0, -strlen('Resource'));
         }
-
-        throw new \Exception("Resource [$child] not found in container [" . get_class($this). "]");
+        return null;
     }
 
-    private function findChild(Request $request, $child, Request $nextRequest) {
+    private function findChild($child, $format) {
         $dynamicChild = $this->findDynamicChild($child);
         if ($dynamicChild) {
-            return $dynamicChild->respond($nextRequest);
+            return $dynamicChild;
         }
 
-        $staticChild = $this->findStaticChild($child . '.' . $request->getFormat());
+        $staticChild = $this->findStaticChild($child . '.' . $format);
         if ($staticChild) {
-            return $staticChild->respond($nextRequest);
+            return $staticChild;
         }
 
         $container = $this->findStaticContainer($child);
         if ($container) {
-            return $container->respond($nextRequest);
+            return $container;
         }
 
         return null;
-    }
-
-    public function getContainerDirectory() {
-        return $this->getDirectory()  . DIRECTORY_SEPARATOR . $this->realName;
     }
 
     /**
