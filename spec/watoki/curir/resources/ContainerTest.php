@@ -1,11 +1,13 @@
 <?php
 namespace spec\watoki\curir\resources;
  
+use spec\watoki\curir\fixtures\FileFixture;
 use spec\watoki\curir\fixtures\ResourceFixture;
 use watoki\scrut\Specification;
 
 /**
  * @property ResourceFixture resource <-
+ * @property FileFixture file <-
  */
 class ContainerTest extends Specification {
 
@@ -27,10 +29,20 @@ class ContainerTest extends Specification {
     }
 
     function testForwardToStaticChild() {
-        $this->markTestIncomplete();
+        $this->file->givenTheFile_WithTheContent('test.txt', 'Hello World');
+        $this->resource->givenTheStaticResourceFor('test.txt');
+        $this->resource->givenTheContainer('StaticChild');
+        $this->resource->givenTheRequestHasTheTarget('test.txt');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
     function testForwardToDynamicChild() {
+        $this->markTestIncomplete();
+    }
+
+    function testDynamicChildIsPreferred() {
         $this->markTestIncomplete();
     }
 
