@@ -62,10 +62,10 @@ class ContainerTest extends Specification {
     }
 
     function testForwardToDynamicContainer() {
-        $this->resource->givenTheContainer_WithTheBody('DynamicContainer', 'public function respond(\watoki\curir\http\Request $r) {
+        $this->resource->givenTheContainer_WithTheBody('DynamicResource', 'public function respond(\watoki\curir\http\Request $r) {
             return new \watoki\curir\http\Response("Found");
         }');
-        $this->resource->givenTheContainer('ParentOfDynamicContainer');
+        $this->resource->givenTheContainer('ParentOfDynamicResource');
         $this->resource->givenTheRequestHasTheTarget('Dynamic');
 
         $this->resource->whenISendTheRequestToThatResource();
@@ -85,8 +85,8 @@ class ContainerTest extends Specification {
     }
 
     function testDynamicContainerIsPreferred() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('NeglectedResource', 'Test', 'function doGet() {}');
-        $this->resource->givenTheContainer_In_WithTheBody('Test', '', 'public function respond(\watoki\curir\http\Request $r) {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('NeglectedResource', 'Overwritten', 'function doGet() {}');
+        $this->resource->givenTheContainer_In_WithTheBody('OverwrittenResource', '', 'public function respond(\watoki\curir\http\Request $r) {
             return new \watoki\curir\http\Response("Me first");
         }');
         $this->resource->givenTheRequestHasTheTarget('Test/Neglected');

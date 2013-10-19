@@ -63,18 +63,16 @@ abstract class Container extends DynamicResource {
      * @return null|\watoki\curir\Resource
      */
     private function findDynamicChild($child) {
-        foreach (array('Resource', 'Container') as $suffix) {
-            $class = $child . $suffix;
-            $fileName = $this->getDirectory() . DIRECTORY_SEPARATOR . $class . '.php';
+        $class = $child . 'Resource';
+        $fileName = $this->getDirectory() . DIRECTORY_SEPARATOR . $class . '.php';
 
-            if (file_exists($fileName)) {
-                $fqn = $this->getNamespace() . '\\' . $class;
-                return $this->factory->getInstance($fqn, array(
-                    'directory' => $this->getDirectory(),
-                    'name' => $child,
-                    'parent' => $this
-                ));
-            }
+        if (file_exists($fileName)) {
+            $fqn = $this->getNamespace() . '\\' . $class;
+            return $this->factory->getInstance($fqn, array(
+                'directory' => $this->getDirectory(),
+                'name' => $child,
+                'parent' => $this
+            ));
         }
         return null;
     }
