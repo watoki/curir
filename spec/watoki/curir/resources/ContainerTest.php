@@ -32,13 +32,25 @@ class ContainerTest extends Specification {
         $this->file->givenTheFile_WithTheContent('test.txt', 'Hello World');
         $this->resource->givenTheStaticResourceFor('test.txt');
         $this->resource->givenTheContainer('StaticChild');
-        $this->resource->givenTheRequestHasTheTarget('test.txt');
+        $this->resource->givenTheRequestHasTheTarget('test');
+        $this->resource->givenIRequestTheFormat('txt');
 
         $this->resource->whenISendTheRequestToThatResource();
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
     function testForwardToDynamicChild() {
+        $this->resource->givenTheDynamicResource_WithTheBody('ChildResource', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter("Found it");
+        }');
+        $this->resource->givenTheContainer('WithDynamicChild');
+        $this->resource->givenTheRequestHasTheTarget('Child');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('"Found it"');
+    }
+
+    function testForwardToDynamicChildWithNamespace() {
         $this->markTestIncomplete();
     }
 
