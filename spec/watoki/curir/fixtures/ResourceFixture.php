@@ -46,7 +46,11 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenTheContainer($containerName) {
-        $this->givenThe__In_WithTheBody('Container', $containerName, '', '');
+        $this->givenTheContainer_WithTheBody($containerName, '');
+    }
+
+    public function givenTheContainer_WithTheBody($name, $body) {
+        $this->givenThe__In_WithTheBody('Container', $name, '', $body);
     }
 
     private function givenThe__In_WithTheBody($baseClass, $name, $dir, $body) {

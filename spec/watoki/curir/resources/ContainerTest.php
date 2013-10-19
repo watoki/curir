@@ -9,6 +9,15 @@ use watoki\scrut\Specification;
  */
 class ContainerTest extends Specification {
 
+    function testRespondsItself() {
+        $this->resource->givenTheContainer_WithTheBody('MySelf', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter("Hello World");
+        }');
+
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('"Hello World"');
+    }
+
     function testNotExistingChild() {
         $this->resource->givenTheContainer('Childless');
         $this->resource->givenTheRequestHasTheTarget('notexisting');
@@ -26,10 +35,6 @@ class ContainerTest extends Specification {
     }
 
     function testForwardToInheritedChild() {
-        $this->markTestIncomplete();
-    }
-
-    function testRespondsItself() {
         $this->markTestIncomplete();
     }
 
