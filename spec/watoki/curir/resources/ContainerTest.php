@@ -97,13 +97,13 @@ class ContainerTest extends Specification {
     }
 
     function testForwardToInheritedChild() {
-        $this->markTestIncomplete();
-        $this->resource->givenTheContainer_In('BaseResource', 'other/place');
-        $this->resource->givenTheDynamicResource_In_WithTheBody('InheritedChildResource', 'other/place/Base', 'function doGet() {
+        $this->resource->givenTheContainer_In('Base', 'other/place');
+        $this->resource->givenTheDynamicResource_In_WithTheBody('InheritedChild', 'other/place/Base', 'function doGet() {
             return new \watoki\curir\responder\DefaultPresenter("I am inherited");
         }');
-        $this->resource->givenTheContainer_Extending('SubResource', '\other\place\BaseResource');
+        $this->resource->givenTheContainer_In_Extending('Sub', 'ParentOfInheriting', '\other\place\BaseResource');
         $this->resource->givenTheRequestHasTheTarget('Sub/InheritedChild');
+        $this->resource->givenTheContainer('ParentOfInheriting');
 
         $this->resource->whenISendTheRequestToThatResource();
         $this->resource->thenTheResponseShouldHaveTheBody('"I am inherited"');

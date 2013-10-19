@@ -65,8 +65,8 @@ class ResourceFixture extends Fixture {
         $this->givenThe__In_WithTheBody('\\watoki\\curir\\resource\\Container', $name, $dir, $body);
     }
 
-    public function givenTheContainer_Extending($name, $base) {
-        $this->givenThe__In_WithTheBody($base, $name, '', '');
+    public function givenTheContainer_In_Extending($name, $dir, $base) {
+        $this->givenThe__In_WithTheBody($base, $name, $dir, '');
     }
 
     private function givenThe__In_WithTheBody($baseClass, $name, $dir, $body) {
