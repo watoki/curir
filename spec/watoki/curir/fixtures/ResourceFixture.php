@@ -86,7 +86,8 @@ class ResourceFixture extends Fixture {
 
         $this->resource = $this->spec->factory->getInstance($namespace . '\\' . $class, array(
             'directory' => $this->file->tmp . DIRECTORY_SEPARATOR . $dir,
-            'name' => $name
+            'name' => $name,
+            'parent' => null
         ));
     }
 
