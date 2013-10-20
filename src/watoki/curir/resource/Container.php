@@ -95,7 +95,8 @@ abstract class Container extends DynamicResource {
      * @return null|\watoki\curir\Resource
      */
     private function findStaticChild($child) {
-        if (file_exists($this->getContainerDirectory() . DIRECTORY_SEPARATOR . $child)) {
+        $file = $this->findFile($child);
+        if ($file) {
             return $this->factory->getInstance(StaticResource::$CLASS, array(
                 'directory' => $this->getContainerDirectory(),
                 'name' => $child,
@@ -111,9 +112,9 @@ abstract class Container extends DynamicResource {
      */
     private function findDynamicChild($child) {
         $class = $child . 'Resource';
-        $fileName = $this->getContainerDirectory() . DIRECTORY_SEPARATOR . $class . '.php';
+        $file = $this->findFile($class . '.php');
 
-        if (file_exists($fileName)) {
+        if ($file) {
             $fqn = $this->getNamespace() . '\\' . $this->realName . '\\' . $class;
             return $this->factory->getInstance($fqn, array(
                 'directory' => $this->getContainerDirectory(),
@@ -129,8 +130,8 @@ abstract class Container extends DynamicResource {
      * @return null|\watoki\curir\Resource
      */
     private function findStaticContainer($child) {
-        $dir = $this->getContainerDirectory() . DIRECTORY_SEPARATOR . $child;
-        if (file_exists($dir) && is_dir($dir)) {
+        $dir = $this->findFile($child);
+        if ($dir && is_dir($dir)) {
             $namespace = $this->getNamespace() . '\\' . $this->realName;
             /** @var Container $container */
             $container = $this->factory->getInstance(StaticContainer::$CLASS, array(
@@ -141,6 +142,15 @@ abstract class Container extends DynamicResource {
             ));
             $container->realName = $child;
             return $container;
+        }
+        return null;
+    }
+
+    private function findFile($fileName) {
+        foreach (glob($this->getContainerDirectory() . DIRECTORY_SEPARATOR . '*') as $file) {
+            if (strtolower(basename($file)) == strtolower($fileName)) {
+                return $file;
+            }
         }
         return null;
     }
