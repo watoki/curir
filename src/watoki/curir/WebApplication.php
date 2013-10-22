@@ -24,13 +24,16 @@ class WebApplication {
     private $root;
 
     public function __construct($rootResourceClass) {
+        $this->rootResourceClass = $rootResourceClass;
         $factory = new Factory();
 
         $reflection = new \ReflectionClass($rootResourceClass);
 
         $this->root = $factory->getInstance($rootResourceClass, array(
             'directory' => dirname($reflection->getFileName()),
-            'name' => $this->buildName()
+            'url' => $this->buildRootUrl(),
+            'name' => substr($reflection->getShortName(), 0, -strlen('Resource')),
+            'parent' => null
         ));
     }
 
@@ -50,14 +53,14 @@ class WebApplication {
         return 'method';
     }
 
-    protected function buildName() {
+    protected function buildRootUrl() {
         $scheme = isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : '';
         $port = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != 80 ? $_SERVER['SERVER_PORT'] : null;
 
         $host = $_SERVER['HTTP_HOST'];
         $path = dirname($_SERVER['SCRIPT_NAME']);
 
-        return (string) new Url(Path::parse($path), null, null, $host, $port, $scheme);
+        return new Url($scheme, $host, $port, Path::parse($path));
     }
 
     protected function buildRequest() {
@@ -91,6 +94,6 @@ class WebApplication {
             }
         }
 
-        return new Request($method, $target, $format, $params, $headers, $body);
+        return new Request($target, $format, $method, $params, $headers, $body);
     }
 }

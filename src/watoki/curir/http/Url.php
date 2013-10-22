@@ -19,43 +19,31 @@ class Url {
 
     const FRAGMENT_SEPARATOR = '#';
 
-    /**
-     * @var Path
-     */
+    /** @var Path */
     private $path;
 
-    /**
-     * @var \watoki\collections\Map
-     */
+    /** @var \watoki\collections\Map */
     private $parameters;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $fragment;
 
-    /**
-     * @var null|string
-     */
+    /** @var null|string */
     private $scheme;
 
-    /**
-     * @var null|string
-     */
+    /** @var null|string */
     private $host;
 
-    /**
-     * @var null|int
-     */
+    /** @var null|int */
     private $port;
 
-    function __construct(Path $resource, Map $parameters = null, $fragment = null, $host = null, $port = null, $scheme = null) {
-        $this->path = $resource;
-        $this->parameters = $parameters ?: new Map();
-        $this->fragment = $fragment;
+    function __construct($scheme, $host, $port, Path $path, Map $parameters = null, $fragment = null) {
         $this->scheme = $scheme;
         $this->host = $host;
         $this->port = $port;
+        $this->path = $path;
+        $this->parameters = $parameters ?: new Map();
+        $this->fragment = $fragment;
     }
 
     /**
@@ -152,7 +140,9 @@ class Url {
             }
         }
 
-        return new Url(Path::parse($string), $parameters, $fragment, $host, $port, $scheme);
+        $path = Path::parse($string);
+
+        return new Url($scheme, $host, $port, $path, $parameters, $fragment);
     }
 
     /**
@@ -221,6 +211,13 @@ class Url {
             }
         }
         return $flat;
+    }
+
+    /**
+     * @return static
+     */
+    public function copy() {
+        return new Url($this->scheme, $this->host, $this->port, $this->path->copy(), $this->parameters->deepCopy(), $this->fragment);
     }
 
 }

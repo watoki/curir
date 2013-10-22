@@ -2,6 +2,7 @@
 namespace watoki\curir\resource;
 
 use watoki\curir\http\Request;
+use watoki\curir\http\Url;
 use watoki\curir\Resource;
 use watoki\curir\serialization\InflaterRepository;
 use watoki\factory\Factory;
@@ -11,12 +12,10 @@ abstract class Container extends DynamicResource {
     /** @var \watoki\factory\Factory */
     private $factory;
 
-    private $realName;
-
-    public function __construct($directory, $name, Container $parent = null, InflaterRepository $repository, Factory $factory) {
-        parent::__construct($directory, $name, $parent, $repository);
+    public function __construct($directory, $name, Url $url, Container $parent = null,
+                                InflaterRepository $repository, Factory $factory) {
+        parent::__construct($directory, $name, $url, $parent, $repository);
         $this->factory = $factory;
-        $this->realName = $name;
     }
 
     public function respond(Request $request) {
@@ -37,7 +36,7 @@ abstract class Container extends DynamicResource {
     }
 
     public function getContainerDirectory() {
-        return $this->getDirectory() . DIRECTORY_SEPARATOR . $this->realName;
+        return $this->getDirectory() . DIRECTORY_SEPARATOR . $this->getName();
     }
 
     private function findInSuperClasses($child, $format) {
@@ -55,13 +54,12 @@ abstract class Container extends DynamicResource {
                 return null;
             }
 
-            /** @var Container $container */
             $container = $this->factory->getInstance($parent->getName(), array(
                 'directory' => dirname($parent->getFileName()),
-                'name' => $this->getName(),
+                'name' => substr($parent->getShortName(), 0, -strlen('Resource')),
+                'url' => $this->getUrl(),
                 'parent' => $this->getParent()
             ));
-            $container->realName = substr($parent->getShortName(), 0, -strlen('Resource'));
         }
         return null;
     }
@@ -97,11 +95,7 @@ abstract class Container extends DynamicResource {
     private function findStaticChild($child) {
         $file = $this->findFile($child);
         if ($file) {
-            return $this->factory->getInstance(StaticResource::$CLASS, array(
-                'directory' => $this->getContainerDirectory(),
-                'name' => $child,
-                'parent' => $this
-            ));
+            return $this->createChild(StaticResource::$CLASS, $child, basename($file));
         }
         return null;
     }
@@ -111,16 +105,12 @@ abstract class Container extends DynamicResource {
      * @return null|\watoki\curir\Resource
      */
     private function findDynamicChild($child) {
-        $class = $child . 'Resource';
-        $file = $this->findFile($class . '.php');
+        $file = $this->findFile($child . 'Resource.php');
+        $class = substr(basename($file), 0, -4);
 
         if ($file) {
-            $fqn = $this->getNamespace() . '\\' . $this->realName . '\\' . $class;
-            return $this->factory->getInstance($fqn, array(
-                'directory' => $this->getContainerDirectory(),
-                'name' => $child,
-                'parent' => $this
-            ));
+            $fqn = $this->getNamespace() . '\\' . $this->getName() . '\\' . $class;
+            return $this->createChild($fqn, $child, substr($class, 0, -strlen('Resource')));
         }
         return null;
     }
@@ -132,16 +122,11 @@ abstract class Container extends DynamicResource {
     private function findStaticContainer($child) {
         $dir = $this->findFile($child);
         if ($dir && is_dir($dir)) {
-            $namespace = $this->getNamespace() . '\\' . $this->realName;
-            /** @var Container $container */
-            $container = $this->factory->getInstance(StaticContainer::$CLASS, array(
-                'namespace' => $namespace,
-                'directory' => $this->getContainerDirectory(),
-                'name' => $child,
-                'parent' => $this
+            $name = basename($dir);
+            $namespace = $this->getNamespace() . '\\' . $this->getName();
+            return $this->createChild(StaticContainer::$CLASS, $child, $name, array(
+                'namespace' => $namespace
             ));
-            $container->realName = $child;
-            return $container;
         }
         return null;
     }
@@ -158,15 +143,22 @@ abstract class Container extends DynamicResource {
     private function findPlaceholder($child) {
         foreach (glob($this->getContainerDirectory() . '/_*.php') as $file) {
             $class = substr(basename($file), 0, -4);
-            $fqn = $this->getNamespace() . '\\' . $this->realName . '\\' . $class;
-
-            return $this->factory->getInstance($fqn, array(
-                'directory' => $this->getContainerDirectory(),
-                'name' => $child,
-                'parent' => $this
-            ));
+            $fqn = $this->getNamespace() . '\\' . $this->getName() . '\\' . $class;
+            return $this->createChild($fqn, $child, substr($class, 0, -strlen('Resource')));
         }
         return null;
+    }
+
+    private function createChild($class, $child, $name, $args = array()) {
+        $nextUrl = $this->getUrl()->copy();
+        $nextUrl->getPath()->append($child);
+
+        return $this->factory->getInstance($class, array_merge(array(
+            'directory' => $this->getContainerDirectory(),
+            'url' => $nextUrl,
+            'name' => $name,
+            'parent' => $this
+        ), $args));
     }
 
     protected function getNamespace() {

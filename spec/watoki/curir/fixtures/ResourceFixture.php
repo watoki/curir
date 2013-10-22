@@ -4,6 +4,7 @@ namespace spec\watoki\curir\fixtures;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
+use watoki\curir\http\Url;
 use watoki\curir\resource\StaticResource;
 use watoki\curir\Resource;
 use watoki\scrut\Fixture;
@@ -27,7 +28,7 @@ class ResourceFixture extends Fixture {
 
     private function getRequest() {
         if (!$this->request) {
-            $this->request = new Request();
+            $this->request = new Request(new Path());
             $this->request->setFormat('json');
         }
         return $this->request;
@@ -46,7 +47,7 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenTheStaticResourceFor($file) {
-        $this->resource = new StaticResource($this->file->tmp, $file);
+        $this->resource = new StaticResource($this->file->tmp, $file, Url::parse('http://localhost/' . $file));
     }
 
     public function givenTheContainer($containerName) {
@@ -86,6 +87,7 @@ class ResourceFixture extends Fixture {
 
         $this->resource = $this->spec->factory->getInstance($namespace . '\\' . $class, array(
             'directory' => $this->file->tmp . DIRECTORY_SEPARATOR . $dir,
+            'url' => Url::parse('http://localhost'),
             'name' => $name,
             'parent' => null
         ));

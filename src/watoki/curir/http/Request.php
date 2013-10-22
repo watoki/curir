@@ -26,14 +26,14 @@ class Request {
     const HEADER_PRAGMA = 'Pragma';
     const HEADER_USER_AGENT = 'User-Agent';
 
-    /** @var string Request::METHOD_X */
-    private $method;
-
-    /** @var Path */
+    /** @var Url */
     private $target;
 
-    /** @var string */
+    /** @var string|null */
     private $format;
+
+    /** @var string Request::METHOD_X */
+    private $method;
 
     /** @var Map Parameter keys and values parsed from query string or body */
     private $parameters;
@@ -44,18 +44,10 @@ class Request {
     /** @var string */
     private $body;
 
-    /**
-     * @param string $method
-     * @param Path $target
-     * @param string $format
-     * @param \watoki\collections\Map $parameters
-     * @param \watoki\collections\Map $headers
-     * @param string $body
-     */
-    function __construct($method = Request::METHOD_GET, Path $target = null, $format = '', Map $parameters = null, Map $headers = null, $body = '') {
-        $this->method = $method;
-        $this->target = $target ?: new Path();
+    function __construct(Path $target, $format = null, $method = Request::METHOD_GET, Map $parameters = null, Map $headers = null, $body = '') {
+        $this->target = $target;
         $this->format = $format;
+        $this->method = $method;
         $this->parameters = $parameters ?: new Map();
         $this->headers = $headers ?: new Map();
         $this->body = $body;
@@ -104,14 +96,14 @@ class Request {
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getFormat() {
         return $this->format;
     }
 
     /**
-     * @param string $format
+     * @param string|null $format
      */
     public function setFormat($format) {
         $this->format = $format;
@@ -122,10 +114,6 @@ class Request {
      */
     public function setMethod($method) {
         $this->method = $method;
-    }
-
-    public function copy() {
-        return new Request($this->method, $this->target->copy(), $this->parameters->deepCopy(), $this->headers->copy(), $this->body);
     }
 
 }

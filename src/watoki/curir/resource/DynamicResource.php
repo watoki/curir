@@ -4,6 +4,7 @@ namespace watoki\curir\resource;
 use rtens\mockster\Method;
 use watoki\collections\Map;
 use watoki\curir\http\Request;
+use watoki\curir\http\Url;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
 use watoki\curir\serialization\InflaterRepository;
@@ -20,8 +21,8 @@ abstract class DynamicResource extends Resource {
     /** @var InflaterRepository */
     private $repository;
 
-    public function __construct($directory, $name, Container $parent = null, InflaterRepository $repository) {
-        parent::__construct($directory, $name, $parent);
+    public function __construct($directory, $name, Url $url, Container $parent = null, InflaterRepository $repository) {
+        parent::__construct($directory, $name, $url, $parent);
         $this->repository = $repository;
         $this->resolver = new ClassResolver(new \ReflectionClass($this));
     }

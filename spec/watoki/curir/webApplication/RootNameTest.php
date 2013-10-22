@@ -17,7 +17,8 @@ class RootNameTest extends Specification {
 
         $this->app->whenIRunTheWebApplication();
 
-        $this->app->thenTheNameOfTheRootResourceShouldBe('http://localhost/test');
+        $this->app->thenTheUrlOfTheRootResourceShouldBe('http://localhost/test');
+        $this->app->thenTheNameOfTheRootResourceShouldBe('WebApplicationFixture');
     }
 
     function testUrlWithoutSchemeAndDifferentPort() {
@@ -28,7 +29,7 @@ class RootNameTest extends Specification {
 
         $this->app->whenIRunTheWebApplication();
 
-        $this->app->thenTheNameOfTheRootResourceShouldBe('//example.com:8080/test');
+        $this->app->thenTheUrlOfTheRootResourceShouldBe('//example.com:8080/test');
     }
 
 } 
