@@ -1,11 +1,13 @@
 <?php
 namespace spec\watoki\curir\resources;
 
+use spec\watoki\curir\fixtures\FileFixture;
 use spec\watoki\curir\fixtures\ResourceFixture;
 use watoki\scrut\Specification;
 
 /**
  * @property ResourceFixture resource <-
+ * @property FileFixture file <-
  */
 class PlaceholderRoutesTest extends Specification {
 
@@ -37,11 +39,25 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testStaticPlaceholderResource() {
-        $this->markTestIncomplete();
+        $this->file->givenTheFile_WithTheContent('PlaceholderResource/some/where/_here.txt', 'Hello World');
+        $this->resource->givenTheContainer('PlaceholderResource');
+
+        $this->resource->givenTheRequestHasTheTarget('some/where/overTheRainbow.txt');
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
     function testStaticPlaceholderContainer() {
-        $this->markTestIncomplete();
+        $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'PlaceholderContainer/someWhere/_under', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter($this->getParent()->getName());
+        }');
+        $this->resource->givenTheContainer('PlaceholderContainer');
+
+        $this->resource->givenTheRequestHasTheTarget('someWhere/over/TheRainbow');
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('"over"');
     }
 
 } 
