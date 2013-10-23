@@ -22,9 +22,9 @@ class WebApplication {
     /** @var Resource */
     private $root;
 
-    public function __construct($rootResourceClass) {
+    public function __construct($rootResourceClass, Factory $factory = null) {
         $this->rootResourceClass = $rootResourceClass;
-        $factory = new Factory();
+        $factory = $factory ? : new Factory();
 
         $this->root = $factory->getInstance($rootResourceClass, array(
             'name' => $this->buildRootName(),
@@ -56,7 +56,8 @@ class WebApplication {
         }
 
         if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
-            throw new \InvalidArgumentException('Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
+            throw new \InvalidArgumentException('Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST,
+                true));
         }
 
         $target = Path::parse($_REQUEST[$this->getTargetKey()]);
