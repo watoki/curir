@@ -15,7 +15,7 @@ class DynamicResourceParameterInflationTest extends Specification {
 
     function testSimpleParameters() {
         $this->resource->givenTheDynamicResource_WithTheBody('SimpleParameters', 'function doGet($one, $two) {
-            return new \watoki\curir\responder\DefaultPresenter(array($one, $two));
+            return new \TestPresenter(array($one, $two));
         }');
         $this->resource->givenTheRequestParameter_Is('one', 'uno');
         $this->resource->givenTheRequestParameter_Is('two', 'dos');
@@ -32,7 +32,7 @@ class DynamicResourceParameterInflationTest extends Specification {
 
     function testInflateParameters() {
         $this->resource->givenTheDynamicResource_WithTheBody('InflateParameters', 'function doGet(\DateTime $d) {
-            return new \watoki\curir\responder\DefaultPresenter($d);
+            return new \TestPresenter($d);
         }');
         $this->resource->givenTheRequestParameter_Is('d', '2011-12-13 14:15:16 UTC');
         $this->resource->givenIRequestTheFormat('json');
@@ -52,7 +52,7 @@ class DynamicResourceParameterInflationTest extends Specification {
              * @param \DateTime $date
              */
             function doGet($int, $bool, $float, $string, $date) {
-                return new \watoki\curir\responder\DefaultPresenter(array($int, $bool, $float, $string, $date));
+                return new \TestPresenter(array($int, $bool, $float, $string, $date));
             }');
         $this->resource->givenTheRequestParameter_Is('int', '1');
         $this->resource->givenTheRequestParameter_Is('bool', 'false');

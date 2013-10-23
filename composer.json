@@ -14,13 +14,11 @@
     ],
     "require": {
         "php": ">=5.3.8",
-        "watoki/tempan": "*",
         "watoki/collections": "*",
 		"watoki/factory": "*"
     },
     "require-dev": {
-        "watoki/scrut": "*",
-        "rtens/mockster": "*"
+        "watoki/scrut": "*"
     },
     "autoload": {
         "psr-0": {

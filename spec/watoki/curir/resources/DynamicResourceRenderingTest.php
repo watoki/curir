@@ -36,7 +36,7 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testRenderModel() {
         $this->resource->givenTheDynamicResource_WithTheBody('RenderMe', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter(array("foo" => "Hello", "bar" => "World"));
+            return new \TestPresenter(array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('json');
         $this->resource->whenISendTheRequestToThatResource();
@@ -45,9 +45,8 @@ class DynamicResourceRenderingTest extends Specification {
     }
 
     function testRenderTemplate() {
-        $this->resource->givenThePresenter('TestPresenter');
         $this->resource->givenTheDynamicResource_WithTheBody('RenderTemplate', 'function doGet() {
-            return new TestPresenter(array("foo" => "Hello", "bar" => "World"));
+            return new \TestPresenter(array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('test');
         $this->file->givenTheFile_WithTheContent('renderTemplate.test', '%foo% %bar%');
@@ -59,24 +58,24 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testNoFormatGiven() {
         $this->resource->givenTheDynamicResource_WithTheBody('DefaultFormat', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter(array("foo" => "bar"));
+            return new \TestPresenter(array("foo" => "bar"));
         }');
-        $this->file->givenTheFile_WithTheContent('defaultFormat.html', '<html property="foo"></html>');
+        $this->file->givenTheFile_WithTheContent('defaultFormat.html', 'Here');
 
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('<html property="foo">bar</html>');
+        $this->resource->thenTheResponseShouldHaveTheBody('Here');
     }
 
     function testCaseInsensitivity() {
         $this->resource->givenTheDynamicResource_WithTheBody('CaseInsensitivity', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter(array("foo" => "bar"));
+            return new \TestPresenter(array("foo" => "bar"));
         }');
-        $this->file->givenTheFile_WithTheContent('CaseInsEnsitIvity.HTML', '<html property="foo"></html>');
+        $this->file->givenTheFile_WithTheContent('CaseInsEnsitIvity.HTML', 'There');
 
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('<html property="foo">bar</html>');
+        $this->resource->thenTheResponseShouldHaveTheBody('There');
     }
 
 }

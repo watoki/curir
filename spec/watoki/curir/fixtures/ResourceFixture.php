@@ -7,7 +7,9 @@ use watoki\curir\http\Response;
 use watoki\curir\http\Url;
 use watoki\curir\resource\StaticResource;
 use watoki\curir\Resource;
+use watoki\factory\Factory;
 use watoki\scrut\Fixture;
+use watoki\scrut\Specification;
 
 /**
  * @property FileFixture file <-
@@ -25,6 +27,28 @@ class ResourceFixture extends Fixture {
 
     /** @var Request|null */
     private $request;
+
+    public function __construct(Specification $spec, Factory $factory) {
+        parent::__construct($spec, $factory);
+        if (!class_exists('TestPresenter')) {
+            eval('class TestPresenter extends \watoki\curir\responder\Presenter {
+                public function renderHtml($template) {
+                    return $template;
+                }
+
+                public function renderJson() {
+                    return json_encode($this->getModel());
+                }
+
+                public function renderTest($template) {
+                    foreach ($this->getModel() as $key => $value) {
+                        $template = str_replace("%{$key}%", $value, $template);
+                    }
+                    return $template;
+                }
+            }');
+        }
+    }
 
     private function getRequest() {
         if (!$this->request) {
@@ -94,12 +118,6 @@ class ResourceFixture extends Fixture {
 
     public function givenThePresenter($presenterName) {
         eval('class ' . $presenterName . ' extends \watoki\curir\responder\Presenter {
-            public function renderTest($template) {
-                foreach ($this->getModel() as $key => $value) {
-                    $template = str_replace("%{$key}%", $value, $template);
-                }
-                return $template;
-            }
         }');
     }
 

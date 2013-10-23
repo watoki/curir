@@ -17,7 +17,7 @@ class ContainerTest extends Specification {
 
     function testRespondsItself() {
         $this->resource->givenTheContainer_WithTheBody('MySelf', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter("Hello World");
+            return new \TestPresenter("Hello World");
         }');
 
         $this->resource->whenISendTheRequestToThatResource();
@@ -45,7 +45,7 @@ class ContainerTest extends Specification {
 
     function testForwardToDynamicChild() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('Child', 'test/WithDynamicChild', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter("Found it");
+            return new \TestPresenter("Found it");
         }');
         $this->resource->givenTheRequestHasTheTarget('Child');
         $this->resource->givenTheContainer_In('WithDynamicChild', 'test');
@@ -56,7 +56,7 @@ class ContainerTest extends Specification {
 
     function testForwardToGrandChild() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('GrandChild', 'WithGrandChild/test/folder', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter("Found me");
+            return new \TestPresenter("Found me");
         }');
         $this->resource->givenTheRequestHasTheTarget('test/folder/GrandChild');
         $this->resource->givenTheContainer('WithGrandChild');
@@ -67,7 +67,7 @@ class ContainerTest extends Specification {
 
     function testCaseInsensitive() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('InsensitiveChild', 'CaseInsensitive/test/folder', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter("Gotcha");
+            return new \TestPresenter("Gotcha");
         }');
         $this->resource->givenTheRequestHasTheTarget('TeSt/fOlder/insEnsitivEchIld');
         $this->resource->givenTheContainer('CaseInsensitive');
@@ -91,7 +91,7 @@ class ContainerTest extends Specification {
     function testDynamicChildIsPreferred() {
         $this->file->givenTheFile_WithTheContent('Test.json', 'The file');
         $this->resource->givenTheDynamicResource_In_WithTheBody('Test', 'PrefersDynamicChild', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter("Dynamic content");
+            return new \TestPresenter("Dynamic content");
         }');
         $this->resource->givenTheRequestHasTheTarget('Test');
         $this->resource->givenTheContainer('PrefersDynamicChild');
@@ -114,7 +114,7 @@ class ContainerTest extends Specification {
     function testForwardToInheritedChild() {
         $this->resource->givenTheContainer_In('Base', 'other/place');
         $this->resource->givenTheDynamicResource_In_WithTheBody('InheritedChild', 'other/place/Base', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter("I am inherited");
+            return new \TestPresenter("I am inherited");
         }');
         $this->resource->givenTheContainer_In_Extending('Sub', 'ParentOfInheriting', '\other\place\BaseResource');
         $this->resource->givenTheRequestHasTheTarget('Sub/InheritedChild');

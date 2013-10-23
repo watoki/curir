@@ -17,7 +17,7 @@ class PlaceholderRoutesTest extends Specification {
 
     function testFindPlaceholderResource() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('_Something', 'DynamicRoute', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter($this->getName());
+            return new \TestPresenter($this->getName());
         }');
         $this->resource->givenTheRequestHasTheTarget('Anything');
         $this->resource->givenTheContainer('DynamicRoute');
@@ -29,7 +29,7 @@ class PlaceholderRoutesTest extends Specification {
     function testRouteWithPlaceholderContainer() {
         $this->resource->givenTheRequestHasTheTarget('ThisOne/Real');
         $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'PlaceholderRoute/_Placeholder', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter($this->getParent()->getName());
+            return new \TestPresenter($this->getParent()->getName());
         }');
         $this->resource->givenTheContainer_In('_Placeholder', 'PlaceholderRoute');
         $this->resource->givenTheContainer('PlaceholderRoute');
@@ -50,7 +50,7 @@ class PlaceholderRoutesTest extends Specification {
 
     function testStaticPlaceholderContainer() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'PlaceholderContainer/someWhere/_under', 'function doGet() {
-            return new \watoki\curir\responder\DefaultPresenter($this->getParent()->getName());
+            return new \TestPresenter($this->getParent()->getName());
         }');
         $this->resource->givenTheContainer('PlaceholderContainer');
 
