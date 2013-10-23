@@ -11,6 +11,10 @@ use watoki\scrut\Specification;
  */
 class ContainerTest extends Specification {
 
+    protected function background() {
+        $this->resource->givenIRequestTheFormat('json');
+    }
+
     function testRespondsItself() {
         $this->resource->givenTheContainer_WithTheBody('MySelf', 'function doGet() {
             return new \watoki\curir\responder\DefaultPresenter("Hello World");

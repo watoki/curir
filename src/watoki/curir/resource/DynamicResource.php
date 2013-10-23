@@ -4,7 +4,6 @@ namespace watoki\curir\resource;
 use rtens\mockster\Method;
 use watoki\collections\Map;
 use watoki\curir\http\Request;
-use watoki\curir\http\Url;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
 use watoki\curir\serialization\InflaterRepository;
@@ -15,16 +14,12 @@ use watoki\factory\ClassResolver;
  */
 abstract class DynamicResource extends Resource {
 
-    /** @var ClassResolver */
-    private $resolver;
-
     /** @var InflaterRepository */
     private $repository;
 
-    public function __construct($directory, $name, Url $url, Container $parent = null, InflaterRepository $repository) {
-        parent::__construct($directory, $name, $url, $parent);
+    public function __construct($name, Container $parent = null, InflaterRepository $repository) {
+        parent::__construct($name, $parent);
         $this->repository = $repository;
-        $this->resolver = new ClassResolver(new \ReflectionClass($this));
     }
 
     public function respond(Request $request) {
@@ -107,8 +102,22 @@ abstract class DynamicResource extends Resource {
                 return $hint;
         }
 
-        $resolved = $this->resolver->resolve($hint);
-        return $resolved ? : $hint;
+        $resolver = new ClassResolver(new \ReflectionClass($this));
+        return $resolver->resolve($hint) ? : $hint;
+    }
+
+    public function getResourceDirectory() {
+        $reflection = new \ReflectionClass($this);
+        return dirname($reflection->getFileName());
+    }
+
+    public function getResourceName() {
+        $reflection = new \ReflectionClass($this);
+        return substr(basename($reflection->getShortName()), 0, -strlen('Resource'));
+    }
+
+    public function getDefaultFormat() {
+        return 'html';
     }
 
 }

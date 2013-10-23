@@ -25,7 +25,7 @@ class RequestTest extends Specification {
 
         $this->app->whenIRunTheWebApplication();
 
-        $this->app->thenTheFormatShouldBe('html');
+        $this->app->thenTheFormatShouldBe(null);
     }
 
     function testParameters() {

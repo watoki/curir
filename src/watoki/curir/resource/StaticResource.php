@@ -13,6 +13,13 @@ class StaticResource extends Resource {
 
     public static $CLASS = __CLASS__;
 
+    private $file;
+
+    public function __construct($name, Container $parent = null, $file) {
+        parent::__construct($name, $parent);
+        $this->file = $file;
+    }
+
     /**
      * @param Request $request
      * @return Response
@@ -20,16 +27,9 @@ class StaticResource extends Resource {
     public function respond(Request $request) {
         $response = new Response();
 
-        $extension = null;
-        $pos = strrpos($this->getName(), '.');
-        if ($pos) {
-            $extension = substr($this->getName(), $pos + 1);
-        }
+        $contentType = $request->getFormat() ? MimeTypes::getType($request->getFormat()) : $this->getDefaultContentType();
 
-        $file = $this->getDirectory() . DIRECTORY_SEPARATOR . $this->getName();
-        $contentType = $extension ? MimeTypes::getType($extension) : $this->getDefaultContentType();
-
-        $response->setBody(file_get_contents($file));
+        $response->setBody(file_get_contents($this->file));
         $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, $contentType);
 
         return $response;

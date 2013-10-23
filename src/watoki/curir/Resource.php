@@ -3,7 +3,6 @@ namespace watoki\curir;
 
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
-use watoki\curir\http\Url;
 use watoki\curir\resource\Container;
 
 /**
@@ -12,21 +11,13 @@ use watoki\curir\resource\Container;
 abstract class Resource {
 
     /** @var string */
-    private $directory;
-
-    /** @var string */
     private $name;
-
-    /** @var \watoki\curir\http\Url */
-    private $url;
 
     /** @var Container|null */
     private $parent;
 
-    public function __construct($directory, $name, Url $url, Container $parent = null) {
-        $this->directory = rtrim($directory, DIRECTORY_SEPARATOR);
+    public function __construct($name, Container $parent = null) {
         $this->name = $name;
-        $this->url = $url;
         $this->parent = $parent;
     }
 
@@ -39,22 +30,8 @@ abstract class Resource {
     /**
      * @return string
      */
-    public function getDirectory() {
-        return $this->directory;
-    }
-
-    /**
-     * @return string
-     */
     public function getName() {
         return $this->name;
-    }
-
-    /**
-     * @return \watoki\curir\http\Url
-     */
-    public function getUrl() {
-        return $this->url;
     }
 
     /**

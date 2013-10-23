@@ -4,6 +4,7 @@ namespace watoki\curir\responder;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
 use watoki\curir\Resource;
+use watoki\curir\resource\DynamicResource;
 use watoki\curir\Responder;
 
 class Presenter extends Responder {
@@ -16,20 +17,20 @@ class Presenter extends Responder {
     }
 
     /**
-     * @param \watoki\curir\Resource $resource
+     * @param \watoki\curir\resource\DynamicResource $resource
      * @param \watoki\curir\http\Request $request
      * @return \watoki\curir\http\Response
      */
-    public function createResponse(Resource $resource, Request $request) {
-        $templateFile = $this->getTemplateFile($resource, $request->getFormat());
-        return new Response($this->render($templateFile, $request->getFormat()));
+    public function createResponse(DynamicResource $resource, Request $request) {
+        $format = $request->getFormat() ? : $resource->getDefaultFormat();
+        return new Response($this->render($resource, $format));
     }
 
-    private function render($templateFile, $format) {
+    private function render(DynamicResource $resource, $format) {
         $method = new \ReflectionMethod($this, 'render' . ucfirst($format));
 
         if (count($method->getParameters())) {
-            return $method->invoke($this, $this->getTemplate($templateFile));
+            return $method->invoke($this, $this->getTemplate($resource, $format));
         } else {
             return $method->invoke($this);
         }
@@ -42,14 +43,21 @@ class Presenter extends Responder {
         return $this->model;
     }
 
-    private function getTemplate($templateFile) {
-        if (!file_exists($templateFile)) {
+    private function getTemplate(DynamicResource $resource, $format) {
+        $templateFile = $this->findFile($resource->getResourceDirectory(), $resource->getResourceName() . '.' . $format);
+
+        if (!$templateFile) {
             throw new \Exception("Could not find template [$templateFile]");
         }
         return file_get_contents($templateFile);
     }
 
-    protected function getTemplateFile(Resource $resource, $format) {
-        return $resource->getDirectory() . DIRECTORY_SEPARATOR . lcfirst($resource->getName()) . '.' . $format;
+    protected function findFile($directory, $fileName) {
+        foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file) {
+            if (strtolower(basename($file)) == strtolower($fileName)) {
+                return $file;
+            }
+        }
+        return null;
     }
 }

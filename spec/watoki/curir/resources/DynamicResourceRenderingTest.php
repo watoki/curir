@@ -57,5 +57,27 @@ class DynamicResourceRenderingTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
+    function testNoFormatGiven() {
+        $this->resource->givenTheDynamicResource_WithTheBody('DefaultFormat', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter(array("foo" => "bar"));
+        }');
+        $this->file->givenTheFile_WithTheContent('defaultFormat.html', '<html property="foo"></html>');
+
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('<html property="foo">bar</html>');
+    }
+
+    function testCaseInsensitivity() {
+        $this->resource->givenTheDynamicResource_WithTheBody('CaseInsensitivity', 'function doGet() {
+            return new \watoki\curir\responder\DefaultPresenter(array("foo" => "bar"));
+        }');
+        $this->file->givenTheFile_WithTheContent('CaseInsEnsitIvity.HTML', '<html property="foo"></html>');
+
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('<html property="foo">bar</html>');
+    }
+
 }
  

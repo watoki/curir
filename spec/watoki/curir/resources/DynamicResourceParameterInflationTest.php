@@ -9,6 +9,10 @@ use watoki\scrut\Specification;
  */
 class DynamicResourceParameterInflationTest extends Specification {
 
+    protected function background() {
+        $this->resource->givenIRequestTheFormat('json');
+    }
+
     function testSimpleParameters() {
         $this->resource->givenTheDynamicResource_WithTheBody('SimpleParameters', 'function doGet($one, $two) {
             return new \watoki\curir\responder\DefaultPresenter(array($one, $two));

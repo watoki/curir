@@ -4,7 +4,6 @@ namespace watoki\curir;
 use watoki\collections\Map;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
-use watoki\curir\http\Url;
 use watoki\factory\Factory;
 
 class WebApplication {
@@ -27,22 +26,14 @@ class WebApplication {
         $this->rootResourceClass = $rootResourceClass;
         $factory = new Factory();
 
-        $reflection = new \ReflectionClass($rootResourceClass);
-
         $this->root = $factory->getInstance($rootResourceClass, array(
-            'directory' => dirname($reflection->getFileName()),
-            'url' => $this->buildRootUrl(),
-            'name' => substr($reflection->getShortName(), 0, -strlen('Resource')),
+            'name' => $this->buildRootName(),
             'parent' => null
         ));
     }
 
     public function run() {
         $this->root->respond($this->buildRequest())->flush();
-    }
-
-    protected function getDefaultFormat() {
-        return 'html';
     }
 
     protected function getTargetKey() {
@@ -53,14 +44,8 @@ class WebApplication {
         return 'method';
     }
 
-    protected function buildRootUrl() {
-        $scheme = isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : '';
-        $port = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != 80 ? $_SERVER['SERVER_PORT'] : null;
-
-        $host = $_SERVER['HTTP_HOST'];
-        $path = dirname($_SERVER['SCRIPT_NAME']);
-
-        return new Url($scheme, $host, $port, Path::parse($path));
+    protected function buildRootName() {
+        return trim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
     }
 
     protected function buildRequest() {
@@ -77,7 +62,7 @@ class WebApplication {
         $target = Path::parse($_REQUEST[$this->getTargetKey()]);
         unset($_REQUEST[$this->getTargetKey()]);
 
-        $format = $this->getDefaultFormat();
+        $format = null;
         if (strpos($target->last(), '.')) {
             list($name, $format) = explode('.', $target->pop());
             $target->append($name);

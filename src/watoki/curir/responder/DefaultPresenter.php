@@ -11,7 +11,7 @@ class DefaultPresenter extends Presenter {
 
     public function renderHtml($template) {
         $renderer = new Renderer($template);
-        $renderer->render($this->getModel());
+        return $renderer->render($this->getModel());
     }
 
 } 

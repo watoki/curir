@@ -5,6 +5,7 @@ use watoki\curir\http\Path;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
 use watoki\curir\Resource;
+use watoki\curir\resource\DynamicResource;
 use watoki\curir\Responder;
 
 class Redirecter extends Responder {
@@ -16,11 +17,11 @@ class Redirecter extends Responder {
     }
 
     /**
-     * @param \watoki\curir\Resource $resource
+     * @param \watoki\curir\resource\DynamicResource $resource
      * @param \watoki\curir\http\Request $request
      * @return \watoki\curir\http\Response
      */
-    public function createResponse(Resource $resource, Request $request) {
+    public function createResponse(DynamicResource $resource, Request $request) {
         $response = new Response();
         $response->getHeaders()->set(Response::HEADER_LOCATION, $this->target->toString());
         return $response;

@@ -29,7 +29,6 @@ class ResourceFixture extends Fixture {
     private function getRequest() {
         if (!$this->request) {
             $this->request = new Request(new Path());
-            $this->request->setFormat('json');
         }
         return $this->request;
     }
@@ -47,7 +46,7 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenTheStaticResourceFor($file) {
-        $this->resource = new StaticResource($this->file->tmp, $file, Url::parse('http://localhost/' . $file));
+        $this->resource = new StaticResource($file, null, $this->file->tmp . DIRECTORY_SEPARATOR . $file);
     }
 
     public function givenTheContainer($containerName) {

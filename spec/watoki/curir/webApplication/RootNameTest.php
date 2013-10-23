@@ -10,26 +10,11 @@ use watoki\scrut\Specification;
 class RootNameTest extends Specification {
 
     function testCreateRootResourceWithUrlAsName() {
-        $this->app->givenTheSchemeIs('http');
-        $this->app->givenTheHostIs('localhost');
-        $this->app->givenThePortIs(80);
         $this->app->givenTheScriptNameIs('/test/index.php');
 
         $this->app->whenIRunTheWebApplication();
 
-        $this->app->thenTheUrlOfTheRootResourceShouldBe('http://localhost/test');
-        $this->app->thenTheNameOfTheRootResourceShouldBe('WebApplicationFixture');
-    }
-
-    function testUrlWithoutSchemeAndDifferentPort() {
-        $this->app->givenTheSchemeIs(null);
-        $this->app->givenTheHostIs('example.com');
-        $this->app->givenThePortIs(8080);
-        $this->app->givenTheScriptNameIs('/test/index.php');
-
-        $this->app->whenIRunTheWebApplication();
-
-        $this->app->thenTheUrlOfTheRootResourceShouldBe('//example.com:8080/test');
+        $this->app->thenTheNameOfTheRootResourceShouldBe('test');
     }
 
 } 

@@ -2,10 +2,9 @@
 namespace spec\watoki\curir\fixtures;
 
 use watoki\curir\http\Request;
-use watoki\curir\http\Url;
+use watoki\curir\http\Response;
 use watoki\curir\Resource;
 use watoki\curir\resource\Container;
-use watoki\curir\http\Response;
 use watoki\curir\WebApplication;
 use watoki\factory\Factory;
 use watoki\scrut\Fixture;
@@ -97,18 +96,14 @@ class WebApplicationFixture extends Fixture {
         $this->spec->assertFalse(self::$request->getHeaders()->has($key));
     }
 
-    public function thenTheUrlOfTheRootResourceShouldBe($string) {
-        $this->spec->assertEquals($string, self::$root->getUrl()->toString());
-    }
-
 }
 
 class WebApplicationFixtureResource extends Resource {
 
     static $CLASS = __CLASS__;
 
-    public function __construct($directory, $name, Url $url, Container $parent = null) {
-        parent::__construct($directory, $name, $url, $parent);
+    public function __construct($name, Container $parent = null) {
+        parent::__construct($name, $parent);
         WebApplicationFixture::$root = $this;
     }
 
