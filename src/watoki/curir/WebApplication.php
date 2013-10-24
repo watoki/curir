@@ -64,7 +64,7 @@ class WebApplication {
         unset($_REQUEST[$this->getTargetKey()]);
 
         $format = null;
-        if (strpos($target->last(), '.')) {
+        if (!$target->isEmpty() && strpos($target->last(), '.')) {
             list($name, $format) = explode('.', $target->pop());
             $target->append($name);
         }

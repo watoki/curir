@@ -9,6 +9,9 @@ class Path extends Liste {
 
     public static function parse($string) {
         $string = rtrim($string, self::SEPARATOR);
+        if ($string === '') {
+            return new Path();
+        }
         return new Path(Liste::split(self::SEPARATOR, $string)->elements);
     }
 
