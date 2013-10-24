@@ -38,7 +38,11 @@ abstract class Container extends DynamicResource {
     }
 
     public function getContainerDirectory() {
-        return $this->getResourceDirectory() . DIRECTORY_SEPARATOR . $this->getResourceName();
+        return $this->getResourceDirectory() . DIRECTORY_SEPARATOR . lcfirst($this->getResourceName());
+    }
+
+    public function getContainerNamespace() {
+        return $this->getResourceDirectory() . '\\' . lcfirst($this->getResourceName());
     }
 
     private function findInSuperClasses($child, $format) {
@@ -113,7 +117,7 @@ abstract class Container extends DynamicResource {
         $class = substr(basename($file), 0, -4);
 
         if ($file) {
-            $fqn = $this->getResourceNamespace() . '\\' . $this->getResourceName() . '\\' . $class;
+            $fqn = $this->getContainerNamespace() . '\\' . $class;
             return $this->factory->getInstance($fqn, array(
                 'name' => $child,
                 'parent' => $this,
@@ -133,7 +137,7 @@ abstract class Container extends DynamicResource {
                 'name' => $child,
                 'parent' => $this,
                 'directory' => $dir,
-                'namespace' => $this->getResourceNamespace() . '\\' . $this->getResourceName()
+                'namespace' => $this->getContainerNamespace()
             ));
         }
         return null;
@@ -143,7 +147,7 @@ abstract class Container extends DynamicResource {
         foreach (glob($this->getContainerDirectory() . '/_*') as $file) {
             if (substr(basename($file), -4) == '.php') {
                 $class = substr(basename($file), 0, -4);
-                $fqn = $this->getResourceNamespace() . '\\' . $this->getResourceName() . '\\' . $class;
+                $fqn = $this->getContainerNamespace() . '\\' . $class;
                 return $this->factory->getInstance($fqn, array(
                     'name' => $child,
                     'parent' => $this,
@@ -153,7 +157,7 @@ abstract class Container extends DynamicResource {
                     'name' => $child,
                     'parent' => $this,
                     'directory' => $file,
-                    'namespace' => $this->getResourceNamespace() . '\\' . $this->getResourceName()
+                    'namespace' => $this->getContainerNamespace()
                 ));
             } else {
                 return $this->factory->getInstance(StaticResource::$CLASS, array(
