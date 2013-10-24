@@ -42,7 +42,7 @@ abstract class Container extends DynamicResource {
     }
 
     public function getContainerNamespace() {
-        return $this->getResourceDirectory() . '\\' . lcfirst($this->getResourceName());
+        return $this->getResourceNamespace() . '\\' . lcfirst($this->getResourceName());
     }
 
     private function findInSuperClasses($child, $format) {
