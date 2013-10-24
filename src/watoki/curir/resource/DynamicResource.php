@@ -22,7 +22,7 @@ abstract class DynamicResource extends Resource {
     }
 
     public function inject(InflaterRepository $repository) {
-    $this->repository = $repository;
+        $this->repository = $repository;
     }
 
     public function respond(Request $request) {
