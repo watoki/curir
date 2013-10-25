@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir\responder;
 
+use watoki\curir\http\MimeTypes;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
 use watoki\curir\Resource;
@@ -23,7 +24,9 @@ class Presenter extends Responder {
      */
     public function createResponse(DynamicResource $resource, Request $request) {
         $format = $request->getFormat() ? : $resource->getDefaultFormat();
-        return new Response($this->render($resource, $format));
+        $response = new Response($this->render($resource, $format));
+        $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, MimeTypes::getType($format));
+        return $response;
     }
 
     private function render(DynamicResource $resource, $format) {

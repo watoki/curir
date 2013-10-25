@@ -42,6 +42,7 @@ class DynamicResourceRenderingTest extends Specification {
         $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('{"foo":"Hello","bar":"World"}');
+        $this->resource->thenTheResponseShouldHaveTheContentType('application/json');
     }
 
     function testRenderTemplate() {
