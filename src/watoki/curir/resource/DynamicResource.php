@@ -17,11 +17,8 @@ abstract class DynamicResource extends Resource {
     /** @var InflaterRepository */
     private $repository;
 
-    public function __construct($name, Container $parent = null) {
+    public function __construct($name, Container $parent = null, InflaterRepository $repository) {
         parent::__construct($name, $parent);
-    }
-
-    public function inject(InflaterRepository $repository) {
         $this->repository = $repository;
     }
 
