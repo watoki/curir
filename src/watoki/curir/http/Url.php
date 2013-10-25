@@ -188,7 +188,7 @@ class Url {
         $port = $this->port ? self::PORT_SEPARATOR . $this->port : '';
         $scheme = $this->scheme ? $this->scheme . self::SCHEME_SEPARATOR : '';
 
-        return $scheme . self::HOST_PREFIX . $this->host . $port
+        return ($this->host ? $scheme . self::HOST_PREFIX . $this->host . $port : '')
                 . $this->path->toString()
                 . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
                 . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');

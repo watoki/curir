@@ -28,7 +28,7 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testRedirectRequest() {
         $this->resource->givenTheDynamicResource_WithTheBody('RedirectMe', 'function doGet() {
-            return new \watoki\curir\responder\Redirecter(\watoki\curir\http\Path::parse("redirect/me/here"));
+            return new \watoki\curir\responder\Redirecter(\watoki\curir\http\Url::parse("redirect/me/here"));
         }');
         $this->resource->whenISendTheRequestToThatResource();
         $this->resource->thenIShouldBeRedirectedTo('redirect/me/here');
