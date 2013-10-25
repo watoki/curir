@@ -16,7 +16,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testFindPlaceholderResource() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('_Something', 'DynamicRoute', 'function doGet() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxSomething', 'DynamicRoute', 'function doGet() {
             return new \TestPresenter($this->getName());
         }');
         $this->resource->givenTheRequestHasTheTarget('Anything');
@@ -28,10 +28,10 @@ class PlaceholderRoutesTest extends Specification {
 
     function testRouteWithPlaceholderContainer() {
         $this->resource->givenTheRequestHasTheTarget('ThisOne/Real');
-        $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'PlaceholderRoute/_Placeholder', 'function doGet() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'PlaceholderRoute/xxPlaceholder', 'function doGet() {
             return new \TestPresenter($this->getParent()->getName());
         }');
-        $this->resource->givenTheContainer_In('_Placeholder', 'PlaceholderRoute');
+        $this->resource->givenTheContainer_In('xxPlaceholder', 'PlaceholderRoute');
         $this->resource->givenTheContainer('PlaceholderRoute');
 
         $this->resource->whenISendTheRequestToThatResource();
@@ -39,7 +39,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testStaticPlaceholderResource() {
-        $this->file->givenTheFile_WithTheContent('PlaceholderResource/some/where/_here.txt', 'Hello World');
+        $this->file->givenTheFile_WithTheContent('PlaceholderResource/some/where/xxHere.txt', 'Hello World');
         $this->resource->givenTheContainer('PlaceholderResource');
 
         $this->resource->givenTheRequestHasTheTarget('some/where/overTheRainbow.txt');
@@ -49,7 +49,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testStaticPlaceholderContainer() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'PlaceholderContainer/someWhere/_under', 'function doGet() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'PlaceholderContainer/someWhere/xxUnder', 'function doGet() {
             return new \TestPresenter($this->getParent()->getName());
         }');
         $this->resource->givenTheContainer('PlaceholderContainer');
@@ -61,7 +61,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testPlaceholderSetParameter() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('_Where', 'SetParameter', '
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'SetParameter', '
             function doGet($place) {
                 return new \TestPresenter($place);
             }
@@ -77,7 +77,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testPlaceholderDoesNotOverwriteParameter() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('_Where', 'DoesNotOverwriteParameter', '
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'DoesNotOverwriteParameter', '
             function doGet($place) {
                 return new \TestPresenter($place);
             }

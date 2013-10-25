@@ -8,6 +8,8 @@ use watoki\factory\Factory;
 
 abstract class Container extends DynamicResource {
 
+    const PLACEHOLDER_PREFIX = 'xx';
+
     /** @var \watoki\factory\Factory */
     private $factory;
 
@@ -141,7 +143,7 @@ abstract class Container extends DynamicResource {
     }
 
     private function findPlaceholder($child) {
-        foreach (glob($this->getContainerDirectory() . '/_*') as $file) {
+        foreach (glob($this->getContainerDirectory() . '/' . self::PLACEHOLDER_PREFIX . '*') as $file) {
             if (substr(basename($file), -4) == '.php') {
                 require_once($file);
                 $class = substr(basename($file), 0, -4);
