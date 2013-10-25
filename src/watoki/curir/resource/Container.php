@@ -115,7 +115,6 @@ abstract class Container extends DynamicResource {
         $class = substr(basename($file), 0, -4);
 
         if ($file) {
-            require_once($file);
             $fqn = $this->getContainerNamespace() . '\\' . $class;
             return $this->factory->getInstance($fqn, array(
                 'name' => $child,
@@ -145,7 +144,6 @@ abstract class Container extends DynamicResource {
     private function findPlaceholder($child) {
         foreach (glob($this->getContainerDirectory() . '/' . self::PLACEHOLDER_PREFIX . '*') as $file) {
             if (substr(basename($file), -4) == '.php') {
-                require_once($file);
                 $class = substr(basename($file), 0, -4);
                 $fqn = $this->getContainerNamespace() . '\\' . $class;
                 return $this->factory->getInstance($fqn, array(
