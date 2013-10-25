@@ -39,13 +39,15 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testStaticPlaceholderResource() {
-        $this->file->givenTheFile_WithTheContent('PlaceholderResource/some/where/xxHere.txt', 'Hello World');
+        $this->file->givenTheFile_WithTheContent('PlaceholderResource/some/where/xxHere.html', 'Hello World');
         $this->resource->givenTheContainer('PlaceholderResource');
 
-        $this->resource->givenTheRequestHasTheTarget('some/where/overTheRainbow.txt');
+        $this->resource->givenIRequestTheFormat(null);
+        $this->resource->givenTheRequestHasTheTarget('some/where/overTheRainbow');
         $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
+        $this->resource->thenTheResponseShouldHaveTheContentType('text/html');
     }
 
     function testStaticPlaceholderContainer() {

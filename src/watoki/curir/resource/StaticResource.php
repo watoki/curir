@@ -27,7 +27,12 @@ class StaticResource extends Resource {
     public function respond(Request $request) {
         $response = new Response();
 
-        $contentType = $request->getFormat() ? MimeTypes::getType($request->getFormat()) : $this->getDefaultContentType();
+        if (strpos(basename($this->file), '.')) {
+            list(, $extension) = explode('.', basename($this->file));
+            $contentType = MimeTypes::getType($extension);
+        } else {
+            $contentType = $this->getDefaultContentType();
+        }
 
         $response->setBody(file_get_contents($this->file));
         $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, $contentType);
