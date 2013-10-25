@@ -60,4 +60,37 @@ class PlaceholderRoutesTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('"over"');
     }
 
+    function testPlaceholderSetParameter() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('_Where', 'SetParameter', '
+            function doGet($place) {
+                return new \TestPresenter($place);
+            }
+            function getPlaceholderKey() {
+                return "place";
+            }');
+        $this->resource->givenTheContainer('SetParameter');
+
+        $this->resource->givenTheRequestHasTheTarget('here');
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('"here"');
+    }
+
+    function testPlaceholderDoesNotOverwriteParameter() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('_Where', 'DoesNotOverwriteParameter', '
+            function doGet($place) {
+                return new \TestPresenter($place);
+            }
+            function getPlaceholderKey() {
+                return "place";
+            }');
+        $this->resource->givenTheContainer('DoesNotOverwriteParameter');
+        $this->resource->givenTheRequestParameter_Is('place', 'there');
+
+        $this->resource->givenTheRequestHasTheTarget('here');
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('"there"');
+    }
+
 } 
