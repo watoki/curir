@@ -62,6 +62,19 @@ class PlaceholderRoutesTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('"over"');
     }
 
+    function testPreferDynamicResource() {
+        $this->file->givenTheFile_WithTheContent('PreferDynamicResource/xxPlaceholder.html', 'Not here');
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxPlaceholder', 'PreferDynamicResource', 'function doGet() {
+            return new \TestPresenter($this->getName());
+        }');
+        $this->resource->givenTheContainer('PreferDynamicResource');
+
+        $this->resource->givenTheRequestHasTheTarget('Foo');
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('"Foo"');
+    }
+
     function testPlaceholderSetParameter() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'SetParameter', '
             function doGet($place) {

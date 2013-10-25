@@ -142,15 +142,16 @@ abstract class Container extends DynamicResource {
     }
 
     private function findPlaceholder($child) {
+        foreach (glob($this->getContainerDirectory() . '/' . self::PLACEHOLDER_PREFIX . '*Resource.php') as $file) {
+            $class = substr(basename($file), 0, -4);
+            $fqn = $this->getContainerNamespace() . '\\' . $class;
+            return $this->factory->getInstance($fqn, array(
+                'name' => $child,
+                'parent' => $this,
+            ));
+        }
         foreach (glob($this->getContainerDirectory() . '/' . self::PLACEHOLDER_PREFIX . '*') as $file) {
-            if (substr(basename($file), -4) == '.php') {
-                $class = substr(basename($file), 0, -4);
-                $fqn = $this->getContainerNamespace() . '\\' . $class;
-                return $this->factory->getInstance($fqn, array(
-                    'name' => $child,
-                    'parent' => $this,
-                ));
-            } else if (is_dir($file)) {
+            if (is_dir($file)) {
                 return $this->factory->getInstance(StaticContainer::$CLASS, array(
                     'name' => $child,
                     'parent' => $this,
