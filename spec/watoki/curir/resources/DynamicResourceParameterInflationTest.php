@@ -77,4 +77,17 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->thenTheRequestShouldFailWith('Error while inflating parameter [one] of [InvalidTypeHintResource::doGet()]: Could not find inflater for type [invalid]');
     }
 
+    function testNoTypeHint() {
+        $this->resource->givenTheDynamicResource_WithTheBody('NoTypeHints', '
+            function doGet($one, $two) {
+                return new \TestPresenter(array($one, $two));
+            }');
+        $this->resource->givenTheRequestParameter_Is('one', 'foo');
+        $this->resource->givenTheRequestParameter_Is('two', array('foo' => 'bar'));
+
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('["foo",{"foo":"bar"}]');
+    }
+
 } 

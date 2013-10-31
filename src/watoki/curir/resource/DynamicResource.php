@@ -61,7 +61,11 @@ abstract class DynamicResource extends Resource {
                 $value = $parameters->get($param->getName());
 
                 try {
-                    $args[] = $this->inflate($value, $type);
+                    if ($type) {
+                        $args[] = $this->inflate($value, $type);
+                    } else {
+                        $args[] = $value;
+                    }
                 } catch (\Exception $e) {
                     throw new \Exception('Error while inflating parameter [' . $param->getName()
                     . '] of [' . $method->getDeclaringClass()->getName() . '::' . $method->getName() . '()]: ' . $e->getMessage());
@@ -100,7 +104,7 @@ abstract class DynamicResource extends Resource {
             }
         }
 
-        return "string";
+        return null;
     }
 
     private function resolveType($hint) {
