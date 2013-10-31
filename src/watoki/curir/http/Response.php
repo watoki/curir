@@ -30,6 +30,9 @@ class Response {
      */
     private $body;
 
+    /** @var null|string */
+    private $status;
+
     function __construct($body = null) {
         $this->headers = new Map();
         $this->body = $body;
@@ -56,7 +59,14 @@ class Response {
         return $this->headers;
     }
 
+    public function setStatus($status) {
+        $this->status = $status;
+    }
+
     public function flush() {
+        if ($this->status) {
+            header('HTTP/1.0 ' . $this->status);
+        }
         foreach ($this->getHeaders() as $header => $value) {
             header($header . ': ' . $value);
         }

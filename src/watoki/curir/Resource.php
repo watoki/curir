@@ -36,14 +36,14 @@ abstract class Resource {
     }
 
     /**
-     * @return null|\watoki\curir\resource\Resource
+     * @return null|\watoki\curir\Resource
      */
     public function getParent() {
         return $this->parent;
     }
 
     /**
-     * @return Resource
+     * @return \watoki\curir\Resource
      */
     public function getRoot() {
         if ($this->parent) {
@@ -52,6 +52,9 @@ abstract class Resource {
         return $this;
     }
 
+    /**
+     * @return \watoki\curir\http\Path
+     */
     public function getRoute() {
         $route = new Path();
         if ($this->parent) {
