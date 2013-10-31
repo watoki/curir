@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir;
 
+use watoki\curir\http\Path;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
 use watoki\curir\resource\Container;
@@ -39,6 +40,25 @@ abstract class Resource {
      */
     public function getParent() {
         return $this->parent;
+    }
+
+    /**
+     * @return Resource
+     */
+    public function getRoot() {
+        if ($this->parent) {
+            return $this->parent->getRoot();
+        }
+        return $this;
+    }
+
+    public function getRoute() {
+        $route = new Path();
+        if ($this->parent) {
+            $route = $this->parent->getRoute();
+        }
+        $route->append($this->getName());
+        return $route;
     }
 
 }
