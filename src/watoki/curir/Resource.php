@@ -16,7 +16,7 @@ abstract class Resource {
     /** @var Container|null */
     private $parent;
 
-    public function __construct($name, Container $parent = null) {
+    public function __construct($name, Resource $parent = null) {
         $this->name = $name;
         $this->parent = $parent;
     }
@@ -35,7 +35,7 @@ abstract class Resource {
     }
 
     /**
-     * @return null|\watoki\curir\resource\Container
+     * @return null|\watoki\curir\resource\Resource
      */
     public function getParent() {
         return $this->parent;

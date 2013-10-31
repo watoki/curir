@@ -13,7 +13,7 @@ abstract class Container extends DynamicResource {
     /** @var \watoki\factory\Factory */
     private $factory;
 
-    public function __construct($name, Container $parent = null, InflaterRepository $repository, Factory $factory) {
+    public function __construct($name, Resource $parent = null, InflaterRepository $repository, Factory $factory) {
         parent::__construct($name, $parent, $repository);
         $this->factory = $factory;
     }

@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir\resource;
 
+use watoki\curir\Resource;
 use watoki\curir\serialization\InflaterRepository;
 use watoki\factory\Factory;
 
@@ -12,7 +13,7 @@ class StaticContainer extends Container {
 
     private $namespace;
 
-    public function __construct($name, Container $parent = null, $directory, $namespace, InflaterRepository $repository, Factory $factory) {
+    public function __construct($name, Resource $parent = null, $directory, $namespace, InflaterRepository $repository, Factory $factory) {
         parent::__construct($name, $parent, $repository, $factory);
         $this->namespace = $namespace;
         $this->directory = $directory;

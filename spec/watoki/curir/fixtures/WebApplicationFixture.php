@@ -4,7 +4,6 @@ namespace spec\watoki\curir\fixtures;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
 use watoki\curir\Resource;
-use watoki\curir\resource\Container;
 use watoki\curir\WebApplication;
 use watoki\factory\Factory;
 use watoki\scrut\Fixture;
@@ -102,7 +101,7 @@ class WebApplicationFixtureResource extends Resource {
 
     static $CLASS = __CLASS__;
 
-    public function __construct($name, Container $parent = null) {
+    public function __construct($name, Resource $parent = null) {
         parent::__construct($name, $parent);
         WebApplicationFixture::$root = $this;
     }

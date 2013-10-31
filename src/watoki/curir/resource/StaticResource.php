@@ -15,7 +15,7 @@ class StaticResource extends Resource {
 
     private $file;
 
-    public function __construct($name, Container $parent = null, $file) {
+    public function __construct($name, Resource $parent = null, $file) {
         parent::__construct($name, $parent);
         $this->file = $file;
     }
