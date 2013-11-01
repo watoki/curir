@@ -60,15 +60,10 @@ abstract class DynamicResource extends Resource {
                 $type = $this->findTypeHint($method, $param);
                 $value = $parameters->get($param->getName());
 
-                try {
-                    if ($type) {
-                        $args[] = $this->inflate($value, $type);
-                    } else {
-                        $args[] = $value;
-                    }
-                } catch (\Exception $e) {
-                    throw new \Exception('Error while inflating parameter [' . $param->getName()
-                    . '] of [' . $method->getDeclaringClass()->getName() . '::' . $method->getName() . '()]: ' . $e->getMessage());
+                if ($type) {
+                    $args[] = $this->inflate($value, $type);
+                } else {
+                    $args[] = $value;
                 }
             } else if ($param->isDefaultValueAvailable()) {
                 $args[] = $param->getDefaultValue();
@@ -86,7 +81,11 @@ abstract class DynamicResource extends Resource {
     }
 
     private function inflate($value, $type) {
-        return $this->repository->getInflater($type)->inflate($value);
+        try {
+            return $this->repository->getInflater($type)->inflate($value);
+        } catch (\Exception $e) {
+            return $value;
+        }
     }
 
     private function findTypeHint(\ReflectionMethod $method, \ReflectionParameter $param) {
