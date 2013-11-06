@@ -2,6 +2,7 @@
 namespace watoki\curir\resource;
 
 use watoki\curir\http\Request;
+use watoki\curir\http\Url;
 use watoki\curir\Resource;
 use watoki\curir\serialization\InflaterRepository;
 use watoki\factory\Factory;
@@ -13,8 +14,8 @@ abstract class Container extends DynamicResource {
     /** @var \watoki\factory\Factory */
     private $factory;
 
-    public function __construct($name, Resource $parent = null, InflaterRepository $repository, Factory $factory) {
-        parent::__construct($name, $parent, $repository);
+    public function __construct(Url $url, Resource $parent = null, InflaterRepository $repository, Factory $factory) {
+        parent::__construct($url, $parent, $repository);
         $this->factory = $factory;
     }
 
@@ -32,7 +33,7 @@ abstract class Container extends DynamicResource {
             return $found->respond($nextRequest);
         }
 
-        throw new \Exception("Resource [$child] not found in container [" . get_class($this) . "] aka [" . $this->getName() . "]");
+        throw new \Exception("Resource [$child] not found in container [" . get_class($this) . "] aka [" . $this->getUrl() . "]");
     }
 
     public function getContainerDirectory() {
@@ -59,7 +60,7 @@ abstract class Container extends DynamicResource {
             }
 
             $container = $this->factory->getInstance($parent->getName(), array(
-                'name' => $this->getName(),
+                'url' => $this->getUrl(),
                 'parent' => $this->getParent()
             ));
         }
@@ -97,9 +98,7 @@ abstract class Container extends DynamicResource {
     private function findStaticChild($child) {
         $file = $this->findFile($child);
         if ($file) {
-            return $this->factory->getInstance(StaticResource::$CLASS, array(
-                'name' => $child,
-                'parent' => $this,
+            return $this->getChild(StaticResource::$CLASS, $child, array(
                 'file' => $file
             ));
         }
@@ -116,10 +115,7 @@ abstract class Container extends DynamicResource {
 
         if ($file) {
             $fqn = $this->getContainerNamespace() . '\\' . $class;
-            return $this->factory->getInstance($fqn, array(
-                'name' => $child,
-                'parent' => $this,
-            ));
+            return $this->getChild($fqn, $child);
         }
         return null;
     }
@@ -131,9 +127,7 @@ abstract class Container extends DynamicResource {
     private function findStaticContainer($child) {
         $dir = $this->findFile($child);
         if ($dir && is_dir($dir)) {
-            return $this->factory->getInstance(StaticContainer::$CLASS, array(
-                'name' => $child,
-                'parent' => $this,
+            return $this->getChild(StaticContainer::$CLASS, $child, array(
                 'directory' => $dir,
                 'namespace' => $this->getContainerNamespace()
             ));
@@ -145,28 +139,31 @@ abstract class Container extends DynamicResource {
         foreach (glob($this->getContainerDirectory() . '/' . self::PLACEHOLDER_PREFIX . '*Resource.php') as $file) {
             $class = substr(basename($file), 0, -4);
             $fqn = $this->getContainerNamespace() . '\\' . $class;
-            return $this->factory->getInstance($fqn, array(
-                'name' => $child,
-                'parent' => $this,
-            ));
+            return $this->getChild($fqn, $child);
         }
         foreach (glob($this->getContainerDirectory() . '/' . self::PLACEHOLDER_PREFIX . '*') as $file) {
             if (is_dir($file)) {
-                return $this->factory->getInstance(StaticContainer::$CLASS, array(
-                    'name' => $child,
-                    'parent' => $this,
+                return $this->getChild(StaticContainer::$CLASS, $child, array(
                     'directory' => $file,
                     'namespace' => $this->getContainerNamespace()
                 ));
             } else {
-                return $this->factory->getInstance(StaticResource::$CLASS, array(
-                    'name' => $child,
-                    'parent' => $this,
+                return $this->getChild(StaticResource::$CLASS, $child, array(
                     'file' => $file
                 ));
             }
         }
         return null;
+    }
+
+    private function getChild($class, $name, $args = array()) {
+        $url = $this->getUrl()->copy();
+        $url->getPath()->append($name);
+
+        return $this->factory->getInstance($class, array_merge(array(
+            'url' => $url,
+            'parent' => $this
+        ), $args));
     }
 
     private function findFile($fileName) {

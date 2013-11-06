@@ -4,6 +4,7 @@ namespace watoki\curir;
 use watoki\collections\Map;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
+use watoki\curir\http\Url;
 use watoki\factory\Factory;
 
 class WebApplication {
@@ -22,12 +23,12 @@ class WebApplication {
     /** @var Resource */
     private $root;
 
-    public function __construct($rootResourceClass, Factory $factory = null) {
+    public function __construct($rootResourceClass, Url $host, Factory $factory = null) {
         $this->rootResourceClass = $rootResourceClass;
         $factory = $factory ? : new Factory();
 
         $this->root = $factory->getInstance($rootResourceClass, array(
-            'name' => $this->buildRootName(),
+            'url' => $this->buildRootUrl($host),
             'parent' => null
         ));
     }
@@ -40,8 +41,9 @@ class WebApplication {
         return 'method';
     }
 
-    protected function buildRootName() {
-        return trim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    protected function buildRootUrl(Url $base) {
+        $base->setPath(Path::parse(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\')));
+        return $base;
     }
 
     protected function buildRequest() {

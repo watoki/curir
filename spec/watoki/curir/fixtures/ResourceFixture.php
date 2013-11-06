@@ -70,7 +70,7 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenTheStaticResourceFor($file) {
-        $this->resource = new StaticResource($file, null, $this->file->tmp . DIRECTORY_SEPARATOR . $file);
+        $this->resource = new StaticResource(Url::parse($file), null, $this->file->tmp . DIRECTORY_SEPARATOR . $file);
     }
 
     public function givenTheContainer($containerName) {

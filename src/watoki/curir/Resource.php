@@ -1,9 +1,9 @@
 <?php
 namespace watoki\curir;
 
-use watoki\curir\http\Path;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
+use watoki\curir\http\Url;
 use watoki\curir\resource\Container;
 
 /**
@@ -12,13 +12,13 @@ use watoki\curir\resource\Container;
 abstract class Resource {
 
     /** @var string */
-    private $name;
+    private $url;
 
     /** @var Container|null */
     private $parent;
 
-    public function __construct($name, Resource $parent = null) {
-        $this->name = $name;
+    public function __construct(Url $url, Resource $parent = null) {
+        $this->url = $url;
         $this->parent = $parent;
     }
 
@@ -29,10 +29,10 @@ abstract class Resource {
     abstract public function respond(Request $request);
 
     /**
-     * @return string
+     * @return Url
      */
-    public function getName() {
-        return $this->name;
+    public function getUrl() {
+        return $this->url;
     }
 
     /**
@@ -43,25 +43,20 @@ abstract class Resource {
     }
 
     /**
+     * @param string $class Name of the ancestor class
+     * @throws \InvalidArgumentException If ancestor does not exist
      * @return \watoki\curir\Resource
      */
-    public function getRoot() {
-        if ($this->parent) {
-            return $this->parent->getRoot();
+    public function getAncestor($class) {
+        $ancestor = $this;
+        while ($ancestor) {
+            if (get_class($ancestor) == $class) {
+                return $ancestor;
+            }
+            $ancestor = $ancestor->getParent();
         }
-        return $this;
-    }
-
-    /**
-     * @return \watoki\curir\http\Path
-     */
-    public function getRoute() {
-        $route = new Path();
-        if ($this->parent) {
-            $route = $this->parent->getRoute();
-        }
-        $route->append($this->getName());
-        return $route;
+        $me = get_class($this);
+        throw new \InvalidArgumentException("[$me] does not have the ancestor [$class].");
     }
 
 }

@@ -4,6 +4,7 @@ namespace watoki\curir\resource;
 use watoki\curir\http\MimeTypes;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
+use watoki\curir\http\Url;
 use watoki\curir\Resource;
 
 /**
@@ -15,8 +16,8 @@ class StaticResource extends Resource {
 
     private $file;
 
-    public function __construct($name, Resource $parent = null, $file) {
-        parent::__construct($name, $parent);
+    public function __construct(Url $url, Resource $parent = null, $file) {
+        parent::__construct($url, $parent);
         $this->file = $file;
     }
 

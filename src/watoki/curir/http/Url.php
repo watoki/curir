@@ -96,6 +96,13 @@ class Url {
     }
 
     /**
+     * @param Path $path
+     */
+    public function setPath(Path $path) {
+        $this->path = $path;
+    }
+
+    /**
      * @return \watoki\collections\Map
      */
     public function getParameters() {
@@ -155,6 +162,9 @@ class Url {
         }
 
         $path = Path::parse($string);
+        if ($path->isEmpty()) {
+            $path->append('');
+        }
 
         return new Url($scheme, $host, $port, $path, $parameters, $fragment);
     }

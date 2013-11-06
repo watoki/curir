@@ -36,7 +36,7 @@ class UrlTest extends Specification {
         $string = 'http://example.com';
         $url = Url::parse($string);
 
-        $this->assertTrue($url->getPath()->isEmpty());
+        $this->assertEquals(new Path(array('')), $url->getPath());
         $this->assertEquals($string, $url->toString());
     }
 
@@ -44,7 +44,7 @@ class UrlTest extends Specification {
         $string = 'http://example.com';
         $url = Url::parse($string . '/');
 
-        $this->assertTrue($url->getPath()->isEmpty());
+        $this->assertEquals(new Path(array('')), $url->getPath());
         $this->assertEquals($string, $url->toString());
     }
 

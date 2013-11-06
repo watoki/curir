@@ -17,7 +17,7 @@ class PlaceholderRoutesTest extends Specification {
 
     function testFindPlaceholderResource() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxSomething', 'DynamicRoute', 'function doGet() {
-            return new \TestPresenter($this->getName());
+            return new \TestPresenter($this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheRequestHasTheTarget('Anything');
         $this->resource->givenTheContainer('DynamicRoute');
@@ -29,7 +29,7 @@ class PlaceholderRoutesTest extends Specification {
     function testRouteWithPlaceholderContainer() {
         $this->resource->givenTheRequestHasTheTarget('ThisOne/Real');
         $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'PlaceholderRoute/xxPlaceholder', 'function doGet() {
-            return new \TestPresenter($this->getParent()->getName());
+            return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer_In('xxPlaceholder', 'PlaceholderRoute');
         $this->resource->givenTheContainer('PlaceholderRoute');
@@ -52,7 +52,7 @@ class PlaceholderRoutesTest extends Specification {
 
     function testStaticPlaceholderContainer() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'PlaceholderContainer/someWhere/xxUnder', 'function doGet() {
-            return new \TestPresenter($this->getParent()->getName());
+            return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PlaceholderContainer');
 
@@ -65,7 +65,7 @@ class PlaceholderRoutesTest extends Specification {
     function testPreferDynamicResource() {
         $this->file->givenTheFile_WithTheContent('PreferDynamicResource/xxPlaceholder.html', 'Not here');
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxPlaceholder', 'PreferDynamicResource', 'function doGet() {
-            return new \TestPresenter($this->getName());
+            return new \TestPresenter($this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PreferDynamicResource');
 

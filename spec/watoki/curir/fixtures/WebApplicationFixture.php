@@ -3,6 +3,7 @@ namespace spec\watoki\curir\fixtures;
 
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
+use watoki\curir\http\Url;
 use watoki\curir\Resource;
 use watoki\curir\WebApplication;
 use watoki\factory\Factory;
@@ -53,13 +54,13 @@ class WebApplicationFixture extends Fixture {
         $_SERVER['SCRIPT_NAME'] = $string;
     }
 
-    public function whenIRunTheWebApplication() {
-        $app = new WebApplication(WebApplicationFixtureResource::$CLASS);
+    public function whenIRunTheWebApplicationUnderTheUrl($url) {
+        $app = new WebApplication(WebApplicationFixtureResource::$CLASS, Url::parse($url));
         $app->run();
     }
 
-    public function thenTheNameOfTheRootResourceShouldBe($string) {
-        $this->spec->assertEquals($string, self::$root->getName());
+    public function thenTheUrlOfTheRootResourceShouldBe($string) {
+        $this->spec->assertEquals($string, self::$root->getUrl()->toString());
     }
 
     public function thenTheTargetShouldBe($string) {
@@ -95,14 +96,18 @@ class WebApplicationFixture extends Fixture {
         $this->spec->assertFalse(self::$request->getHeaders()->has($key));
     }
 
+    public function givenTheRequestUriIs($string) {
+        $_SERVER['REQUEST_URI'] = $string;
+    }
+
 }
 
 class WebApplicationFixtureResource extends Resource {
 
     static $CLASS = __CLASS__;
 
-    public function __construct($name, Resource $parent = null) {
-        parent::__construct($name, $parent);
+    public function __construct(Url $url, Resource $parent = null) {
+        parent::__construct($url, $parent);
         WebApplicationFixture::$root = $this;
     }
 

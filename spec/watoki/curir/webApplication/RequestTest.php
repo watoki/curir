@@ -13,7 +13,7 @@ class RequestTest extends Specification {
         $this->app->givenTheMethodIs('GET');
         $this->app->givenTheRequestIs('one/two/three.txt');
 
-        $this->app->whenIRunTheWebApplication();
+        $this->app->whenIRunTheWebApplicationUnderTheUrl('http://example.com');
 
         $this->app->thenTheTargetShouldBe('one/two/three');
         $this->app->thenTheFormatShouldBe('txt');
@@ -23,7 +23,7 @@ class RequestTest extends Specification {
     function testDefaultFormat() {
         $this->app->givenTheRequestIs('one/two');
 
-        $this->app->whenIRunTheWebApplication();
+        $this->app->whenIRunTheWebApplicationUnderTheUrl('http://example.com');
 
         $this->app->thenTheFormatShouldBe(null);
     }
@@ -31,7 +31,7 @@ class RequestTest extends Specification {
     function testParameters() {
         $this->app->givenTheTheRequestParameter_Is('one', 'two');
 
-        $this->app->whenIRunTheWebApplication();
+        $this->app->whenIRunTheWebApplicationUnderTheUrl('http://example.com');
 
         $this->app->thenTheParameter_ShouldBe('one', 'two');
     }
@@ -40,7 +40,7 @@ class RequestTest extends Specification {
         $this->app->givenTheMethodIs('POST');
         $this->app->givenTheTheRequestParameter_Is('method', 'somethingElse');
 
-        $this->app->whenIRunTheWebApplication();
+        $this->app->whenIRunTheWebApplicationUnderTheUrl('http://example.com');
 
         $this->app->thenTheMethodShouldBe('somethingElse');
     }
@@ -49,7 +49,7 @@ class RequestTest extends Specification {
         $this->app->givenRequestTheHeader_Is('HTTP_ACCEPT', '*/*');
         $this->app->givenRequestTheHeader_Is('HTTP_PRAGMA', null);
 
-        $this->app->whenIRunTheWebApplication();
+        $this->app->whenIRunTheWebApplicationUnderTheUrl('http://example.com');
 
         $this->app->thenTheHeader_ShouldBe('Accept', '*/*');
         $this->app->thenThereShouldBeNoHeader('Pragma');
