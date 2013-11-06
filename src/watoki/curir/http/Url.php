@@ -47,28 +47,17 @@ class Url {
     }
 
     /**
-     * @return Path
-     */
-    public function getPath() {
-        return $this->path;
-    }
-
-    /**
-     * @return \watoki\collections\Map
-     */
-    public function getParameters() {
-        return $this->parameters;
-    }
-
-    /**
      * @return null|string
      */
-    public function getFragment() {
-        return $this->fragment;
+    public function getScheme() {
+        return $this->scheme;
     }
 
-    public function setFragment($fragment) {
-        $this->fragment = $fragment;
+    /**
+     * @param null|string $scheme
+     */
+    public function setScheme($scheme) {
+        $this->scheme = $scheme;
     }
 
     /**
@@ -99,6 +88,31 @@ class Url {
         $this->port = $port;
     }
 
+    /**
+     * @return Path
+     */
+    public function getPath() {
+        return $this->path;
+    }
+
+    /**
+     * @return \watoki\collections\Map
+     */
+    public function getParameters() {
+        return $this->parameters;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getFragment() {
+        return $this->fragment;
+    }
+
+    public function setFragment($fragment) {
+        $this->fragment = $fragment;
+    }
+
     static public function parse($string) {
         $fragment = null;
         $fragmentPos = strpos($string, self::FRAGMENT_SEPARATOR);
@@ -119,7 +133,7 @@ class Url {
         }
 
         $scheme = null;
-        $schemeSepPos = strpos($string, self::SCHEME_SEPARATOR);
+        $schemeSepPos = strpos($string, self::SCHEME_SEPARATOR . self::HOST_PREFIX);
         if ($schemeSepPos !== false) {
             $scheme = substr($string, 0, $schemeSepPos);
             $string = substr($string, $schemeSepPos + 1);
@@ -129,7 +143,7 @@ class Url {
         $port = null;
         if (substr($string, 0, 2) == self::HOST_PREFIX) {
             $string = substr($string, 2);
-            $hostPos = strpos($string, self::SEPARATOR);
+            $hostPos = strpos($string, self::SEPARATOR) ?: strlen($string);
             $host = substr($string, 0, $hostPos);
             $string = substr($string, $hostPos);
 
@@ -188,7 +202,8 @@ class Url {
         $port = $this->port ? self::PORT_SEPARATOR . $this->port : '';
         $scheme = $this->scheme ? $this->scheme . self::SCHEME_SEPARATOR : '';
 
-        return ($this->host ? $scheme . self::HOST_PREFIX . $this->host . $port : '')
+        $isAbsolutePath = $this->path->isEmpty() || $this->path->first() == '';
+        return ($this->host && $isAbsolutePath ? $scheme . self::HOST_PREFIX . $this->host . $port : '')
                 . $this->path->toString()
                 . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
                 . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
