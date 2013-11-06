@@ -24,13 +24,13 @@ class WebApplicationFixture extends Fixture {
         $_SERVER['SERVER_PORT'] = '10';
         $_SERVER['SCRIPT_NAME'] = '/some/where/index.php';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        $_REQUEST = array(
-            '-' => ''
-        );
+        $_REQUEST = array();
+        $_GET = array();
     }
 
     public function givenTheRequestIs($string) {
-        $_REQUEST['-'] = $string;
+        $_REQUEST[$string] = '';
+        $_GET[$string] = '';
     }
 
     public function givenTheMethodIs($string) {

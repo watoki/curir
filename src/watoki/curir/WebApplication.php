@@ -36,10 +36,6 @@ class WebApplication {
         $this->root->respond($this->buildRequest())->flush();
     }
 
-    protected function getTargetKey() {
-        return '-';
-    }
-
     protected function getMethodKey() {
         return 'method';
     }
@@ -55,13 +51,14 @@ class WebApplication {
             unset($_REQUEST[$this->getMethodKey()]);
         }
 
-        if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
-            throw new \InvalidArgumentException('Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST,
-                true));
+        $target = new Path();
+        foreach ($_GET as $key => $value) {
+            if (!$value) {
+                $target = Path::parse($key);
+                unset($_REQUEST[$key]);
+                break;
+            }
         }
-
-        $target = Path::parse($_REQUEST[$this->getTargetKey()]);
-        unset($_REQUEST[$this->getTargetKey()]);
 
         $format = null;
         if (!$target->isEmpty() && strpos($target->last(), '.')) {
