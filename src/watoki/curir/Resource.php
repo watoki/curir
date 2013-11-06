@@ -32,7 +32,7 @@ abstract class Resource {
      * @return Url
      */
     public function getUrl() {
-        return $this->url;
+        return $this->url->copy();
     }
 
     /**

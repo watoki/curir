@@ -157,7 +157,7 @@ abstract class Container extends DynamicResource {
     }
 
     private function getChild($class, $name, $args = array()) {
-        $url = $this->getUrl()->copy();
+        $url = $this->getUrl();
         $url->getPath()->append($name);
 
         return $this->factory->getInstance($class, array_merge(array(
