@@ -10,7 +10,6 @@ use watoki\scrut\Specification;
 class RootNameTest extends Specification {
 
     function testRewrittenUrl() {
-        $this->app->givenTheRequestUriIs("/test/path/to/resource.html");
         $this->app->givenTheScriptNameIs('/test/index.php');
 
         $this->app->whenIRunTheWebApplicationUnderTheUrl('http://example.com');

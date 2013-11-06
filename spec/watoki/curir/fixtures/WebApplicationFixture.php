@@ -25,13 +25,13 @@ class WebApplicationFixture extends Fixture {
         $_SERVER['SERVER_PORT'] = '10';
         $_SERVER['SCRIPT_NAME'] = '/some/where/index.php';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        $_REQUEST = array();
-        $_GET = array();
+        $_REQUEST = array(
+            '-' => ''
+        );
     }
 
     public function givenTheRequestIs($string) {
-        $_REQUEST[$string] = '';
-        $_GET[$string] = '';
+        $_REQUEST['-'] = $string;
     }
 
     public function givenTheMethodIs($string) {
@@ -94,10 +94,6 @@ class WebApplicationFixture extends Fixture {
 
     public function thenThereShouldBeNoHeader($key) {
         $this->spec->assertFalse(self::$request->getHeaders()->has($key));
-    }
-
-    public function givenTheRequestUriIs($string) {
-        $_SERVER['REQUEST_URI'] = $string;
     }
 
 }
