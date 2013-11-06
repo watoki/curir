@@ -16,7 +16,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testFindPlaceholderResource() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('xxSomething', 'DynamicRoute', 'function doGet() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxSomething', 'dynamicRoute', 'function doGet() {
             return new \TestPresenter($this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheRequestHasTheTarget('Anything');
@@ -28,10 +28,10 @@ class PlaceholderRoutesTest extends Specification {
 
     function testRouteWithPlaceholderContainer() {
         $this->resource->givenTheRequestHasTheTarget('ThisOne/Real');
-        $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'PlaceholderRoute/xxPlaceholder', 'function doGet() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'placeholderRoute/xxPlaceholder', 'function doGet() {
             return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
         }');
-        $this->resource->givenTheContainer_In('xxPlaceholder', 'PlaceholderRoute');
+        $this->resource->givenTheContainer_In('xxPlaceholder', 'placeholderRoute');
         $this->resource->givenTheContainer('PlaceholderRoute');
 
         $this->resource->whenISendTheRequestToThatResource();
@@ -39,7 +39,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testStaticPlaceholderResource() {
-        $this->file->givenTheFile_WithTheContent('PlaceholderResource/some/where/xxHere.html', 'Hello World');
+        $this->file->givenTheFile_WithTheContent('placeholderResource/some/where/xxHere.html', 'Hello World');
         $this->resource->givenTheContainer('PlaceholderResource');
 
         $this->resource->givenIRequestTheFormat(null);
@@ -51,7 +51,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testStaticPlaceholderContainer() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'PlaceholderContainer/someWhere/xxUnder', 'function doGet() {
+        $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'placeholderContainer/someWhere/xxUnder', 'function doGet() {
             return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PlaceholderContainer');
@@ -63,8 +63,8 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testPreferDynamicResource() {
-        $this->file->givenTheFile_WithTheContent('PreferDynamicResource/xxPlaceholder.html', 'Not here');
-        $this->resource->givenTheDynamicResource_In_WithTheBody('xxPlaceholder', 'PreferDynamicResource', 'function doGet() {
+        $this->file->givenTheFile_WithTheContent('preferDynamicResource/xxPlaceholder.html', 'Not here');
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxPlaceholder', 'preferDynamicResource', 'function doGet() {
             return new \TestPresenter($this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PreferDynamicResource');
@@ -76,7 +76,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testPlaceholderSetParameter() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'SetParameter', '
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'setParameter', '
             function doGet($place) {
                 return new \TestPresenter($place);
             }
@@ -92,7 +92,7 @@ class PlaceholderRoutesTest extends Specification {
     }
 
     function testPlaceholderDoesNotOverwriteParameter() {
-        $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'DoesNotOverwriteParameter', '
+        $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'doesNotOverwriteParameter', '
             function doGet($place) {
                 return new \TestPresenter($place);
             }
