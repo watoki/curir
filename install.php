@@ -7,4 +7,4 @@ file_put_contents("build/install_composer.php", file_get_contents('http://getcom
 echo "Installing composer.phar" . PHP_EOL;
 echo shell_exec("php build/install_composer.php --install-dir build");
 
-echo shell_exec("php build/composer.phar install");
+echo shell_exec("php build/composer.phar install --dev");
