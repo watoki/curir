@@ -29,10 +29,15 @@ abstract class Resource {
     abstract public function respond(Request $request);
 
     /**
+     * @param null|string|Url $merge Will be merged with the Resource's URL
      * @return Url
      */
-    public function getUrl() {
-        return $this->url->copy();
+    public function getUrl($merge = null) {
+        $url = $this->url->copy();
+        if ($merge) {
+            $url->merge($merge instanceof Url ? $merge : Url::parse($merge));
+        }
+        return $url;
     }
 
     /**

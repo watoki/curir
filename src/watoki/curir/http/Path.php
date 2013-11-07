@@ -15,8 +15,16 @@ class Path extends Liste {
         return new Path(Liste::split(self::SEPARATOR, $string)->elements);
     }
 
+    public function isAbsolute() {
+        return !$this->isEmpty() && $this->first() == '';
+    }
+
     public function toString() {
         return $this->join(self::SEPARATOR);
+    }
+
+    function __toString() {
+        return $this->toString();
     }
 
 }

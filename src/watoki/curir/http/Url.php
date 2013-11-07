@@ -245,4 +245,28 @@ class Url {
         return new Url($this->scheme, $this->host, $this->port, $this->path->copy(), $this->parameters->deepCopy(), $this->fragment);
     }
 
+    public function merge(Url $with) {
+        if ($with->path->isAbsolute()) {
+            $this->path = $with->path->copy();
+        } else {
+            foreach ($with->path as $resource) {
+                $this->path->append($resource);
+            }
+        }
+
+        if ($with->host) {
+            $this->scheme = $with->scheme;
+            $this->host = $with->host;
+            $this->port = $with->port;
+        }
+
+        foreach ($with->parameters as $key => $value) {
+            $this->parameters->set($key, $value);
+        }
+
+        if ($with->fragment) {
+            $this->fragment = $with->fragment;
+        }
+    }
+
 }
