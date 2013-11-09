@@ -9,12 +9,17 @@ use watoki\scrut\Specification;
  */
 class RootNameTest extends Specification {
 
-    function testRewrittenUrl() {
-        $this->app->givenTheScriptNameIs('/test/index.php');
-
-        $this->app->whenIRunTheWebApplicationUnderTheUrl('http://example.com');
-
+    function testInFolder() {
+        $this->app->givenTheRootUrlIs('http://example.com/test');
+        $this->app->whenIRunTheWebApplication();
         $this->app->thenTheUrlOfTheRootResourceShouldBe('http://example.com/test');
+        $this->app->thenTheUrlOfTheRootResourceShouldBeAbsolute();
+    }
+
+    function testInRoot() {
+        $this->app->givenTheRootUrlIs('http://example.com');
+        $this->app->whenIRunTheWebApplication();
+        $this->app->thenTheUrlOfTheRootResourceShouldBe('http://example.com');
     }
 
 } 

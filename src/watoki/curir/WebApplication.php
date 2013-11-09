@@ -23,12 +23,12 @@ class WebApplication {
     /** @var Resource */
     private $root;
 
-    public function __construct($rootResourceClass, Url $host, Factory $factory = null) {
+    public function __construct($rootResourceClass, Url $rootUrl, Factory $factory = null) {
         $this->rootResourceClass = $rootResourceClass;
         $factory = $factory ? : new Factory();
 
         $this->root = $factory->getInstance($rootResourceClass, array(
-            'url' => $this->buildRootUrl($host),
+            'url' => $rootUrl,
             'parent' => null
         ));
     }
@@ -44,11 +44,6 @@ class WebApplication {
 
     protected function getMethodKey() {
         return 'method';
-    }
-
-    protected function buildRootUrl(Url $base) {
-        $base->setPath(Path::parse(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\')));
-        return $base;
     }
 
     protected function buildRequest() {

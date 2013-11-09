@@ -18,12 +18,12 @@ class WebApplicationFixture extends Fixture {
     /** @var \watoki\curir\http\Request */
     static $request;
 
+    /** @var Url */
+    private $rootUrl;
+
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
 
-        $_SERVER['HTTP_HOST'] = 'localhost';
-        $_SERVER['SERVER_PORT'] = '10';
-        $_SERVER['SCRIPT_NAME'] = '/some/where/index.php';
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_REQUEST = array(
             '-' => ''
@@ -38,29 +38,21 @@ class WebApplicationFixture extends Fixture {
         $_SERVER['REQUEST_METHOD'] = $string;
     }
 
-    public function givenTheSchemeIs($string) {
-        $_SERVER['REQUEST_SCHEME'] = $string;
+    public function givenTheRootUrlIs($string) {
+        $this->rootUrl = Url::parse($string);
     }
 
-    public function givenTheHostIs($string) {
-        $_SERVER['HTTP_HOST'] = $string;
-    }
-
-    public function givenThePortIs($int) {
-        $_SERVER['SERVER_PORT'] = $int;
-    }
-
-    public function givenTheScriptNameIs($string) {
-        $_SERVER['SCRIPT_NAME'] = $string;
-    }
-
-    public function whenIRunTheWebApplicationUnderTheUrl($url) {
-        $app = new WebApplication(WebApplicationFixtureResource::$CLASS, Url::parse($url));
+    public function whenIRunTheWebApplication() {
+        $app = new WebApplication(WebApplicationFixtureResource::$CLASS, $this->rootUrl);
         $app->run();
     }
 
     public function thenTheUrlOfTheRootResourceShouldBe($string) {
         $this->spec->assertEquals($string, self::$root->getUrl()->toString());
+    }
+
+    public function thenTheUrlOfTheRootResourceShouldBeAbsolute() {
+        $this->spec->assertTrue(self::$root->getUrl()->getPath()->isAbsolute());
     }
 
     public function thenTheTargetShouldBe($string) {
