@@ -24,6 +24,7 @@ class WebApplicationFixture extends Fixture {
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
 
+        $this->rootUrl = Url::parse('http://lacarte');
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_REQUEST = array(
             '-' => ''
