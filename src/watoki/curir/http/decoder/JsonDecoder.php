@@ -11,9 +11,7 @@ class JsonDecoder implements ParameterDecoder {
      * @return Map
      */
     public function decode($body) {
-        if (!$body) {
-            return new Map();
-        }
-        return new Map(json_decode($body, true));
+        $decoded = json_decode($body, true);
+        return is_array($decoded) ? new Map($decoded) : new Map();
     }
 }

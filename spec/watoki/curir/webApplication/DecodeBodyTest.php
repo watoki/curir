@@ -44,6 +44,14 @@ class DecodeBodyTest extends Specification {
         $this->app->whenIRunTheWebApplication();
     }
 
+    function testDecodeInvalidJson() {
+        $this->app->givenTheMethodIs('put');
+        $this->app->givenTheRequestContentTypeIs('application/json');
+        $this->app->givenTheRequestBodyIs('not json');
+
+        $this->app->whenIRunTheWebApplication();
+    }
+
     function testOverwriteQueryParameters() {
         $this->app->givenTheMethodIs('put');
         $this->app->givenTheRequestContentTypeIs('application/json');
