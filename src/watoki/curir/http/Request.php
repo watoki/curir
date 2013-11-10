@@ -9,12 +9,13 @@ class Request {
 
     public static $CLASS = __CLASS__;
 
-    const METHOD_OPTIONS = 'options';
     const METHOD_GET = 'get';
-    const METHOD_HEAD = 'head';
     const METHOD_POST = 'post';
     const METHOD_PUT = 'put';
+    const METHOD_PATCH = 'patch';
     const METHOD_DELETE = 'delete';
+    const METHOD_HEAD = 'head';
+    const METHOD_OPTIONS = 'options';
     const METHOD_TRACE = 'trace';
 
     const HEADER_ACCEPT = 'Accept';
@@ -25,6 +26,7 @@ class Request {
     const HEADER_CONNECTION = 'Connection';
     const HEADER_PRAGMA = 'Pragma';
     const HEADER_USER_AGENT = 'User-Agent';
+    const HEADER_CONTENT_TYPE = 'Content-Type';
 
     /** @var Url */
     private $target;

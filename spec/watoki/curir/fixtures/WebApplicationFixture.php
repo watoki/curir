@@ -21,6 +21,8 @@ class WebApplicationFixture extends Fixture {
     /** @var Url */
     private $rootUrl;
 
+    private $body;
+
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
 
@@ -35,6 +37,14 @@ class WebApplicationFixture extends Fixture {
         $_REQUEST['-'] = $string;
     }
 
+    public function givenTheRequestBodyIs($string) {
+        $this->body = $string;
+    }
+
+    public function givenTheRequestContentTypeIs($string) {
+        $_SERVER['CONTENT_TYPE'] = $string;
+    }
+
     public function givenTheMethodIs($string) {
         $_SERVER['REQUEST_METHOD'] = $string;
     }
@@ -44,7 +54,8 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function whenIRunTheWebApplication() {
-        $app = new WebApplication(WebApplicationFixtureResource::$CLASS, $this->rootUrl);
+        $app = new WebApplicationFixtureWebApplication(WebApplicationFixtureResource::$CLASS, $this->rootUrl);
+        $app->body = $this->body;
         $app->run();
     }
 
@@ -87,6 +98,16 @@ class WebApplicationFixture extends Fixture {
 
     public function thenThereShouldBeNoHeader($key) {
         $this->spec->assertFalse(self::$request->getHeaders()->has($key));
+    }
+
+}
+
+class WebApplicationFixtureWebApplication extends WebApplication {
+
+    public $body = '';
+
+    protected function readBody() {
+        return $this->body;
     }
 
 }
