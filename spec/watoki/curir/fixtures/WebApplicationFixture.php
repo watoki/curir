@@ -100,6 +100,10 @@ class WebApplicationFixture extends Fixture {
         $this->spec->assertFalse(self::$request->getHeaders()->has($key));
     }
 
+    public function thenTheParametersShouldBeEmpty() {
+        $this->spec->assertTrue(self::$request->getParameters()->isEmpty());
+    }
+
 }
 
 class WebApplicationFixtureWebApplication extends WebApplication {

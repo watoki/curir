@@ -9,6 +9,12 @@ use watoki\scrut\Specification;
  */
 class DecodeBodyTest extends Specification {
 
+    function testUndefinedContentType() {
+        $this->app->givenTheMethodIs('put');
+        $this->app->whenIRunTheWebApplication();
+        $this->app->thenTheParametersShouldBeEmpty();
+    }
+
     function testDecodeFormData() {
         $this->app->givenTheMethodIs('put');
         $this->app->givenTheRequestContentTypeIs('application/x-www-form-urlencoded');
@@ -24,6 +30,7 @@ class DecodeBodyTest extends Specification {
         $this->app->givenTheRequestBodyIs('');
 
         $this->app->whenIRunTheWebApplication();
+        $this->app->thenTheParametersShouldBeEmpty();
     }
 
     function testDecodeJson() {
@@ -42,6 +49,7 @@ class DecodeBodyTest extends Specification {
         $this->app->givenTheRequestBodyIs('');
 
         $this->app->whenIRunTheWebApplication();
+        $this->app->thenTheParametersShouldBeEmpty();
     }
 
     function testDecodeInvalidJson() {
@@ -50,6 +58,7 @@ class DecodeBodyTest extends Specification {
         $this->app->givenTheRequestBodyIs('not json');
 
         $this->app->whenIRunTheWebApplication();
+        $this->app->thenTheParametersShouldBeEmpty();
     }
 
     function testOverwriteQueryParameters() {

@@ -97,7 +97,9 @@ class WebApplication {
     }
 
     private function decodeParamsFromBody(Map $params, $body) {
-        $contentType = $_SERVER[self::$headerKeys[Request::HEADER_CONTENT_TYPE]];
+        $key = self::$headerKeys[Request::HEADER_CONTENT_TYPE];
+        $contentType = isset($_SERVER[$key]) ? $_SERVER[$key] : null;
+
         if (!array_key_exists($contentType, $this->decoders)) {
             return $params;
         }
