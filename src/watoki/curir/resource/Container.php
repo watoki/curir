@@ -2,22 +2,11 @@
 namespace watoki\curir\resource;
 
 use watoki\curir\http\Request;
-use watoki\curir\http\Url;
 use watoki\curir\Resource;
-use watoki\curir\serialization\InflaterRepository;
-use watoki\factory\Factory;
 
 abstract class Container extends DynamicResource {
 
     const PLACEHOLDER_PREFIX = 'xx';
-
-    /** @var \watoki\factory\Factory */
-    private $factory;
-
-    public function __construct(Url $url, Resource $parent = null, InflaterRepository $repository, Factory $factory) {
-        parent::__construct($url, $parent, $repository);
-        $this->factory = $factory;
-    }
 
     public function respond(Request $request) {
         if ($request->getTarget()->isEmpty()) {

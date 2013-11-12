@@ -27,7 +27,7 @@ class DynamicResourceParameterInflationTest extends Specification {
     function testMissingParameter() {
         $this->resource->givenTheDynamicResource_WithTheBody('MissingParameter', 'function doGet($notThere, $default = "yay") {}');
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith('Missing parameter [notThere] for method [doGet]');
+        $this->resource->thenTheRequestShouldFailWith('Cannot inject parameter [notThere] of [MissingParameterResource::doGet]');
     }
 
     function testInflateParameters() {

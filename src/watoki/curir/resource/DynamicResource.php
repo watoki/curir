@@ -1,27 +1,24 @@
 <?php
 namespace watoki\curir\resource;
 
-use rtens\mockster\Method;
 use watoki\collections\Map;
 use watoki\curir\http\Request;
-use watoki\curir\http\Url;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
-use watoki\curir\serialization\InflaterRepository;
-use watoki\factory\ClassResolver;
+use watoki\factory\Factory;
+use watoki\factory\filters\DefaultFilterFactory;
+use watoki\factory\Injector;
 
 /**
  * The Response of a DynamicResource is rendered by translating the Request into a method invocation.
  */
 abstract class DynamicResource extends Resource {
 
-    /** @var InflaterRepository */
-    private $repository;
+    /** @var DefaultFilterFactory <- */
+    public $filters;
 
-    public function __construct(Url $url, Resource $parent = null, InflaterRepository $repository) {
-        parent::__construct($url, $parent);
-        $this->repository = $repository;
-    }
+    /** @var Factory <- */
+    public $factory;
 
     public function respond(Request $request) {
         $this->setPlaceholderKey($request);
@@ -55,75 +52,12 @@ abstract class DynamicResource extends Resource {
     }
 
     protected function collectArguments(Map $parameters, \ReflectionMethod $method) {
-        $args = array();
-        foreach ($method->getParameters() as $param) {
-            if ($parameters->has($param->getName())) {
-                $type = $this->findTypeHint($method, $param);
-                $value = $parameters->get($param->getName());
-
-                if ($type) {
-                    $args[] = $this->inflate($value, $type);
-                } else {
-                    $args[] = $value;
-                }
-            } else if ($param->isDefaultValueAvailable()) {
-                $args[] = $param->getDefaultValue();
-            } else {
-                $class = get_class($this);
-                throw new \Exception(
-                    "Invalid request: Missing parameter [{$param->getName()}] for method [{$method->getName()}] in component [$class]");
-            }
-        }
-        return $args;
+        $injector = new Injector($this->factory);
+        return $injector->injectMethodArguments($method, $parameters->toArray(), $this->filters);
     }
 
     private function buildMethodName($method) {
         return 'do' . ucfirst($method);
-    }
-
-    private function inflate($value, $type) {
-        try {
-            return $this->repository->getInflater($type)->inflate($value);
-        } catch (\Exception $e) {
-            return $value;
-        }
-    }
-
-    private function findTypeHint(\ReflectionMethod $method, \ReflectionParameter $param) {
-        if ($param->getClass()) {
-            return $param->getClass()->getName();
-        }
-
-        if ($method->getDocComment()) {
-            $matches = array();
-            $pattern = '/@param\s+(\S+)\s+\$' . $param->getName() . '/';
-            $found = preg_match($pattern, $method->getDocComment(), $matches);
-
-            if ($found) {
-                return $this->resolveType($matches[1]);
-            }
-        }
-
-        return null;
-    }
-
-    private function resolveType($hint) {
-        switch ($hint) {
-            case 'array':
-                return 'array';
-            case 'int':
-            case 'integer':
-                return 'integer';
-            case 'bool':
-            case 'boolean':
-                return 'boolean';
-            case 'float':
-            case 'string':
-                return $hint;
-        }
-
-        $resolver = new ClassResolver(new \ReflectionClass($this));
-        return $resolver->resolve($hint) ? : $hint;
     }
 
     public function getResourceDirectory() {
