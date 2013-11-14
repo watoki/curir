@@ -1,15 +1,14 @@
 <?php
 namespace watoki\curir;
 
-use watoki\curir\http\Request;
-use watoki\curir\http\Response;
+use watoki\curir\http\Responding;
 use watoki\curir\http\Url;
 use watoki\curir\resource\Container;
 
 /**
  * A Resource responds to a Request with a Response.
  */
-abstract class Resource {
+abstract class Resource implements Responding {
 
     /** @var string */
     private $url;
@@ -21,12 +20,6 @@ abstract class Resource {
         $this->url = $url;
         $this->parent = $parent;
     }
-
-    /**
-     * @param Request $request
-     * @return Response
-     */
-    abstract public function respond(Request $request);
 
     /**
      * @param null|string|Url $merge Will be merged with the Resource's URL
