@@ -54,7 +54,7 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function whenIRunTheWebApplication() {
-        $app = new WebApplicationFixtureWebApplication(WebApplicationFixtureResource::$CLASS, $this->rootUrl);
+        $app = new WebApplicationFixtureWebApplication(new WebApplicationFixtureResource($this->rootUrl));
         $app->body = $this->body;
         $app->run();
     }

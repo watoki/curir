@@ -7,8 +7,7 @@ use watoki\curir\http\decoder\JsonDecoder;
 use watoki\curir\http\ParameterDecoder;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
-use watoki\curir\http\Url;
-use watoki\factory\Factory;
+use watoki\curir\http\Responding;
 
 class WebApplication {
 
@@ -30,19 +29,13 @@ class WebApplication {
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
-    public function __construct($rootResourceClass, Url $rootUrl, Factory $factory = null) {
-        $this->rootResourceClass = $rootResourceClass;
-        $factory = $factory ? : new Factory();
+    public function __construct(Responding $root) {
+        $this->root = $root;
 
         $formDecoder = new FormDecoder();
         $this->registerDecoder('application/x-www-form-urlencoded', $formDecoder);
         $this->registerDecoder('multipart/form-data', $formDecoder);
         $this->registerDecoder('application/json', new JsonDecoder());
-
-        $this->root = $factory->getInstance($rootResourceClass, array(
-            'url' => $rootUrl,
-            'parent' => null
-        ));
     }
 
     public function run() {
@@ -114,9 +107,6 @@ class WebApplication {
         $this->decoders[$contentType] = $decoder;
     }
 
-    /**
-     * @return string
-     */
     protected function readBody() {
         return file_get_contents('php://input');
     }
