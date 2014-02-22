@@ -20,7 +20,7 @@ class DynamicResourceRenderingTest extends Specification {
     function testRenderFormatNotRegistered() {
         $this->resource->givenIRequestTheFormat('nothing');
         $this->resource->givenTheDynamicResource_WithTheBody('NoFormat', 'function doGet() {
-            return new \watoki\curir\responder\Presenter();
+            return new \watoki\curir\responder\Presenter($this);
         }');
         $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith("renderNothing() does not exist");
@@ -36,7 +36,7 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testRenderModel() {
         $this->resource->givenTheDynamicResource_WithTheBody('RenderMe', 'function doGet() {
-            return new \TestPresenter(array("foo" => "Hello", "bar" => "World"));
+            return new \TestPresenter($this, array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('json');
         $this->resource->whenISendTheRequestToThatResource();
@@ -47,7 +47,7 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testRenderTemplate() {
         $this->resource->givenTheDynamicResource_WithTheBody('RenderTemplate', 'function doGet() {
-            return new \TestPresenter(array("foo" => "Hello", "bar" => "World"));
+            return new \TestPresenter($this, array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('test');
         $this->file->givenTheFile_WithTheContent('renderTemplate.test', '%foo% %bar%');
@@ -57,20 +57,10 @@ class DynamicResourceRenderingTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
-    function testNoFormatGiven() {
-        $this->resource->givenTheDynamicResource_WithTheBody('DefaultFormat', 'function doGet() {
-            return new \TestPresenter(array("foo" => "bar"));
-        }');
-        $this->file->givenTheFile_WithTheContent('defaultFormat.html', 'Here');
-
-        $this->resource->whenISendTheRequestToThatResource();
-
-        $this->resource->thenTheResponseShouldHaveTheBody('Here');
-    }
-
     function testCaseInsensitivity() {
+        $this->resource->givenIRequestTheFormat('html');
         $this->resource->givenTheDynamicResource_WithTheBody('CaseInsensitivity', 'function doGet() {
-            return new \TestPresenter(array("foo" => "bar"));
+            return new \TestPresenter($this, array("foo" => "bar"));
         }');
         $this->file->givenTheFile_WithTheContent('CaseInsEnsitIvity.HTML', 'There');
 

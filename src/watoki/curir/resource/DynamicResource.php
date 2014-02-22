@@ -23,7 +23,7 @@ abstract class DynamicResource extends Resource {
     public function respond(Request $request) {
         $this->setPlaceholderKey($request);
         $responder = $this->invokeMethod($request->getMethod(), $request->getParameters());
-        return $responder->createResponse($this, $request);
+        return $responder->createResponse($request);
     }
 
     private function setPlaceholderKey(Request $request) {

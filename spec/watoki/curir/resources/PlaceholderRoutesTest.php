@@ -17,7 +17,7 @@ class PlaceholderRoutesTest extends Specification {
 
     function testFindPlaceholderResource() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxSomething', 'dynamicRoute', 'function doGet() {
-            return new \TestPresenter($this->getUrl()->getPath()->last());
+            return new \TestPresenter($this, $this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheRequestHasTheTarget('Anything');
         $this->resource->givenTheContainer('DynamicRoute');
@@ -29,7 +29,7 @@ class PlaceholderRoutesTest extends Specification {
     function testRouteWithPlaceholderContainer() {
         $this->resource->givenTheRequestHasTheTarget('ThisOne/Real');
         $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'placeholderRoute/xxPlaceholder', 'function doGet() {
-            return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
+            return new \TestPresenter($this, $this->getParent()->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer_In('xxPlaceholder', 'placeholderRoute');
         $this->resource->givenTheContainer('PlaceholderRoute');
@@ -52,7 +52,7 @@ class PlaceholderRoutesTest extends Specification {
 
     function testStaticPlaceholderContainer() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'placeholderContainer/someWhere/xxUnder', 'function doGet() {
-            return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
+            return new \TestPresenter($this, $this->getParent()->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PlaceholderContainer');
 
@@ -65,7 +65,7 @@ class PlaceholderRoutesTest extends Specification {
     function testPreferDynamicResource() {
         $this->file->givenTheFile_WithTheContent('preferDynamicResource/xxPlaceholder.html', 'Not here');
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxPlaceholder', 'preferDynamicResource', 'function doGet() {
-            return new \TestPresenter($this->getUrl()->getPath()->last());
+            return new \TestPresenter($this, $this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PreferDynamicResource');
 
@@ -78,7 +78,7 @@ class PlaceholderRoutesTest extends Specification {
     function testPlaceholderSetParameter() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'setParameter', '
             function doGet($place) {
-                return new \TestPresenter($place);
+                return new \TestPresenter($this, $place);
             }
             function getPlaceholderKey() {
                 return "place";
@@ -94,7 +94,7 @@ class PlaceholderRoutesTest extends Specification {
     function testPlaceholderDoesNotOverwriteParameter() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'doesNotOverwriteParameter', '
             function doGet($place) {
-                return new \TestPresenter($place);
+                return new \TestPresenter($this, $place);
             }
             function getPlaceholderKey() {
                 return "place";

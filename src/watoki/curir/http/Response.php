@@ -16,6 +16,7 @@ class Response {
     const STATUS_NOT_FOUND = '404 Not Found';
     const STATUS_METHOD_NOT_ALLOWED = '405 Method Not Allowed';
     const STATUS_UNSUPPORTED_MEDIA_TYPE = '415 Unsupported Media Type';
+    const STATUS_SERVER_ERROR = '500 Internal Server Error';
     const STATUS_NOT_IMPLEMENTED = '501 Not Implemented';
 
     public static $CLASS = __CLASS__;
@@ -31,7 +32,7 @@ class Response {
     private $body;
 
     /** @var null|string */
-    private $status;
+    private $status = self::STATUS_OK;
 
     function __construct($body = null) {
         $this->headers = new Map();
@@ -61,6 +62,10 @@ class Response {
 
     public function setStatus($status) {
         $this->status = $status;
+    }
+
+    public function getStatus() {
+        return $this->status;
     }
 
     public function flush() {

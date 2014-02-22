@@ -4,10 +4,12 @@ namespace watoki\curir;
 use watoki\collections\Map;
 use watoki\curir\http\decoder\FormDecoder;
 use watoki\curir\http\decoder\JsonDecoder;
+use watoki\curir\http\error\ErrorResponder;
+use watoki\curir\http\error\HttpError;
 use watoki\curir\http\ParameterDecoder;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
-use watoki\curir\http\Responding;
+use watoki\curir\http\Response;
 
 class WebApplication {
 
@@ -29,7 +31,7 @@ class WebApplication {
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
-    public function __construct(Responding $root) {
+    public function __construct(Resource $root) {
         $this->root = $root;
 
         $formDecoder = new FormDecoder();
@@ -39,7 +41,7 @@ class WebApplication {
     }
 
     public function run() {
-        $this->root->respond($this->buildRequest())->flush();
+        $this->getResponse($this->buildRequest())->flush();
     }
 
     protected function getTargetKey() {
@@ -50,6 +52,14 @@ class WebApplication {
         return 'method';
     }
 
+    protected function getResponse(Request $request) {
+        try {
+            return $this->root->respond($request);
+        } catch (\Exception $e) {
+            return $this->getErrorResponder($e)->createResponse($request);
+        }
+    }
+
     protected function buildRequest() {
         $method = strtolower($_SERVER['REQUEST_METHOD']);
         if (array_key_exists($this->getMethodKey(), $_REQUEST)) {
@@ -58,8 +68,8 @@ class WebApplication {
         }
 
         if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
-            throw new \InvalidArgumentException('Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST,
-                    true));
+            throw new HttpError(Response::STATUS_BAD_REQUEST,
+                    'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
         }
 
         $target = Path::parse($_REQUEST[$this->getTargetKey()]);
@@ -110,5 +120,13 @@ class WebApplication {
 
     protected function readBody() {
         return file_get_contents('php://input');
+    }
+
+    /**
+     * @param \Exception $e
+     * @return ErrorResponder
+     */
+    protected function getErrorResponder(\Exception $e) {
+        return new ErrorResponder($this->root, $e);
     }
 }

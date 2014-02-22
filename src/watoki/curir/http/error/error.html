@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Oops!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: sans-serif;
+            font-size: 1.5em;
+            padding: 2%;
+        }
+
+        h1::before {
+            content: "=(";
+            display: block;
+            font-size: 3em;
+            color: #333333;
+            margin-bottom: .2em;
+        }
+
+        h1 {
+            color: #cc0000;
+            margin: 0;
+        }
+
+        h4 {
+            margin: 2% 0;
+        }
+
+        .details {
+            font-size: 0.5em;
+            margin-top: 10%;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Error: $status</h1>
+<h4>$message</h4>
+
+
+<p>
+    Sorry about that. Please try to
+    <a href="javascript:location.reload()">reload</a>,
+    <a href="javascript:history.back()">go back</a>
+    or <a href="$rootUrl">go to start</a>
+</p>
+
+<div class="details">
+    <a href="javascript:" onclick="s=document.getElementById('trace').style; s.display=s.display?'':'none';">details</a>
+
+<pre id="trace" style="display: none">
+$timestamp
+$trace
+</pre>
+
+</div>
+</body>
+</html>

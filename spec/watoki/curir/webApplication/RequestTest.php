@@ -2,6 +2,8 @@
 namespace spec\watoki\curir\webApplication;
 
 use spec\watoki\curir\fixtures\WebApplicationFixture;
+use watoki\curir\http\error\HttpError;
+use watoki\curir\http\Response;
 use watoki\scrut\Specification;
 
 /**
@@ -20,7 +22,7 @@ class RequestTest extends Specification {
         $this->app->thenTheMethodShouldBe('get');
     }
 
-    function testDefaultFormat() {
+    function testWithoutExtensionFormat() {
         $this->app->givenTheRequestIs('one/two');
 
         $this->app->whenIRunTheWebApplication();
@@ -66,7 +68,6 @@ class RequestTest extends Specification {
         $this->app->thenTheMethodShouldBe('get');
     }
 
-
     function testTargetWithTrailingSlash() {
         $this->app->givenTheMethodIs('GET');
         $this->app->givenTheRequestIs('one/two/three/');
@@ -75,6 +76,37 @@ class RequestTest extends Specification {
 
         $this->app->thenTheTargetShouldBe('one/two/three');
         $this->app->thenTheMethodShouldBe('get');
+    }
+
+    function testThrownException() {
+        $this->app->givenTheRequestIs('something.html');
+        $this->app->givenTheTargetResourceThrowsTheException(new \Exception('General Exception'));
+
+        $this->app->whenIRunTheWebApplication();
+
+        $this->app->thenTheResponseShouldHaveTheStatus(Response::STATUS_SERVER_ERROR);
+        $this->app->thenTheResponseBodyShouldContain(Response::STATUS_SERVER_ERROR);
+        $this->app->thenTheResponseBodyShouldContain('General Exception');
+        $this->app->thenTheResponseBodyShouldNotContain('$');
+    }
+
+    function testThrownExceptionWithNonHtmlFormat() {
+        $this->app->givenTheRequestIs('something.txt');
+        $this->app->givenTheTargetResourceThrowsTheException(new \Exception('General Exception'));
+
+        $this->app->whenIRunTheWebApplication();
+
+        $this->app->thenTheResponseShouldHaveTheStatus(Response::STATUS_SERVER_ERROR);
+        $this->app->thenTheResponseBodyShouldBe('General Exception');
+    }
+
+    function testThrownHttpError() {
+        $this->app->givenTheTargetResourceThrowsTheException(new HttpError(Response::STATUS_FORBIDDEN, 'Some bad thing'));
+
+        $this->app->whenIRunTheWebApplication();
+
+        $this->app->thenTheResponseShouldHaveTheStatus(Response::STATUS_FORBIDDEN);
+        $this->app->thenTheResponseBodyShouldBe('Some bad thing');
     }
 
 } 

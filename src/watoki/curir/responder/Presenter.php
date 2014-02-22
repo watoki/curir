@@ -13,27 +13,30 @@ class Presenter extends Responder {
     /** @var mixed */
     private $model;
 
-    function __construct($viewModel = array()) {
+    /** @var DynamicResource */
+    private $resource;
+
+    function __construct(DynamicResource $resource, $viewModel = array()) {
+        $this->resource = $resource;
         $this->model = $viewModel;
     }
 
     /**
-     * @param \watoki\curir\resource\DynamicResource $resource
      * @param \watoki\curir\http\Request $request
      * @return \watoki\curir\http\Response
      */
-    public function createResponse(DynamicResource $resource, Request $request) {
-        $format = $request->getFormat() ? : $resource->getDefaultFormat();
-        $response = new Response($this->render($resource, $format));
+    public function createResponse(Request $request) {
+        $format = $request->getFormat();
+        $response = new Response($this->render($format));
         $response->getHeaders()->set(Response::HEADER_CONTENT_TYPE, MimeTypes::getType($format));
         return $response;
     }
 
-    private function render(DynamicResource $resource, $format) {
+    private function render($format) {
         $method = new \ReflectionMethod($this, 'render' . ucfirst($format));
 
         if (count($method->getParameters())) {
-            return $method->invoke($this, $this->getTemplate($resource, $format));
+            return $method->invoke($this, $this->getTemplate($format));
         } else {
             return $method->invoke($this);
         }
@@ -46,8 +49,8 @@ class Presenter extends Responder {
         return $this->model;
     }
 
-    private function getTemplate(DynamicResource $resource, $format) {
-        $templateFile = $this->findFile($resource->getResourceDirectory(), $resource->getResourceName() . '.' . $format);
+    private function getTemplate($format) {
+        $templateFile = $this->findFile($this->resource->getResourceDirectory(), $this->resource->getResourceName() . '.' . $format);
 
         if (!$templateFile) {
             throw new \Exception("Could not find template [$templateFile]");

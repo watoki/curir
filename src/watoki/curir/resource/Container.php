@@ -1,7 +1,9 @@
 <?php
 namespace watoki\curir\resource;
 
+use watoki\curir\http\error\HttpError;
 use watoki\curir\http\Request;
+use watoki\curir\http\Response;
 use watoki\curir\Resource;
 
 abstract class Container extends DynamicResource {
@@ -22,7 +24,8 @@ abstract class Container extends DynamicResource {
             return $found->respond($nextRequest);
         }
 
-        throw new \Exception("Resource [$child] not found in container [" . get_class($this) . "] aka [" . $this->getUrl() . "]");
+        throw new HttpError(Response::STATUS_NOT_FOUND,
+                "Resource [$child] not found in container [" . get_class($this) . "] aka [" . $this->getUrl() . "]");
     }
 
     public function getContainerDirectory() {
