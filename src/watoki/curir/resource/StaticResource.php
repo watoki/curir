@@ -29,7 +29,8 @@ class StaticResource extends Resource {
         $response = new Response();
 
         if (strpos(basename($this->file), '.')) {
-            list(, $extension) = explode('.', basename($this->file));
+            $parts = explode('.', basename($this->file));
+            $extension = array_pop($parts);
             $contentType = MimeTypes::getType($extension);
         } else {
             $contentType = $this->getDefaultContentType();

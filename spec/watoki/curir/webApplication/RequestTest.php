@@ -55,4 +55,16 @@ class RequestTest extends Specification {
         $this->app->thenThereShouldBeNoHeader('Pragma');
     }
 
+    function testTargetWithTwoDots() {
+        $this->app->givenTheMethodIs('GET');
+        $this->app->givenTheRequestIs('one/two/three.min.txt');
+
+        $this->app->whenIRunTheWebApplication();
+
+        $this->app->thenTheTargetShouldBe('one/two/three.min');
+        $this->app->thenTheFormatShouldBe('txt');
+        $this->app->thenTheMethodShouldBe('get');
+
+    }
+
 } 

@@ -67,8 +67,9 @@ class WebApplication {
 
         $format = null;
         if (!$target->isEmpty() && strpos($target->last(), '.')) {
-            list($name, $format) = explode('.', $target->pop());
-            $target->append($name);
+            $parts = explode('.', $target->pop());
+            $format = array_pop($parts);
+            $target->append(implode('.', $parts));
         }
 
         $params = Map::toCollections($_REQUEST);
