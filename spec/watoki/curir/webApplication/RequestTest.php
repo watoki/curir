@@ -64,7 +64,17 @@ class RequestTest extends Specification {
         $this->app->thenTheTargetShouldBe('one/two/three.min');
         $this->app->thenTheFormatShouldBe('txt');
         $this->app->thenTheMethodShouldBe('get');
+    }
 
+
+    function testTargetWithTrailingSlash() {
+        $this->app->givenTheMethodIs('GET');
+        $this->app->givenTheRequestIs('one/two/three/');
+
+        $this->app->whenIRunTheWebApplication();
+
+        $this->app->thenTheTargetShouldBe('one/two/three');
+        $this->app->thenTheMethodShouldBe('get');
     }
 
 } 
