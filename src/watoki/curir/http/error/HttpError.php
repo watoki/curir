@@ -8,9 +8,13 @@ class HttpError extends \Exception {
 
     private $status;
 
-    public function __construct($status = Response::STATUS_SERVER_ERROR, $message = "", $code = 0, Exception $previous = null) {
-        parent::__construct($message, $code, $previous);
+    private $userMessage;
+
+    public function __construct($status = Response::STATUS_SERVER_ERROR, $userMessage = "", $message = "",
+                                $code = 0, Exception $previous = null) {
+        parent::__construct($message ?: $userMessage, $code, $previous);
         $this->status = $status;
+        $this->userMessage = $userMessage;
     }
 
     /**
@@ -18,6 +22,13 @@ class HttpError extends \Exception {
      */
     public function getStatus() {
         return $this->status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserMessage() {
+        return $this->userMessage;
     }
 
 } 

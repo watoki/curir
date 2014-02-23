@@ -68,7 +68,7 @@ class WebApplication {
         }
 
         if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
-            throw new HttpError(Response::STATUS_BAD_REQUEST,
+            throw new HttpError(Response::STATUS_BAD_REQUEST, "The target resource is missing.",
                     'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
         }
 

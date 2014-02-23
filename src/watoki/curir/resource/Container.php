@@ -24,7 +24,7 @@ abstract class Container extends DynamicResource {
             return $found->respond($nextRequest);
         }
 
-        throw new HttpError(Response::STATUS_NOT_FOUND,
+        throw new HttpError(Response::STATUS_NOT_FOUND, "The resource you are looking for does not exist.",
                 "Resource [$child] not found in container [" . get_class($this) . "] aka [" . $this->getUrl() . "]");
     }
 
