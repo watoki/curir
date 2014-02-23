@@ -15,7 +15,7 @@ class Response {
     const STATUS_FORBIDDEN = '403 Forbidden';
     const STATUS_NOT_FOUND = '404 Not Found';
     const STATUS_METHOD_NOT_ALLOWED = '405 Method Not Allowed';
-    const STATUS_UNSUPPORTED_MEDIA_TYPE = '415 Unsupported Media Type';
+    const STATUS_NOT_ACCEPTABLE = '406 Not Acceptable';
     const STATUS_SERVER_ERROR = '500 Internal Server Error';
     const STATUS_NOT_IMPLEMENTED = '501 Not Implemented';
 

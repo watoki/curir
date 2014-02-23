@@ -3,6 +3,7 @@ namespace spec\watoki\curir\resources;
 
 use spec\watoki\curir\fixtures\FileFixture;
 use spec\watoki\curir\fixtures\ResourceFixture;
+use watoki\curir\http\Response;
 use watoki\scrut\Specification;
 
 /**
@@ -30,6 +31,7 @@ class ContainerTest extends Specification {
 
         $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith('Resource [notExisting] not found in container [ChildlessResource]');
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_NOT_FOUND);
     }
 
     function testForwardToStaticChild() {

@@ -2,6 +2,7 @@
 namespace spec\watoki\curir\resources;
 
 use spec\watoki\curir\fixtures\ResourceFixture;
+use watoki\curir\http\Response;
 use watoki\scrut\Specification;
 
 /**
@@ -28,6 +29,7 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->givenTheDynamicResource_WithTheBody('MissingParameter', 'function doGet($notThere, $default = "yay") {}');
         $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith('Cannot inject parameter [notThere] of [MissingParameterResource::doGet]');
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_BAD_REQUEST);
     }
 
     function testInflateParameters() {

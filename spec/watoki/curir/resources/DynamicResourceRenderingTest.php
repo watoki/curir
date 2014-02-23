@@ -3,6 +3,7 @@ namespace spec\watoki\curir\resources;
  
 use spec\watoki\curir\fixtures\FileFixture;
 use spec\watoki\curir\fixtures\ResourceFixture;
+use watoki\curir\http\Response;
 use watoki\scrut\Specification;
 
 /**
@@ -14,7 +15,8 @@ class DynamicResourceRenderingTest extends Specification {
     function testMethodNotExisting() {
         $this->resource->givenTheDynamicResource('NoMethods');
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith('Method NoMethodsResource::doGet() does not exist');
+        $this->resource->thenTheRequestShouldFailWith('Resource [NoMethodsResource] aka [http://localhost] does not support method [get]');
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_METHOD_NOT_ALLOWED);
     }
 
     function testRenderFormatNotRegistered() {
@@ -23,7 +25,8 @@ class DynamicResourceRenderingTest extends Specification {
             return new \watoki\curir\responder\Presenter($this);
         }');
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith("renderNothing() does not exist");
+        $this->resource->thenTheRequestShouldFailWith("Invalid accepted types for [NoFormatResource] aka [http://localhost]: [nothing]");
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_NOT_ACCEPTABLE);
     }
 
     function testRedirectRequest() {
