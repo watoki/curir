@@ -6,6 +6,7 @@ use watoki\curir\http\decoder\FormDecoder;
 use watoki\curir\http\decoder\JsonDecoder;
 use watoki\curir\http\error\ErrorResponder;
 use watoki\curir\http\error\HttpError;
+use watoki\curir\http\MimeTypes;
 use watoki\curir\http\ParameterDecoder;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
@@ -80,6 +81,13 @@ class WebApplication {
             $parts = explode('.', $target->pop());
             $formats[] = array_pop($parts);
             $target->append(implode('.', $parts));
+        }
+        foreach (explode(',', $_SERVER['HTTP_ACCEPT']) as $accepted) {
+            $accepted = trim($accepted);
+            if (strpos($accepted, ';') !== false) {
+                list($accepted,) = explode(';', $accepted);
+            }
+            $formats = array_unique(array_merge($formats, MimeTypes::getExtensions($accepted)));
         }
 
         $params = Map::toCollections($_REQUEST);

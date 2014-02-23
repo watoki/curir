@@ -30,6 +30,15 @@ class RequestTest extends Specification {
         $this->app->thenTheFormatsShouldBe(array());
     }
 
+    function testFormatFromRequestHeader() {
+        $this->app->givenTheRequestIs('some/resource.json');
+        $this->app->givenRequestTheHeader_Is('HTTP_ACCEPT', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
+
+        $this->app->whenIRunTheWebApplication();
+
+        $this->app->thenTheFormatsShouldBe(array('json', 'htm', 'html', 'shtml', 'xhtml', 'xml'));
+    }
+
     function testParameters() {
         $this->app->givenTheTheRequestParameter_Is('one', 'two');
 

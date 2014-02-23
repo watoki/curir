@@ -31,6 +31,7 @@ class WebApplicationFixture extends Fixture {
 
         $this->rootUrl = Url::parse('http://lacarte');
         $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['HTTP_ACCEPT'] = '*/*';
         $_REQUEST = array(
             '-' => ''
         );

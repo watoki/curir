@@ -143,4 +143,11 @@ class MimeTypes {
         return null;
     }
 
+    public static function getExtensions($type) {
+        if (!array_key_exists($type, self::$map)) {
+            return array();
+        }
+        return self::$map[$type];
+    }
+
 }
