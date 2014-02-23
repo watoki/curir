@@ -18,7 +18,7 @@ class RequestTest extends Specification {
         $this->app->whenIRunTheWebApplication();
 
         $this->app->thenTheTargetShouldBe('one/two/three');
-        $this->app->thenTheFormatShouldBe('txt');
+        $this->app->thenTheFormatsShouldBe(array('txt'));
         $this->app->thenTheMethodShouldBe('get');
     }
 
@@ -27,7 +27,7 @@ class RequestTest extends Specification {
 
         $this->app->whenIRunTheWebApplication();
 
-        $this->app->thenTheFormatShouldBe(null);
+        $this->app->thenTheFormatsShouldBe(array());
     }
 
     function testParameters() {
@@ -64,7 +64,7 @@ class RequestTest extends Specification {
         $this->app->whenIRunTheWebApplication();
 
         $this->app->thenTheTargetShouldBe('one/two/three.min');
-        $this->app->thenTheFormatShouldBe('txt');
+        $this->app->thenTheFormatsShouldBe(array('txt'));
         $this->app->thenTheMethodShouldBe('get');
     }
 

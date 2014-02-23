@@ -19,7 +19,7 @@ abstract class Container extends DynamicResource {
         $nextRequest->setTarget($request->getTarget()->copy());
         $child = $nextRequest->getTarget()->shift();
 
-        $found = $this->findInSuperClasses($child, $request->getFormat());
+        $found = $this->findInSuperClasses($child, $request->getFormats());
         if ($found) {
             return $found->respond($nextRequest);
         }
@@ -36,10 +36,10 @@ abstract class Container extends DynamicResource {
         return $this->getResourceNamespace() . '\\' . lcfirst($this->getResourceName());
     }
 
-    private function findInSuperClasses($child, $format) {
+    private function findInSuperClasses($child, $formats) {
         $container = $this;
         while (true) {
-            $found = $container->findChild($child, $format);
+            $found = $container->findChild($child, $formats);
             if ($found) {
                 return $found;
             }
@@ -59,15 +59,17 @@ abstract class Container extends DynamicResource {
         return null;
     }
 
-    private function findChild($child, $format) {
+    private function findChild($child, $formats) {
         $dynamicChild = $this->findDynamicChild($child);
         if ($dynamicChild) {
             return $dynamicChild;
         }
 
-        $staticChild = $this->findStaticChild($child . '.' . $format);
-        if ($staticChild) {
-            return $staticChild;
+        foreach ($formats as $format) {
+            $staticChild = $this->findStaticChild($child . '.' . $format);
+            if ($staticChild) {
+                return $staticChild;
+            }
         }
 
         $container = $this->findStaticContainer($child);

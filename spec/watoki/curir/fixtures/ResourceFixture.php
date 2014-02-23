@@ -164,7 +164,7 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenIRequestTheFormat($format) {
-        $this->getRequest()->setFormat($format);
+        $this->getRequest()->setFormats(array($format));
     }
 
     public function thenIShouldBeRedirectedTo($target) {

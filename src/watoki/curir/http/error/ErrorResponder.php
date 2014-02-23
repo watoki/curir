@@ -31,7 +31,7 @@ class ErrorResponder extends Responder {
             $userMessage = $this->exception->getUserMessage();
         }
 
-        if ($request->getFormat() == 'html') {
+        if (in_array('html', $request->getFormats())) {
             $template = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'error.html');
             $template = str_replace('$status', $status, $template);
             $template = str_replace('$rootUrl', $this->root->getUrl(), $template);

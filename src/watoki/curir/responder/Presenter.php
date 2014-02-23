@@ -28,7 +28,8 @@ class Presenter extends Responder {
      * @return \watoki\curir\http\Response
      */
     public function createResponse(Request $request) {
-        $formats = array($request->getFormat());
+        $formats = $request->getFormats();
+
         foreach ($formats as $format) {
             try {
                 $response = new Response($this->render($format));
@@ -36,6 +37,7 @@ class Presenter extends Responder {
                 return $response;
             } catch (\Exception $e) {}
         }
+
         throw new HttpError(Response::STATUS_NOT_ACCEPTABLE, "Could not render the resource in an accepted format",
             "Invalid accepted types for [" . get_class($this->resource) . "] aka [" . $this->resource->getUrl() . "]: " .
             "[" . implode(', ', $formats) . "]");

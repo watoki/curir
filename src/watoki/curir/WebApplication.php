@@ -75,10 +75,10 @@ class WebApplication {
         $target = Path::parse($_REQUEST[$this->getTargetKey()]);
         unset($_REQUEST[$this->getTargetKey()]);
 
-        $format = null;
+        $formats = array();
         if (!$target->isEmpty() && strpos($target->last(), '.')) {
             $parts = explode('.', $target->pop());
-            $format = array_pop($parts);
+            $formats[] = array_pop($parts);
             $target->append(implode('.', $parts));
         }
 
@@ -97,7 +97,7 @@ class WebApplication {
             }
         }
 
-        return new Request($target, $format, $method, $params, $headers, $body);
+        return new Request($target, $formats, $method, $params, $headers, $body);
     }
 
     private function decodeParamsFromBody(Map $params, $body) {

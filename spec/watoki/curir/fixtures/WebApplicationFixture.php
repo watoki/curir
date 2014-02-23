@@ -80,8 +80,8 @@ class WebApplicationFixture extends Fixture {
         $this->spec->assertEquals($string, self::$request->getTarget()->toString());
     }
 
-    public function thenTheFormatShouldBe($string) {
-        $this->spec->assertEquals($string, self::$request->getFormat());
+    public function thenTheFormatsShouldBe($array) {
+        $this->spec->assertEquals($array, self::$request->getFormats());
     }
 
     public function thenTheMethodShouldBe($string) {
