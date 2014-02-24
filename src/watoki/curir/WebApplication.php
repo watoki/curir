@@ -39,6 +39,12 @@ class WebApplication {
         $this->registerDecoder('application/x-www-form-urlencoded', $formDecoder);
         $this->registerDecoder('multipart/form-data', $formDecoder);
         $this->registerDecoder('application/json', new JsonDecoder());
+
+        ini_set('display_errors', 0);
+    }
+
+    public function onFatalError() {
+
     }
 
     public function run() {
@@ -54,6 +60,12 @@ class WebApplication {
     }
 
     protected function getResponse(Request $request) {
+        register_shutdown_function(function () use ($request) {
+            $error = error_get_last();
+            $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
+            $this->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
+        });
+
         try {
             return $this->root->respond($request);
         } catch (\Exception $e) {
@@ -70,7 +82,7 @@ class WebApplication {
 
         if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
             throw new HttpError(Response::STATUS_BAD_REQUEST, "The target resource is missing.",
-                    'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
+                'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
         }
 
         $target = Path::parse($_REQUEST[$this->getTargetKey()]);
