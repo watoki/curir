@@ -62,8 +62,10 @@ class WebApplication {
     protected function getResponse(Request $request) {
         register_shutdown_function(function () use ($request) {
             $error = error_get_last();
-            $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
-            $this->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
+            if ($error['type'] == 1) {
+                $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
+                $this->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
+            }
         });
 
         try {
