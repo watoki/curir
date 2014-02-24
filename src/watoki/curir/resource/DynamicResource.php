@@ -7,6 +7,7 @@ use watoki\curir\http\Request;
 use watoki\curir\http\Response;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
+use watoki\curir\responder\DefaultResponder;
 use watoki\factory\Factory;
 use watoki\factory\filters\DefaultFilterFactory;
 use watoki\factory\Injector;
@@ -25,6 +26,9 @@ abstract class DynamicResource extends Resource {
     public function respond(Request $request) {
         $this->setPlaceholderKey($request);
         $responder = $this->invokeMethod($request->getMethod(), $request->getParameters());
+        if (!is_object($responder)) {
+            $responder = new DefaultResponder((string) $responder);
+        }
         return $responder->createResponse($request);
     }
 
