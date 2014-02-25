@@ -35,14 +35,19 @@ class ErrorResponder extends Responder {
             $template = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'error.html');
             $template = str_replace('$status', $status, $template);
             $template = str_replace('$rootUrl', $this->root->getUrl(), $template);
-            $template = str_replace('$timestamp', date('Y-m-d H:i:s'), $template);
             $template = str_replace('$userMessage', $userMessage, $template);
-            $template = str_replace('$type', get_class($this->exception), $template);
-            $template = str_replace('$message', $this->exception->getMessage(), $template);
-            $template = str_replace('$trace', $this->exception->getTraceAsString(), $template);
+
+            $details = date('Y-m-d H:i:s');
+            $exception = $this->exception;
+            while ($exception) {
+                $details .= "\n" . get_class($exception) . ": " .  $exception->getMessage() . "\n"
+                    . $exception->getTraceAsString() . "\n";
+                $exception = $exception->getPrevious();
+            }
+            $template = str_replace('$details', $details, $template);
             $response = new Response($template);
         } else {
-            $response = new Response($this->exception->getMessage());
+            $response = new Response($userMessage ?: $this->exception->getMessage());
         }
 
         $response->setStatus($status);
