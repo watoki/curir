@@ -26,6 +26,10 @@ class DefaultResponder extends Responder {
         $this->bodies[$format] = $body;
     }
 
+    public function getBody($format) {
+        return $this->bodies[$format];
+    }
+
     /**
      * @param \watoki\curir\http\Request $request
      * @return \watoki\curir\http\Response
