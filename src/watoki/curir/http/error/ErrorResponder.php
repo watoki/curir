@@ -44,6 +44,7 @@ class ErrorResponder extends Responder {
                     . $exception->getTraceAsString() . "\n";
                 $exception = $exception->getPrevious();
             }
+            $details = htmlentities($details);
             $template = str_replace('$details', $details, $template);
             $response = new Response($template);
         } else {
