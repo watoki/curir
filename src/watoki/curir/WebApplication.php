@@ -11,6 +11,8 @@ use watoki\curir\http\ParameterDecoder;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
+use watoki\curir\http\Url;
+use watoki\factory\Factory;
 
 class WebApplication {
 
@@ -31,6 +33,16 @@ class WebApplication {
 
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
+
+    public static function quickStart($rootResourceClass) {
+        $factory = new Factory();
+
+        $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
+        $url = Url::parse('http://' . $_SERVER['HTTP_HOST'] . $port . $_SERVER['CONTEXT_PREFIX']);
+
+        $app = new WebApplication($factory->getInstance($rootResourceClass, array($url)));
+        $app->run();
+    }
 
     public function __construct(Resource $root) {
         $this->root = $root;

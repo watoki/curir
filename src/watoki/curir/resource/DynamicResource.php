@@ -26,7 +26,7 @@ abstract class DynamicResource extends Resource {
     public function respond(Request $request) {
         $this->setPlaceholderKey($request);
         $responder = $this->invokeMethod($request->getMethod(), $request->getParameters());
-        if (!is_object($responder)) {
+        if (!$responder instanceof Responder) {
             $responder = new DefaultResponder((string) $responder);
         }
         return $responder->createResponse($request);
