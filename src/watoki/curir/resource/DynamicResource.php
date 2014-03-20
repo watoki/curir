@@ -54,11 +54,12 @@ abstract class DynamicResource extends Resource {
      * @return Responder
      */
     private function invokeMethod($method, Map $parameters) {
+        $methodName = $this->buildMethodName($method);
         try {
-            $reflection = new \ReflectionMethod($this, $this->buildMethodName($method));
+            $reflection = new \ReflectionMethod($this, $methodName);
         } catch (\ReflectionException $e) {
             throw new HttpError(Response::STATUS_METHOD_NOT_ALLOWED, 'Method ' . strtoupper($method) . ' is not allowed here.',
-                "Resource [" . get_class($this) . "] aka [" . $this->getUrl() . "] does not support method [$method]");
+                "Resource [" . get_class($this) . "] aka [" . $this->getUrl() . "] has no method [$methodName]");
         }
 
         return $reflection->invokeArgs($this, $this->collectArguments($parameters, $reflection));

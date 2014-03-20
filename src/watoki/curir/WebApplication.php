@@ -51,8 +51,6 @@ class WebApplication {
         $this->registerDecoder('application/x-www-form-urlencoded', $formDecoder);
         $this->registerDecoder('multipart/form-data', $formDecoder);
         $this->registerDecoder('application/json', new JsonDecoder());
-
-        ini_set('display_errors', 0);
     }
 
     public function onFatalError() {
@@ -72,6 +70,7 @@ class WebApplication {
     }
 
     protected function getResponse(Request $request) {
+        ini_set('display_errors', 0);
         register_shutdown_function(function () use ($request) {
             $error = error_get_last();
             if ($error['type'] == 1) {
