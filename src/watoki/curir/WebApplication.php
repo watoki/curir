@@ -34,8 +34,8 @@ class WebApplication {
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
-    public static function quickStart($rootResourceClass) {
-        $factory = new Factory();
+    public static function quickStart($rootResourceClass, Factory $factory = null) {
+        $factory = $factory ? : new Factory();
 
         $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
         $url = Url::parse('http://' . $_SERVER['HTTP_HOST'] . $port . $_SERVER['CONTEXT_PREFIX']);
