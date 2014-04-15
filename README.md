@@ -6,15 +6,19 @@
 
 To use curir in your own project with [Composer], add the following lines to your `composer.json`.
 
-    "require" : {
-        "watoki/curir" : "*"
-    }
+```js
+"require" : {
+    "watoki/curir" : "*"
+}
+```
 
 To install curir as a stand-alone project you can use
 
-    git clone https://github.com/watoki/curir.git
-    cd curir
-    php install.php
+```bash
+git clone https://github.com/watoki/curir.git
+cd curir
+php install.php
+```
 
 [Composer]: http://getcomposer.org/
 
@@ -22,25 +26,31 @@ To install curir as a stand-alone project you can use
 
 The easiest way to use *curir* is to have this one line in a `index.php` file
 
-    WebApplication::quickStart('MyResource');
+```php
+WebApplication::quickStart('MyResource');
+```
 
 which packs a request into a `Request` object, passes it to the given `Resource` and flushes
 its `Response`. The class `MyResource` could look like
 
-    class MyResource extends Resource {
-        public function respond(Request $request) {
-            return new Response('Hello World');
-        }
+```php
+class MyResource extends Resource {
+    public function respond(Request $request) {
+        return new Response('Hello World');
     }
+}
+```
 
 or it could extend `DynamicResource` which invokes a method corresponding with the *METHOD* of the HTTP request which
 can be overwritten with a `method` query parameter.
 
-    class MyResource extends DynamicResource {
-        public function doGet() {
-            return "Hello World";
-        }
+```php
+class MyResource extends DynamicResource {
+    public function doGet() {
+        return "Hello World";
     }
+}
+```
 
 ## Routing ##
 
@@ -75,11 +85,13 @@ can use `mod_rewrite` to send all requests to `index.php` with
 Query parameters are translated into method arguments by the `DynamicResource`. So the request
 `my.site/blog/search?text=story&after=2001-01-01` translates to
 
-    class SearchResource extends DynamicResource {
-        public function doGet(DateTime $after, $text = null) {
-            // ...
-        }
+```php
+class SearchResource extends DynamicResource {
+    public function doGet(DateTime $after, $text = null) {
+        // ...
     }
+}
+```
 
 Method arguments can be optional and also provide hints to which type a query parameter should be converted to.
 
