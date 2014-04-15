@@ -60,7 +60,7 @@ So the file structure of a blog application could look like
       |- PostsResource.php
       |- SearchResource.php
       |- posts
-        |- xxPostResource.php
+      | |- xxPostResource.php
       |- about.html
 
 The target path is passed as a query parameter, by default `-` (e.g.`http://my.site/blog/index.php?-=posts/42`). On Apache, you
