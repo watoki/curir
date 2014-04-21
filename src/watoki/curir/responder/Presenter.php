@@ -9,7 +9,7 @@ use watoki\curir\Resource;
 use watoki\curir\resource\DynamicResource;
 use watoki\curir\Responder;
 
-abstract class Presenter extends Responder {
+class Presenter extends Responder {
 
     /** @var mixed */
     private $model;
