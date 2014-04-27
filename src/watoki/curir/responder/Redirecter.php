@@ -12,8 +12,12 @@ class Redirecter extends Responder {
     /** @var \watoki\curir\http\Url */
     private $target;
 
-    function __construct(Url $target) {
+    /** @var string */
+    private $status;
+
+    function __construct(Url $target, $status = Response::STATUS_SEE_OTHER) {
         $this->target = $target;
+        $this->status = $status;
     }
 
     /**
@@ -22,6 +26,7 @@ class Redirecter extends Responder {
      */
     public function createResponse(Request $request) {
         $response = new Response();
+        $response->setStatus($this->status);
         $response->getHeaders()->set(Response::HEADER_LOCATION, $this->target->toString());
         return $response;
     }

@@ -76,7 +76,7 @@ class WebApplication {
         $that = $this;
         register_shutdown_function(function () use ($request, $that) {
             $error = error_get_last();
-            if ($error['type'] == 1) {
+            if (in_array($error['type'], array(E_ERROR, E_PARSE, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
                 $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
                 $that->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
             }
