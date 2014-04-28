@@ -108,4 +108,22 @@ class PlaceholderRoutesTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('there');
     }
 
+    function testPlaceholderIsSetForChildren() {
+        $this->resource->givenTheContainer_In_WithTheBody('xxForTheChildren', 'aboveYou', '
+            function getPlaceholderKey() {
+                return "father";
+            }');
+        $this->resource->givenTheDynamicResource_In_WithTheBody('Child', 'aboveYou/xxForTheChildren', '
+            function doGet($father) {
+                return $father;
+            }');
+
+        $this->resource->givenTheRequestHasTheTarget('DarthVader/child');
+
+        $this->resource->givenTheContainer('AboveYou');
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('DarthVader');
+    }
+
 } 

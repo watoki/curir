@@ -38,7 +38,7 @@ abstract class DynamicResource extends Resource {
         return $responder->createResponse($request);
     }
 
-    private function setPlaceholderKey(Request $request) {
+    protected function setPlaceholderKey(Request $request) {
         $key = $this->getPlaceholderKey();
         if (!$key || $request->getParameters()->has($key)) {
             return;
