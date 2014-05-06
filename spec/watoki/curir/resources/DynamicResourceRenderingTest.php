@@ -15,7 +15,7 @@ class DynamicResourceRenderingTest extends Specification {
     function testMethodNotExisting() {
         $this->resource->givenTheDynamicResource('NoMethods');
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith('Resource [NoMethodsResource] aka [http://localhost] does not support method [get]');
+        $this->resource->thenTheRequestShouldFailWith('Resource [NoMethodsResource] aka [http://localhost] has no method [doGet]');
         $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_METHOD_NOT_ALLOWED);
     }
 

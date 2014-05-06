@@ -25,14 +25,20 @@ abstract class DynamicResource extends Resource {
 
     public function respond(Request $request) {
         $this->setPlaceholderKey($request);
-        $responder = $this->invokeMethod($request->getMethod(), $request->getParameters());
+
+        $params = $request->getParameters();
+        if (!$params->has('request')) {
+            $params->set('request', $request);
+        }
+
+        $responder = $this->invokeMethod($request->getMethod(), $params);
         if (!$responder instanceof Responder) {
             $responder = new DefaultResponder((string) $responder);
         }
         return $responder->createResponse($request);
     }
 
-    private function setPlaceholderKey(Request $request) {
+    protected function setPlaceholderKey(Request $request) {
         $key = $this->getPlaceholderKey();
         if (!$key || $request->getParameters()->has($key)) {
             return;
@@ -54,11 +60,12 @@ abstract class DynamicResource extends Resource {
      * @return Responder
      */
     private function invokeMethod($method, Map $parameters) {
+        $methodName = $this->buildMethodName($method);
         try {
-            $reflection = new \ReflectionMethod($this, $this->buildMethodName($method));
+            $reflection = new \ReflectionMethod($this, $methodName);
         } catch (\ReflectionException $e) {
             throw new HttpError(Response::STATUS_METHOD_NOT_ALLOWED, 'Method ' . strtoupper($method) . ' is not allowed here.',
-                "Resource [" . get_class($this) . "] aka [" . $this->getUrl() . "] does not support method [$method]");
+                "Resource [" . get_class($this) . "] aka [" . $this->getUrl() . "] has no method [$methodName]");
         }
 
         return $reflection->invokeArgs($this, $this->collectArguments($parameters, $reflection));

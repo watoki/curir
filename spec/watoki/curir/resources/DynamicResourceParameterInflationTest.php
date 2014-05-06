@@ -94,4 +94,26 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('["foo",{"foo":"bar"}]');
     }
 
+    function testInjectRequestAsParameter() {
+        $this->resource->givenTheDynamicResource_WithTheBody('InjectRequestParameter', '
+            function doGet($request) {
+                return $request->getBody();
+            }
+        ');
+        $this->resource->givenTheRequestHasTheBody('Some body');
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('Some body');
+    }
+
+    function testDoNotOverwriteRequestParameter() {
+        $this->resource->givenTheDynamicResource_WithTheBody('DoNotOverwriteRequestParameter', '
+            function doGet($request) {
+                return $request;
+            }
+        ');
+        $this->resource->givenTheRequestParameter_Is('request', 'Some body');
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('Some body');
+    }
+
 } 
