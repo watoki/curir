@@ -2,6 +2,7 @@
 namespace spec\watoki\curir\resources;
 
 use spec\watoki\curir\fixtures\ResourceFixture;
+use watoki\curir\http\Response;
 use watoki\scrut\Specification;
 
 /**
@@ -15,7 +16,7 @@ class DynamicResourceParameterInflationTest extends Specification {
 
     function testSimpleParameters() {
         $this->resource->givenTheDynamicResource_WithTheBody('SimpleParameters', 'function doGet($one, $two) {
-            return new \TestPresenter(array($one, $two));
+            return new \TestPresenter($this, array($one, $two));
         }');
         $this->resource->givenTheRequestParameter_Is('one', 'uno');
         $this->resource->givenTheRequestParameter_Is('two', 'dos');
@@ -28,11 +29,12 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->givenTheDynamicResource_WithTheBody('MissingParameter', 'function doGet($notThere, $default = "yay") {}');
         $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith('Cannot inject parameter [notThere] of [MissingParameterResource::doGet]');
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_BAD_REQUEST);
     }
 
     function testInflateParameters() {
         $this->resource->givenTheDynamicResource_WithTheBody('InflateParameters', 'function doGet(\DateTime $d) {
-            return new \TestPresenter($d);
+            return new \TestPresenter($this, $d);
         }');
         $this->resource->givenTheRequestParameter_Is('d', '2011-12-13 14:15:16 UTC');
         $this->resource->givenIRequestTheFormat('json');
@@ -52,7 +54,7 @@ class DynamicResourceParameterInflationTest extends Specification {
              * @param \DateTime $date
              */
             function doGet($int, $bool, $float, $string, $date) {
-                return new \TestPresenter(array($int, $bool, $float, $string, $date));
+                return new \TestPresenter($this, array($int, $bool, $float, $string, $date));
             }');
         $this->resource->givenTheRequestParameter_Is('int', '1');
         $this->resource->givenTheRequestParameter_Is('bool', 'false');
@@ -71,7 +73,7 @@ class DynamicResourceParameterInflationTest extends Specification {
              * @param invalid $one
              */
             function doGet($one) {
-                return new \TestPresenter($one);
+                return new \TestPresenter($this, $one);
             }');
         $this->resource->givenTheRequestParameter_Is('one', 'not');
 
@@ -82,7 +84,7 @@ class DynamicResourceParameterInflationTest extends Specification {
     function testNoTypeHint() {
         $this->resource->givenTheDynamicResource_WithTheBody('NoTypeHints', '
             function doGet($one, $two) {
-                return new \TestPresenter(array($one, $two));
+                return new \TestPresenter($this, array($one, $two));
             }');
         $this->resource->givenTheRequestParameter_Is('one', 'foo');
         $this->resource->givenTheRequestParameter_Is('two', array('foo' => 'bar'));
@@ -90,6 +92,28 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->whenISendTheRequestToThatResource();
 
         $this->resource->thenTheResponseShouldHaveTheBody('["foo",{"foo":"bar"}]');
+    }
+
+    function testInjectRequestAsParameter() {
+        $this->resource->givenTheDynamicResource_WithTheBody('InjectRequestParameter', '
+            function doGet($request) {
+                return $request->getBody();
+            }
+        ');
+        $this->resource->givenTheRequestHasTheBody('Some body');
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('Some body');
+    }
+
+    function testDoNotOverwriteRequestParameter() {
+        $this->resource->givenTheDynamicResource_WithTheBody('DoNotOverwriteRequestParameter', '
+            function doGet($request) {
+                return $request;
+            }
+        ');
+        $this->resource->givenTheRequestParameter_Is('request', 'Some body');
+        $this->resource->whenISendTheRequestToThatResource();
+        $this->resource->thenTheResponseShouldHaveTheBody('Some body');
     }
 
 } 

@@ -42,6 +42,7 @@ class MimeTypes {
         'image/x-icon' => array('ico'),
         'image/ief' => array('ief'),
         'image/jpeg' => array('jpeg', 'jpg', 'jpe'),
+        'application/javascript' => array('js'),
         'application/x-javascript' => array('js'),
         'text/javascript' => array('js'),
         'application/x-latex' => array('latex'),
@@ -140,6 +141,13 @@ class MimeTypes {
             }
         }
         return null;
+    }
+
+    public static function getExtensions($type) {
+        if (!array_key_exists($type, self::$map)) {
+            return array();
+        }
+        return self::$map[$type];
     }
 
 }

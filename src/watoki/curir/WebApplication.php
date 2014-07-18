@@ -5,10 +5,15 @@ use watoki\collections\Map;
 use watoki\curir\http\decoder\FormDecoder;
 use watoki\curir\http\decoder\ImageDecoder;
 use watoki\curir\http\decoder\JsonDecoder;
+use watoki\curir\http\error\ErrorResponder;
+use watoki\curir\http\error\HttpError;
+use watoki\curir\http\MimeTypes;
 use watoki\curir\http\ParameterDecoder;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
-use watoki\curir\http\Responding;
+use watoki\curir\http\Response;
+use watoki\curir\http\Url;
+use watoki\factory\Factory;
 
 class WebApplication {
 
@@ -30,7 +35,19 @@ class WebApplication {
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
-    public function __construct(Responding $root) {
+    public static function quickStart($rootResourceClass, Factory $factory = null) {
+        $factory = $factory ? : new Factory();
+
+        $scheme = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "");
+        $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
+        $path = dirname($_SERVER['SCRIPT_NAME']);
+        $url = $scheme . "://" . $_SERVER['SERVER_NAME'] . $port . $path;
+
+        $app = new WebApplication($factory->getInstance($rootResourceClass, array(Url::parse($url))));
+        $app->run();
+    }
+
+    public function __construct(Resource $root) {
         $this->root = $root;
 
         $formDecoder = new FormDecoder();
@@ -40,8 +57,12 @@ class WebApplication {
         $this->registerDecoder('image/jpeg', new ImageDecoder());
     }
 
+    public function onFatalError() {
+
+    }
+
     public function run() {
-        $this->root->respond($this->buildRequest())->flush();
+        $this->getResponse($this->buildRequest())->flush();
     }
 
     protected function getTargetKey() {
@@ -52,6 +73,24 @@ class WebApplication {
         return 'method';
     }
 
+    protected function getResponse(Request $request) {
+        ini_set('display_errors', 0);
+        $that = $this;
+        register_shutdown_function(function () use ($request, $that) {
+            $error = error_get_last();
+            if (in_array($error['type'], array(E_ERROR, E_PARSE, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
+                $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
+                $that->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
+            }
+        });
+
+        try {
+            return $this->root->respond($request);
+        } catch (\Exception $e) {
+            return $this->getErrorResponder($e)->createResponse($request);
+        }
+    }
+
     protected function buildRequest() {
         $method = strtolower($_SERVER['REQUEST_METHOD']);
         if (array_key_exists($this->getMethodKey(), $_REQUEST)) {
@@ -60,17 +99,25 @@ class WebApplication {
         }
 
         if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
-            throw new \InvalidArgumentException('Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST,
-                    true));
+            throw new HttpError(Response::STATUS_BAD_REQUEST, "The target resource is missing.",
+                    'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
         }
 
         $target = Path::parse($_REQUEST[$this->getTargetKey()]);
         unset($_REQUEST[$this->getTargetKey()]);
 
-        $format = null;
+        $formats = array();
         if (!$target->isEmpty() && strpos($target->last(), '.')) {
-            list($name, $format) = explode('.', $target->pop());
-            $target->append($name);
+            $parts = explode('.', $target->pop());
+            $formats[] = array_pop($parts);
+            $target->append(implode('.', $parts));
+        }
+        foreach (explode(',', $_SERVER['HTTP_ACCEPT']) as $accepted) {
+            $accepted = trim($accepted);
+            if (strpos($accepted, ';') !== false) {
+                list($accepted,) = explode(';', $accepted);
+            }
+            $formats = array_unique(array_merge($formats, MimeTypes::getExtensions($accepted)));
         }
 
         $params = Map::toCollections($_REQUEST);
@@ -88,7 +135,7 @@ class WebApplication {
             }
         }
 
-        return new Request($target, $format, $method, $params, $headers, $body);
+        return new Request($target, $formats, $method, $params, $headers, $body);
     }
 
     private function decodeParamsFromBody(Map $params, $body) {
@@ -111,5 +158,13 @@ class WebApplication {
 
     protected function readBody() {
         return file_get_contents('php://input');
+    }
+
+    /**
+     * @param \Exception $e
+     * @return ErrorResponder
+     */
+    public function getErrorResponder(\Exception $e) {
+        return new ErrorResponder($this->root, $e);
     }
 }

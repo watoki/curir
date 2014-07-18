@@ -3,6 +3,7 @@ namespace spec\watoki\curir\resources;
 
 use spec\watoki\curir\fixtures\FileFixture;
 use spec\watoki\curir\fixtures\ResourceFixture;
+use watoki\curir\http\Response;
 use watoki\scrut\Specification;
 
 /**
@@ -17,11 +18,11 @@ class ContainerTest extends Specification {
 
     function testRespondsItself() {
         $this->resource->givenTheContainer_WithTheBody('MySelf', 'function doGet() {
-            return new \TestPresenter("Hello World");
+            return new \watoki\curir\responder\DefaultResponder("Hello World");
         }');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"Hello World"');
+        $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
     function testNotExistingChild() {
@@ -30,6 +31,7 @@ class ContainerTest extends Specification {
 
         $this->resource->whenITryToSendTheRequestToThatResource();
         $this->resource->thenTheRequestShouldFailWith('Resource [notExisting] not found in container [ChildlessResource]');
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_NOT_FOUND);
     }
 
     function testForwardToStaticChild() {
@@ -45,35 +47,35 @@ class ContainerTest extends Specification {
 
     function testForwardToDynamicChild() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('Child', 'test/withDynamicChild', 'function doGet() {
-            return new \TestPresenter("Found it");
+            return new \watoki\curir\responder\DefaultResponder(array("html" => "Html", "" => "Found it"));
         }');
         $this->resource->givenTheRequestHasTheTarget('Child');
         $this->resource->givenTheContainer_In('WithDynamicChild', 'test');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"Found it"');
+        $this->resource->thenTheResponseShouldHaveTheBody('Found it');
     }
 
     function testForwardToGrandChild() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('GrandChild', 'withGrandChild/test/folder', 'function doGet() {
-            return new \TestPresenter("Found me");
+            return new \watoki\curir\responder\DefaultResponder(array("html" => "Html", "json" => "Found me", "" => "Default"));
         }');
         $this->resource->givenTheRequestHasTheTarget('test/folder/GrandChild');
         $this->resource->givenTheContainer('WithGrandChild');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"Found me"');
+        $this->resource->thenTheResponseShouldHaveTheBody('Found me');
     }
 
     function testCaseInsensitive() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('InsensitiveChild', 'caseInsensitive/test/folder', 'function doGet() {
-            return new \TestPresenter("Gotcha");
+            return new \watoki\curir\responder\DefaultResponder("Gotcha");
         }');
         $this->resource->givenTheRequestHasTheTarget('TeSt/fOlder/insEnsitivEchIld');
         $this->resource->givenTheContainer('CaseInsensitive');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"Gotcha"');
+        $this->resource->thenTheResponseShouldHaveTheBody('Gotcha');
     }
 
     function testForwardToDynamicContainer() {
@@ -91,13 +93,13 @@ class ContainerTest extends Specification {
     function testDynamicChildIsPreferred() {
         $this->file->givenTheFile_WithTheContent('Test.json', 'The file');
         $this->resource->givenTheDynamicResource_In_WithTheBody('Test', 'prefersDynamicChild', 'function doGet() {
-            return new \TestPresenter("Dynamic content");
+            return new \watoki\curir\responder\DefaultResponder("Dynamic content");
         }');
         $this->resource->givenTheRequestHasTheTarget('Test');
         $this->resource->givenTheContainer('PrefersDynamicChild');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"Dynamic content"');
+        $this->resource->thenTheResponseShouldHaveTheBody('Dynamic content');
     }
 
     function testDynamicContainerIsPreferred() {
@@ -114,14 +116,14 @@ class ContainerTest extends Specification {
     function testForwardToInheritedChild() {
         $this->resource->givenTheContainer_In('Base', 'other/place');
         $this->resource->givenTheDynamicResource_In_WithTheBody('InheritedChild', 'other/place/base', 'function doGet() {
-            return new \TestPresenter("I am inherited");
+            return new \watoki\curir\responder\DefaultResponder("I am inherited");
         }');
         $this->resource->givenTheContainer_In_Extending('Sub', 'parentOfInheriting', '\other\place\BaseResource');
         $this->resource->givenTheRequestHasTheTarget('Sub/InheritedChild');
         $this->resource->givenTheContainer('ParentOfInheriting');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"I am inherited"');
+        $this->resource->thenTheResponseShouldHaveTheBody('I am inherited');
     }
 
 }

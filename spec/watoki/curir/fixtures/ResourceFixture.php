@@ -1,6 +1,7 @@
 <?php
 namespace spec\watoki\curir\fixtures;
 
+use watoki\curir\http\error\HttpError;
 use watoki\curir\http\Path;
 use watoki\curir\http\Request;
 use watoki\curir\http\Response;
@@ -146,6 +147,14 @@ class ResourceFixture extends Fixture {
         $this->spec->assertContains($string, $this->caught->getMessage());
     }
 
+    public function thenTheRequestShouldReturnTheStatus($string) {
+        $this->spec->assertNotNull($this->caught, 'No Exception caught.');
+        if (!$this->caught instanceof HttpError) {
+            $this->spec->fail("Exception is not an HttpError");
+        }
+        $this->spec->assertContains($string, $this->caught->getStatus());
+    }
+
     public function thenTheResponseShouldHaveTheContentType($mime) {
         $this->spec->assertEquals($mime, $this->response->getHeaders()->get(Response::HEADER_CONTENT_TYPE));
     }
@@ -155,7 +164,11 @@ class ResourceFixture extends Fixture {
     }
 
     public function givenIRequestTheFormat($format) {
-        $this->getRequest()->setFormat($format);
+        $this->getRequest()->setFormats(array($format));
+    }
+
+    public function givenTheRequestHasTheBody($string) {
+        $this->getRequest()->setBody($string);
     }
 
     public function thenIShouldBeRedirectedTo($target) {

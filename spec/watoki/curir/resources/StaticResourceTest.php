@@ -41,5 +41,15 @@ class StaticResourceTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheContentType('text/plain');
     }
 
+    function testResourceWithTwoDots() {
+        $this->file->givenTheFile_WithTheContent('jquery.min.js', 'js stuff');
+        $this->resource->givenTheStaticResourceFor('jquery.min.js');
+
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('js stuff');
+        $this->resource->thenTheResponseShouldHaveTheContentType('application/javascript');
+    }
+
 }
  

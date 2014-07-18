@@ -1,7 +1,9 @@
 <?php
 namespace watoki\curir\resource;
 
+use watoki\curir\http\error\HttpError;
 use watoki\curir\http\Request;
+use watoki\curir\http\Response;
 use watoki\curir\Resource;
 
 abstract class Container extends DynamicResource {
@@ -15,14 +17,16 @@ abstract class Container extends DynamicResource {
 
         $nextRequest = clone $request;
         $nextRequest->setTarget($request->getTarget()->copy());
+        $this->setPlaceholderKey($nextRequest);
         $child = $nextRequest->getTarget()->shift();
 
-        $found = $this->findInSuperClasses($child, $request->getFormat());
+        $found = $this->findInSuperClasses($child, $request->getFormats());
         if ($found) {
             return $found->respond($nextRequest);
         }
 
-        throw new \Exception("Resource [$child] not found in container [" . get_class($this) . "] aka [" . $this->getUrl() . "]");
+        throw new HttpError(Response::STATUS_NOT_FOUND, "The resource you are looking for does not exist.",
+                "Resource [$child] not found in container [" . get_class($this) . "] aka [" . $this->getUrl() . "]");
     }
 
     public function getContainerDirectory() {
@@ -33,10 +37,10 @@ abstract class Container extends DynamicResource {
         return $this->getResourceNamespace() . '\\' . lcfirst($this->getResourceName());
     }
 
-    private function findInSuperClasses($child, $format) {
+    private function findInSuperClasses($child, $formats) {
         $container = $this;
         while (true) {
-            $found = $container->findChild($child, $format);
+            $found = $container->findChild($child, $formats);
             if ($found) {
                 return $found;
             }
@@ -56,15 +60,17 @@ abstract class Container extends DynamicResource {
         return null;
     }
 
-    private function findChild($child, $format) {
+    private function findChild($child, $formats) {
         $dynamicChild = $this->findDynamicChild($child);
         if ($dynamicChild) {
             return $dynamicChild;
         }
 
-        $staticChild = $this->findStaticChild($child . '.' . $format);
-        if ($staticChild) {
-            return $staticChild;
+        foreach ($formats as $format) {
+            $staticChild = $this->findStaticChild($child . '.' . $format);
+            if ($staticChild) {
+                return $staticChild;
+            }
         }
 
         $container = $this->findStaticContainer($child);

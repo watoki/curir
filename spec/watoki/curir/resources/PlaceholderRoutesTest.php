@@ -17,25 +17,25 @@ class PlaceholderRoutesTest extends Specification {
 
     function testFindPlaceholderResource() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxSomething', 'dynamicRoute', 'function doGet() {
-            return new \TestPresenter($this->getUrl()->getPath()->last());
+            return new \watoki\curir\responder\DefaultResponder($this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheRequestHasTheTarget('Anything');
         $this->resource->givenTheContainer('DynamicRoute');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"Anything"');
+        $this->resource->thenTheResponseShouldHaveTheBody('Anything');
     }
 
     function testRouteWithPlaceholderContainer() {
         $this->resource->givenTheRequestHasTheTarget('ThisOne/Real');
         $this->resource->givenTheDynamicResource_In_WithTheBody('Real', 'placeholderRoute/xxPlaceholder', 'function doGet() {
-            return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
+            return new \watoki\curir\responder\DefaultResponder($this->getParent()->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer_In('xxPlaceholder', 'placeholderRoute');
         $this->resource->givenTheContainer('PlaceholderRoute');
 
         $this->resource->whenISendTheRequestToThatResource();
-        $this->resource->thenTheResponseShouldHaveTheBody('"ThisOne"');
+        $this->resource->thenTheResponseShouldHaveTheBody('ThisOne');
     }
 
     function testStaticPlaceholderResource() {
@@ -52,33 +52,33 @@ class PlaceholderRoutesTest extends Specification {
 
     function testStaticPlaceholderContainer() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('TheRainbow', 'placeholderContainer/someWhere/xxUnder', 'function doGet() {
-            return new \TestPresenter($this->getParent()->getUrl()->getPath()->last());
+            return new \watoki\curir\responder\DefaultResponder($this->getParent()->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PlaceholderContainer');
 
         $this->resource->givenTheRequestHasTheTarget('someWhere/over/TheRainbow');
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('"over"');
+        $this->resource->thenTheResponseShouldHaveTheBody('over');
     }
 
     function testPreferDynamicResource() {
         $this->file->givenTheFile_WithTheContent('preferDynamicResource/xxPlaceholder.html', 'Not here');
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxPlaceholder', 'preferDynamicResource', 'function doGet() {
-            return new \TestPresenter($this->getUrl()->getPath()->last());
+            return new \watoki\curir\responder\DefaultResponder($this->getUrl()->getPath()->last());
         }');
         $this->resource->givenTheContainer('PreferDynamicResource');
 
         $this->resource->givenTheRequestHasTheTarget('Foo');
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('"Foo"');
+        $this->resource->thenTheResponseShouldHaveTheBody('Foo');
     }
 
     function testPlaceholderSetParameter() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'setParameter', '
             function doGet($place) {
-                return new \TestPresenter($place);
+                return new \watoki\curir\responder\DefaultResponder($place);
             }
             function getPlaceholderKey() {
                 return "place";
@@ -88,13 +88,13 @@ class PlaceholderRoutesTest extends Specification {
         $this->resource->givenTheRequestHasTheTarget('here');
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('"here"');
+        $this->resource->thenTheResponseShouldHaveTheBody('here');
     }
 
     function testPlaceholderDoesNotOverwriteParameter() {
         $this->resource->givenTheDynamicResource_In_WithTheBody('xxWhere', 'doesNotOverwriteParameter', '
             function doGet($place) {
-                return new \TestPresenter($place);
+                return new \watoki\curir\responder\DefaultResponder($place);
             }
             function getPlaceholderKey() {
                 return "place";
@@ -105,7 +105,25 @@ class PlaceholderRoutesTest extends Specification {
         $this->resource->givenTheRequestHasTheTarget('here');
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('"there"');
+        $this->resource->thenTheResponseShouldHaveTheBody('there');
+    }
+
+    function testPlaceholderIsSetForChildren() {
+        $this->resource->givenTheContainer_In_WithTheBody('xxForTheChildren', 'aboveYou', '
+            function getPlaceholderKey() {
+                return "father";
+            }');
+        $this->resource->givenTheDynamicResource_In_WithTheBody('Child', 'aboveYou/xxForTheChildren', '
+            function doGet($father) {
+                return $father;
+            }');
+
+        $this->resource->givenTheRequestHasTheTarget('DarthVader/child');
+
+        $this->resource->givenTheContainer('AboveYou');
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('DarthVader');
     }
 
 } 

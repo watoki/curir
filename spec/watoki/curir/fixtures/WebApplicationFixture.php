@@ -23,14 +23,20 @@ class WebApplicationFixture extends Fixture {
 
     private $body;
 
+    /** @var Response|null */
+    private $response;
+
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
 
         $this->rootUrl = Url::parse('http://lacarte');
         $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['HTTP_ACCEPT'] = '*/*';
         $_REQUEST = array(
             '-' => ''
         );
+
+        WebApplicationFixtureResource::$throwException = null;
     }
 
     public function givenTheRequestIs($string) {
@@ -53,10 +59,14 @@ class WebApplicationFixture extends Fixture {
         $this->rootUrl = Url::parse($string);
     }
 
+    public function givenTheTargetResourceThrowsTheException($exception) {
+        WebApplicationFixtureResource::$throwException = $exception;
+    }
+
     public function whenIRunTheWebApplication() {
         $app = new WebApplicationFixtureWebApplication(new WebApplicationFixtureResource($this->rootUrl));
         $app->body = $this->body;
-        $app->run();
+        $this->response = $app->run();
     }
 
     public function thenTheUrlOfTheRootResourceShouldBe($string) {
@@ -71,8 +81,8 @@ class WebApplicationFixture extends Fixture {
         $this->spec->assertEquals($string, self::$request->getTarget()->toString());
     }
 
-    public function thenTheFormatShouldBe($string) {
-        $this->spec->assertEquals($string, self::$request->getFormat());
+    public function thenTheFormatsShouldBe($array) {
+        $this->spec->assertEquals($array, self::$request->getFormats());
     }
 
     public function thenTheMethodShouldBe($string) {
@@ -104,6 +114,22 @@ class WebApplicationFixture extends Fixture {
         $this->spec->assertTrue(self::$request->getParameters()->isEmpty());
     }
 
+    public function thenTheResponseShouldHaveTheStatus($status) {
+        $this->spec->assertEquals($status, $this->response->getStatus());
+    }
+
+    public function thenTheResponseBodyShouldContain($string) {
+        $this->spec->assertContains($string, $this->response->getBody());
+    }
+
+    public function thenTheResponseBodyShouldBe($string) {
+        $this->spec->assertEquals($string, $this->response->getBody());
+    }
+
+    public function thenTheResponseBodyShouldNotContain($string) {
+        $this->spec->assertNotContains($string, $this->response->getBody());
+    }
+
 }
 
 class WebApplicationFixtureWebApplication extends WebApplication {
@@ -114,23 +140,28 @@ class WebApplicationFixtureWebApplication extends WebApplication {
         return $this->body;
     }
 
+    public function run() {
+        return $this->getResponse($this->buildRequest());
+    }
+
 }
 
 class WebApplicationFixtureResource extends Resource {
 
     static $CLASS = __CLASS__;
 
+    static $throwException;
+
     public function __construct(Url $url, Resource $parent = null) {
         parent::__construct($url, $parent);
         WebApplicationFixture::$root = $this;
     }
 
-    /**
-     * @param \watoki\curir\http\Request $request
-     * @return \watoki\curir\http\Response
-     */
     public function respond(Request $request) {
         WebApplicationFixture::$request = $request;
+        if (self::$throwException) {
+            throw self::$throwException;
+        }
         return new Response();
     }
 }

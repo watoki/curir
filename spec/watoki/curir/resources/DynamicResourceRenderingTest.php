@@ -3,6 +3,7 @@ namespace spec\watoki\curir\resources;
  
 use spec\watoki\curir\fixtures\FileFixture;
 use spec\watoki\curir\fixtures\ResourceFixture;
+use watoki\curir\http\Response;
 use watoki\scrut\Specification;
 
 /**
@@ -14,16 +15,18 @@ class DynamicResourceRenderingTest extends Specification {
     function testMethodNotExisting() {
         $this->resource->givenTheDynamicResource('NoMethods');
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith('Method NoMethodsResource::doGet() does not exist');
+        $this->resource->thenTheRequestShouldFailWith('Resource [NoMethodsResource] aka [http://localhost] has no method [doGet]');
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_METHOD_NOT_ALLOWED);
     }
 
     function testRenderFormatNotRegistered() {
         $this->resource->givenIRequestTheFormat('nothing');
         $this->resource->givenTheDynamicResource_WithTheBody('NoFormat', 'function doGet() {
-            return new \watoki\curir\responder\Presenter();
+            return new \watoki\curir\responder\Presenter($this);
         }');
         $this->resource->whenITryToSendTheRequestToThatResource();
-        $this->resource->thenTheRequestShouldFailWith("renderNothing() does not exist");
+        $this->resource->thenTheRequestShouldFailWith("Invalid accepted types for [NoFormatResource] aka [http://localhost]: [nothing]");
+        $this->resource->thenTheRequestShouldReturnTheStatus(Response::STATUS_NOT_ACCEPTABLE);
     }
 
     function testRedirectRequest() {
@@ -36,7 +39,7 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testRenderModel() {
         $this->resource->givenTheDynamicResource_WithTheBody('RenderMe', 'function doGet() {
-            return new \TestPresenter(array("foo" => "Hello", "bar" => "World"));
+            return new \TestPresenter($this, array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('json');
         $this->resource->whenISendTheRequestToThatResource();
@@ -47,7 +50,7 @@ class DynamicResourceRenderingTest extends Specification {
 
     function testRenderTemplate() {
         $this->resource->givenTheDynamicResource_WithTheBody('RenderTemplate', 'function doGet() {
-            return new \TestPresenter(array("foo" => "Hello", "bar" => "World"));
+            return new \TestPresenter($this, array("foo" => "Hello", "bar" => "World"));
         }');
         $this->resource->givenIRequestTheFormat('test');
         $this->file->givenTheFile_WithTheContent('renderTemplate.test', '%foo% %bar%');
@@ -57,20 +60,10 @@ class DynamicResourceRenderingTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('Hello World');
     }
 
-    function testNoFormatGiven() {
-        $this->resource->givenTheDynamicResource_WithTheBody('DefaultFormat', 'function doGet() {
-            return new \TestPresenter(array("foo" => "bar"));
-        }');
-        $this->file->givenTheFile_WithTheContent('defaultFormat.html', 'Here');
-
-        $this->resource->whenISendTheRequestToThatResource();
-
-        $this->resource->thenTheResponseShouldHaveTheBody('Here');
-    }
-
     function testCaseInsensitivity() {
+        $this->resource->givenIRequestTheFormat('html');
         $this->resource->givenTheDynamicResource_WithTheBody('CaseInsensitivity', 'function doGet() {
-            return new \TestPresenter(array("foo" => "bar"));
+            return new \TestPresenter($this, array("foo" => "bar"));
         }');
         $this->file->givenTheFile_WithTheContent('CaseInsEnsitIvity.HTML', 'There');
 
