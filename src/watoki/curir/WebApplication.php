@@ -3,6 +3,7 @@ namespace watoki\curir;
 
 use watoki\collections\Map;
 use watoki\curir\http\decoder\FormDecoder;
+use watoki\curir\http\decoder\ImageDecoder;
 use watoki\curir\http\decoder\JsonDecoder;
 use watoki\curir\http\ParameterDecoder;
 use watoki\curir\http\Path;
@@ -36,6 +37,7 @@ class WebApplication {
         $this->registerDecoder('application/x-www-form-urlencoded', $formDecoder);
         $this->registerDecoder('multipart/form-data', $formDecoder);
         $this->registerDecoder('application/json', new JsonDecoder());
+        $this->registerDecoder('image/jpeg', new ImageDecoder());
     }
 
     public function run() {
