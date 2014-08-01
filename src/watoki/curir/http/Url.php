@@ -178,6 +178,7 @@ class Url {
         foreach (explode('&', $query) as $pair) {
             if (strstr($pair, '=') !== false) {
                 list($key, $value) = explode('=', $pair);
+                $value = urldecode($value);
             } else {
                 $key = $pair;
                 $value = null;
