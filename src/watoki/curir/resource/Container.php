@@ -17,6 +17,7 @@ abstract class Container extends DynamicResource {
 
         $nextRequest = clone $request;
         $nextRequest->setTarget($request->getTarget()->copy());
+        $this->setPlaceholderKey($nextRequest);
         $child = $nextRequest->getTarget()->shift();
 
         $found = $this->findInSuperClasses($child, $request->getFormats());

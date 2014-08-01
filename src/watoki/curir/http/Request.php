@@ -79,6 +79,13 @@ class Request {
     }
 
     /**
+     * @param string $body
+     */
+    public function setBody($body) {
+        $this->body = $body;
+    }
+
+    /**
      * @return \watoki\collections\Map Indexed by self::HEADER_*
      */
     public function getHeaders() {
