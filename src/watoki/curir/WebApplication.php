@@ -73,7 +73,7 @@ class WebApplication {
         ini_set('display_errors', 0);
         register_shutdown_function(function () use ($request) {
             $error = error_get_last();
-            if ($error['type'] == 1) {
+            if (in_array($error['type'], array(E_ERROR, E_PARSE, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
                 $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
                 $this->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
             }
