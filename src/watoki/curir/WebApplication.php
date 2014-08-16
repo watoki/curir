@@ -3,6 +3,7 @@ namespace watoki\curir;
 
 use watoki\collections\Map;
 use watoki\curir\http\decoder\FormDecoder;
+use watoki\curir\http\decoder\ImageDecoder;
 use watoki\curir\http\decoder\JsonDecoder;
 use watoki\curir\http\error\ErrorResponder;
 use watoki\curir\http\error\HttpError;
@@ -37,10 +38,12 @@ class WebApplication {
     public static function quickStart($rootResourceClass, Factory $factory = null) {
         $factory = $factory ? : new Factory();
 
+        $scheme = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "");
         $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
-        $url = Url::parse('http://' . $_SERVER['HTTP_HOST'] . $port . $_SERVER['CONTEXT_PREFIX']);
+        $path = dirname($_SERVER['SCRIPT_NAME']);
+        $url = $scheme . "://" . $_SERVER['SERVER_NAME'] . $port . $path;
 
-        $app = new WebApplication($factory->getInstance($rootResourceClass, array($url)));
+        $app = new WebApplication($factory->getInstance($rootResourceClass, array(Url::parse($url))));
         $app->run();
     }
 
@@ -51,6 +54,7 @@ class WebApplication {
         $this->registerDecoder('application/x-www-form-urlencoded', $formDecoder);
         $this->registerDecoder('multipart/form-data', $formDecoder);
         $this->registerDecoder('application/json', new JsonDecoder());
+        $this->registerDecoder('image/jpeg', new ImageDecoder());
     }
 
     public function onFatalError() {
@@ -71,11 +75,12 @@ class WebApplication {
 
     protected function getResponse(Request $request) {
         ini_set('display_errors', 0);
-        register_shutdown_function(function () use ($request) {
+        $that = $this;
+        register_shutdown_function(function () use ($request, $that) {
             $error = error_get_last();
             if (in_array($error['type'], array(E_ERROR, E_PARSE, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
                 $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
-                $this->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
+                $that->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
             }
         });
 
@@ -95,7 +100,7 @@ class WebApplication {
 
         if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
             throw new HttpError(Response::STATUS_BAD_REQUEST, "The target resource is missing.",
-                'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
+                    'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
         }
 
         $target = Path::parse($_REQUEST[$this->getTargetKey()]);
@@ -159,7 +164,7 @@ class WebApplication {
      * @param \Exception $e
      * @return ErrorResponder
      */
-    protected function getErrorResponder(\Exception $e) {
+    public function getErrorResponder(\Exception $e) {
         return new ErrorResponder($this->root, $e);
     }
 }

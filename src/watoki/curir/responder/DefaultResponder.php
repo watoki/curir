@@ -35,12 +35,15 @@ class DefaultResponder extends Responder {
      * @return \watoki\curir\http\Response
      */
     public function createResponse(Request $request) {
-        $format = null;
+        $formats = $request->getFormats();
+        $format = $formats[0];
+
         $body = isset($this->bodies['']) ? $this->bodies[''] : '';
 
-        foreach ($request->getFormats() as $accepted) {
+        foreach ($formats as $accepted) {
             if (array_key_exists($accepted, $this->bodies)) {
                 $body = $this->bodies[$accepted];
+                $format = $accepted;
                 break;
             }
         }
