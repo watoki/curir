@@ -30,6 +30,8 @@ class WebApplicationFixture extends Fixture {
         parent::__construct($spec, $factory);
 
         $this->rootUrl = Url::parse('http://lacarte');
+
+        global $_SERVER, $_REQUEST;
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['HTTP_ACCEPT'] = '*/*';
         $_REQUEST = array(
@@ -40,6 +42,7 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenTheRequestIs($string) {
+        global $_REQUEST;
         $_REQUEST['-'] = $string;
     }
 
@@ -48,10 +51,12 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenTheRequestContentTypeIs($string) {
+        global $_SERVER;
         $_SERVER['CONTENT_TYPE'] = $string;
     }
 
     public function givenTheMethodIs($string) {
+        global $_SERVER;
         $_SERVER['REQUEST_METHOD'] = $string;
     }
 
@@ -90,6 +95,7 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenTheTheRequestParameter_Is($key, $value) {
+        global $_REQUEST;
         $_REQUEST[$key] = $value;
     }
 
@@ -98,6 +104,7 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenRequestTheHeader_Is($key, $value) {
+        global $_SERVER;
         $_SERVER[$key] = $value;
     }
 
