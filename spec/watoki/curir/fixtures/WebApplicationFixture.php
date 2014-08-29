@@ -26,15 +26,16 @@ class WebApplicationFixture extends Fixture {
     /** @var Response|null */
     private $response;
 
+    private $globals = array();
+
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
 
         $this->rootUrl = Url::parse('http://lacarte');
 
-        global $_SERVER, $_REQUEST;
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-        $_SERVER['HTTP_ACCEPT'] = '*/*';
-        $_REQUEST = array(
+        $this->globals['_SERVER']['REQUEST_METHOD'] = 'GET';
+        $this->globals['_SERVER']['HTTP_ACCEPT'] = '*/*';
+        $this->globals['_REQUEST'] = array(
             '-' => ''
         );
 
@@ -42,8 +43,7 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenTheRequestIs($string) {
-        global $_REQUEST;
-        $_REQUEST['-'] = $string;
+        $this->globals['_REQUEST']['-'] = $string;
     }
 
     public function givenTheRequestBodyIs($string) {
@@ -51,13 +51,11 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenTheRequestContentTypeIs($string) {
-        global $_SERVER;
-        $_SERVER['CONTENT_TYPE'] = $string;
+        $this->globals['_SERVER']['CONTENT_TYPE'] = $string;
     }
 
     public function givenTheMethodIs($string) {
-        global $_SERVER;
-        $_SERVER['REQUEST_METHOD'] = $string;
+        $this->globals['_SERVER']['REQUEST_METHOD'] = $string;
     }
 
     public function givenTheRootUrlIs($string) {
@@ -71,6 +69,7 @@ class WebApplicationFixture extends Fixture {
     public function whenIRunTheWebApplication() {
         $app = new WebApplicationFixtureWebApplication(new WebApplicationFixtureResource($this->rootUrl));
         $app->body = $this->body;
+        $app->globals = $this->globals;
         $this->response = $app->run();
     }
 
@@ -95,8 +94,7 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenTheTheRequestParameter_Is($key, $value) {
-        global $_REQUEST;
-        $_REQUEST[$key] = $value;
+        $this->globals['_REQUEST'][$key] = $value;
     }
 
     public function thenTheParameter_ShouldBe($key, $value) {
@@ -104,8 +102,7 @@ class WebApplicationFixture extends Fixture {
     }
 
     public function givenRequestTheHeader_Is($key, $value) {
-        global $_SERVER;
-        $_SERVER[$key] = $value;
+        $this->globals['_SERVER'][$key] = $value;
     }
 
     public function thenTheHeader_ShouldBe($key, $value) {
@@ -143,12 +140,15 @@ class WebApplicationFixtureWebApplication extends WebApplication {
 
     public $body = '';
 
+    public $globals = array();
+
     protected function readBody() {
         return $this->body;
     }
 
     public function run() {
-        return $this->getResponse($this->buildRequest());
+        return $this->getResponse($this->buildRequest(
+            $this->globals['_REQUEST'], $this->globals['_SERVER']));
     }
 
 }

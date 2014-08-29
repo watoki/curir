@@ -62,7 +62,7 @@ class WebApplication {
     }
 
     public function run() {
-        $this->getResponse($this->buildRequest())->flush();
+        $this->getResponse($this->buildRequest($_REQUEST, $_SERVER))->flush();
     }
 
     protected function getTargetKey() {
@@ -91,20 +91,20 @@ class WebApplication {
         }
     }
 
-    protected function buildRequest() {
-        $method = strtolower($_SERVER['REQUEST_METHOD']);
-        if (array_key_exists($this->getMethodKey(), $_REQUEST)) {
-            $method = $_REQUEST[$this->getMethodKey()];
-            unset($_REQUEST[$this->getMethodKey()]);
+    protected function buildRequest($requestData, $serverData) {
+        $method = strtolower($serverData['REQUEST_METHOD']);
+        if (array_key_exists($this->getMethodKey(), $requestData)) {
+            $method = $requestData[$this->getMethodKey()];
+            unset($requestData[$this->getMethodKey()]);
         }
 
-        if (!array_key_exists($this->getTargetKey(), $_REQUEST)) {
+        if (!array_key_exists($this->getTargetKey(), $requestData)) {
             throw new HttpError(Response::STATUS_BAD_REQUEST, "The target resource is missing.",
-                    'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($_REQUEST, true));
+                    'Request parameter $_REQUEST["' . $this->getTargetKey() . '"] not set in ' . json_encode($requestData));
         }
 
-        $target = Path::parse($_REQUEST[$this->getTargetKey()]);
-        unset($_REQUEST[$this->getTargetKey()]);
+        $target = Path::parse($requestData[$this->getTargetKey()]);
+        unset($requestData[$this->getTargetKey()]);
 
         $formats = array();
         if (!$target->isEmpty() && strpos($target->last(), '.')) {
@@ -112,7 +112,7 @@ class WebApplication {
             $formats[] = array_pop($parts);
             $target->append(implode('.', $parts));
         }
-        foreach (explode(',', $_SERVER['HTTP_ACCEPT']) as $accepted) {
+        foreach (explode(',', $serverData['HTTP_ACCEPT']) as $accepted) {
             $accepted = trim($accepted);
             if (strpos($accepted, ';') !== false) {
                 list($accepted,) = explode(';', $accepted);
@@ -120,27 +120,27 @@ class WebApplication {
             $formats = array_unique(array_merge($formats, MimeTypes::getExtensions($accepted)));
         }
 
-        $params = Map::toCollections($_REQUEST);
+        $params = Map::toCollections($requestData);
 
         $body = $this->readBody();
 
         if ($method != Request::METHOD_GET && $method != Request::METHOD_HEAD) {
-            $params = $this->decodeParamsFromBody($params, $body);
+            $params = $this->decodeParamsFromBody($params, $body, $serverData);
         }
 
         $headers = new Map();
         foreach (self::$headerKeys as $name => $key) {
-            if (isset($_SERVER[$key])) {
-                $headers->set($name, $_SERVER[$key]);
+            if (isset($serverData[$key])) {
+                $headers->set($name, $serverData[$key]);
             }
         }
 
         return new Request($target, $formats, $method, $params, $headers, $body);
     }
 
-    private function decodeParamsFromBody(Map $params, $body) {
+    private function decodeParamsFromBody(Map $params, $body, $serverData) {
         $key = self::$headerKeys[Request::HEADER_CONTENT_TYPE];
-        $contentType = isset($_SERVER[$key]) ? $_SERVER[$key] : null;
+        $contentType = isset($serverData[$key]) ? $serverData[$key] : null;
 
         if (!array_key_exists($contentType, $this->decoders)) {
             return $params;
