@@ -61,14 +61,18 @@ class Request {
     /** @var string */
     private $body;
 
+    /** @var \watoki\collections\Map */
+    private $cookies;
+
     function __construct(Path $target, $formats = array(), $method = Request::METHOD_GET, Map $parameters = null,
-                         Map $headers = null, $body = '') {
+                         Map $headers = null, $body = '', Map $cookies = null) {
         $this->target = $target;
         $this->formats = $formats;
         $this->method = $method;
         $this->parameters = $parameters ? : new Map();
         $this->headers = $headers ? : new Map();
         $this->body = $body;
+        $this->cookies = $cookies ? : new Map();
     }
 
     /**
@@ -139,6 +143,13 @@ class Request {
      */
     public function setMethod($method) {
         $this->method = $method;
+    }
+
+    /**
+     * @return \watoki\collections\Map
+     */
+    public function getCookies() {
+        return $this->cookies;
     }
 
 }

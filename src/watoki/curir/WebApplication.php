@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir;
 
+use watoki\collections\events\MapSetEvent;
 use watoki\collections\Map;
 use watoki\curir\http\decoder\FormDecoder;
 use watoki\curir\http\decoder\ImageDecoder;
@@ -57,12 +58,16 @@ class WebApplication {
         $this->registerDecoder('image/jpeg', new ImageDecoder());
     }
 
-    public function onFatalError() {
-
+    /**
+     * @param \Exception $exception
+     * @return Responder
+     */
+    public function onFatalError(\Exception $exception) {
+        return $this->getErrorResponder($exception);
     }
 
     public function run() {
-        $this->getResponse($this->buildRequest($_REQUEST, $_SERVER))->flush();
+        $this->getResponse($this->buildRequest($_REQUEST, $_SERVER, $_COOKIE))->flush();
     }
 
     protected function getTargetKey() {
@@ -80,7 +85,7 @@ class WebApplication {
             $error = error_get_last();
             if (in_array($error['type'], array(E_ERROR, E_PARSE, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
                 $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
-                $that->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
+                $this->onFatalError(new \Exception($message))->createResponse($request)->flush();
             }
         });
 
@@ -91,7 +96,7 @@ class WebApplication {
         }
     }
 
-    protected function buildRequest($requestData, $serverData) {
+    protected function buildRequest($requestData, $serverData, $cookies = array()) {
         $method = strtolower($serverData['REQUEST_METHOD']);
         if (array_key_exists($this->getMethodKey(), $requestData)) {
             $method = $requestData[$this->getMethodKey()];
@@ -135,7 +140,12 @@ class WebApplication {
             }
         }
 
-        return new Request($target, $formats, $method, $params, $headers, $body);
+        $cookieMap = new Map($cookies);
+        $cookieMap->on(MapSetEvent::$CLASSNAME, function () {
+            throw new \Exception('Cookies are read-only. Use Response::setCookie to send cookies to the client.');
+        });
+
+        return new Request($target, $formats, $method, $params, $headers, $body, $cookieMap);
     }
 
     private function decodeParamsFromBody(Map $params, $body, $serverData) {
