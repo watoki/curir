@@ -1,6 +1,6 @@
 <?php
 namespace watoki\curir\http;
-
+ 
 use watoki\collections\Map;
 
 class Response {
@@ -34,9 +34,6 @@ class Response {
 
     /** @var null|string */
     private $status = self::STATUS_OK;
-
-    /** @var array|array[] */
-    private $cookies = array();
 
     function __construct($body = null) {
         $this->headers = new Map();
@@ -72,36 +69,12 @@ class Response {
         return $this->status;
     }
 
-    public function setCookie($name, $value = null, $expire = null, $path = null, $domain = null, $secure = null, $httponly = null) {
-        $this->cookies[$name] = array(
-            'value' => $value,
-            'expire' => $expire,
-            'path' => $path,
-            'domain' => $domain,
-            'secure' => $secure,
-            'httponly' => $httponly
-        );
-    }
-
-    public function getCookies() {
-        return $this->cookies;
-    }
-
     public function flush() {
         if ($this->status) {
             header('HTTP/1.0 ' . $this->status);
         }
         foreach ($this->getHeaders() as $header => $value) {
             header($header . ': ' . $value);
-        }
-        foreach ($this->cookies as $name => $data) {
-            setcookie($name,
-                $data['value'],
-                $data['expire'],
-                $data['path'],
-                $data['domain'],
-                $data['secure'],
-                $data['httponly']);
         }
         echo $this->getBody();
     }

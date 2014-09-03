@@ -1,7 +1,6 @@
 <?php
 namespace watoki\curir;
 
-use watoki\collections\events\MapSetEvent;
 use watoki\collections\Map;
 use watoki\curir\http\decoder\FormDecoder;
 use watoki\curir\http\decoder\ImageDecoder;
@@ -58,16 +57,12 @@ class WebApplication {
         $this->registerDecoder('image/jpeg', new ImageDecoder());
     }
 
-    /**
-     * @param \Exception $exception
-     * @return Responder
-     */
-    public function onFatalError(\Exception $exception) {
-        return $this->getErrorResponder($exception);
+    public function onFatalError() {
+
     }
 
     public function run() {
-        $this->getResponse($this->buildRequest($_REQUEST, $_SERVER, $_COOKIE))->flush();
+        $this->getResponse($this->buildRequest($_REQUEST, $_SERVER))->flush();
     }
 
     protected function getTargetKey() {
@@ -85,7 +80,7 @@ class WebApplication {
             $error = error_get_last();
             if (in_array($error['type'], array(E_ERROR, E_PARSE, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
                 $message = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']};";
-                $this->onFatalError(new \Exception($message))->createResponse($request)->flush();
+                $that->getErrorResponder(new \Exception($message))->createResponse($request)->flush();
             }
         });
 
@@ -96,7 +91,7 @@ class WebApplication {
         }
     }
 
-    protected function buildRequest($requestData, $serverData, $cookies = array()) {
+    protected function buildRequest($requestData, $serverData) {
         $method = strtolower($serverData['REQUEST_METHOD']);
         if (array_key_exists($this->getMethodKey(), $requestData)) {
             $method = $requestData[$this->getMethodKey()];
@@ -140,12 +135,7 @@ class WebApplication {
             }
         }
 
-        $cookieMap = new Map($cookies);
-        $cookieMap->on(MapSetEvent::$CLASSNAME, function () {
-            throw new \Exception('Cookies are read-only. Use Response::setCookie to send cookies to the client.');
-        });
-
-        return new Request($target, $formats, $method, $params, $headers, $body, $cookieMap);
+        return new Request($target, $formats, $method, $params, $headers, $body);
     }
 
     private function decodeParamsFromBody(Map $params, $body, $serverData) {
