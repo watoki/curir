@@ -34,14 +34,14 @@ class DynamicResourceParameterInflationTest extends Specification {
 
     function testInflateParameters() {
         $this->resource->givenTheDynamicResource_WithTheBody('InflateParameters', 'function doGet(\DateTime $d) {
-            return new \TestPresenter($this, $d);
+            return new \TestPresenter($this, $d->format("c"));
         }');
         $this->resource->givenTheRequestParameter_Is('d', '2011-12-13 14:15:16 UTC');
         $this->resource->givenIRequestTheFormat('json');
 
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('{"date":"2011-12-13 14:15:16","timezone_type":3,"timezone":"UTC"}');
+        $this->resource->thenTheResponseShouldHaveTheBody('"2011-12-13T14:15:16+00:00"');
     }
 
     function testTypeHintInComment() {
@@ -54,7 +54,7 @@ class DynamicResourceParameterInflationTest extends Specification {
              * @param \DateTime $date
              */
             function doGet($int, $bool, $float, $string, $date) {
-                return new \TestPresenter($this, array($int, $bool, $float, $string, $date));
+                return new \TestPresenter($this, array($int, $bool, $float, $string, $date->format("c")));
             }');
         $this->resource->givenTheRequestParameter_Is('int', '1');
         $this->resource->givenTheRequestParameter_Is('bool', 'false');
@@ -64,7 +64,7 @@ class DynamicResourceParameterInflationTest extends Specification {
 
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('[1,false,3.1415,"test",{"date":"2000-01-01 00:00:00","timezone_type":3,"timezone":"UTC"}]');
+        $this->resource->thenTheResponseShouldHaveTheBody('[1,false,3.1415,"test","2000-01-01T00:00:00+00:00"]');
     }
 
     function testInvalidTypeHint() {
