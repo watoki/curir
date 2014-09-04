@@ -121,14 +121,14 @@ class Request {
     }
 
     /**
-     * @return string|null
+     * @return array|string[]
      */
     public function getFormats() {
         return $this->formats;
     }
 
     /**
-     * @param string|null $formats
+     * @param array|string[] $formats
      */
     public function setFormats($formats) {
         $this->formats = $formats;
