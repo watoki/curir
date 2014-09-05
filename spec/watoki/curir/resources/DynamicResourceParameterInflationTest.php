@@ -44,6 +44,19 @@ class DynamicResourceParameterInflationTest extends Specification {
         $this->resource->thenTheResponseShouldHaveTheBody('"2011-12-13T14:15:16+00:00"');
     }
 
+    public function testDoNotInflateNullAsDateTime() {
+        $this->resource->givenTheDynamicResource_WithTheBody('DoNotInflateNullAsDateTime', '
+            function doGet(\DateTime $d = null) {
+                return new \TestPresenter($this, $d);
+            }');
+        $this->resource->givenTheRequestParameter_Is('d', null);
+        $this->resource->givenIRequestTheFormat('json');
+
+        $this->resource->whenISendTheRequestToThatResource();
+
+        $this->resource->thenTheResponseShouldHaveTheBody('null');
+    }
+
     function testTypeHintInComment() {
         $this->resource->givenTheDynamicResource_WithTheBody('TypeHints', '
             /**
