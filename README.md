@@ -24,7 +24,7 @@ php install.php
 
 ## Quickstart ##
 
-The easiest way to use *curir* is to have this one line in a `index.php` file
+The easiest way to use *curir* is to have this one line in an `index.php` file
 
 ```php
 WebApplication::quickStart('MyResource');
@@ -41,8 +41,8 @@ class MyResource extends Resource {
 }
 ```
 
-or it could extend `DynamicResource` which invokes a method corresponding with the *METHOD* of the HTTP request which
-can be overwritten with a `method` query parameter.
+or it could extend `DynamicResource` which invokes a method corresponding with the *METHOD* of the HTTP request (which
+can also be overwritten with a `method` query parameter).
 
 ```php
 class MyResource extends DynamicResource {
@@ -54,8 +54,8 @@ class MyResource extends DynamicResource {
 
 ## Routing ##
 
-There isn't actually much routing going on. All requests are passed to the *root* `Resource` provided to `WebApplication`.
-Most web applications expose more than one resource though, so the root resource may pass the request to further
+There isn't actually much routing going on. All requests are passed to the `Resource` provided to `WebApplication`.
+Most web applications expose more than one resource though, so the *root* resource may pass the request to further
 resources. The `Container` class for example passes the request to a child based on the requested path. A *child* resource
 is simply a class in the folder belonging to a `Container`. If the container is called `RootResource`, its folder is called `root`.
 
