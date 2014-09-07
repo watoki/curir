@@ -92,7 +92,8 @@ class DynamicResourceParameterInflationTest extends Specification {
 
         $this->resource->whenISendTheRequestToThatResource();
 
-        $this->resource->thenTheResponseShouldHaveTheBody('"not"');    }
+        $this->resource->thenTheResponseShouldHaveTheBody('"not"');
+    }
 
     function testNoTypeHint() {
         $this->resource->givenTheDynamicResource_WithTheBody('NoTypeHints', '
