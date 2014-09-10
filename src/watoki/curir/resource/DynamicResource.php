@@ -76,7 +76,7 @@ abstract class DynamicResource extends Resource {
         try {
             return $injector->injectMethodArguments($method, $parameters->toArray(), $this->filters);
         } catch (\Exception $e) {
-            throw new HttpError(Response::STATUS_BAD_REQUEST, "A request parameter is missing.", $e->getMessage());
+            throw new HttpError(Response::STATUS_BAD_REQUEST, "A request parameter is invalid or missing.", $e->getMessage());
         }
     }
 
