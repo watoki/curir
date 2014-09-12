@@ -30,6 +30,9 @@ class RequestBuilder {
     /** @var Path */
     private $context;
 
+    /** @var array|ParameterDecoder[] */
+    private $decoders = array();
+
     function __construct(Path $context = null) {
         $this->context = $context ? : new Path();
     }
@@ -37,10 +40,11 @@ class RequestBuilder {
     /**
      * @param array $serverData
      * @param array $requestData
-     * @throws HttpError If target key is missing
+     * @param callable $bodyReader
+     * @throws HttpError
      * @return WebRequest
      */
-    public function build($serverData, $requestData) {
+    public function build($serverData, $requestData, $bodyReader) {
         $method = $this->getMethod($serverData, $requestData);
 
         if (!array_key_exists($this->targetKey, $requestData)) {
@@ -52,13 +56,15 @@ class RequestBuilder {
 
         $formats = $this->getFormats($target, $serverData);
 
+        unset($requestData[$this->methodKey]);
+        unset($requestData[$this->targetKey]);
         $arguments = Map::toCollections($requestData);
 
-//        $body = $this->readBody();
+        $body = $bodyReader();
 
-//        if ($method != Request::METHOD_GET && $method != Request::METHOD_HEAD) {
-//            $params = $this->decodeParamsFromBody($params, $body, $serverData);
-//        }
+        if ($method != WebRequest::METHOD_GET && $method != WebRequest::METHOD_HEAD) {
+            $arguments = $this->decodeParamsFromBody($arguments, $body, $serverData);
+        }
 
         $headers = new Map();
         foreach (self::$headerKeys as $name => $key) {
@@ -66,9 +72,6 @@ class RequestBuilder {
                 $headers->set($name, $serverData[$key]);
             }
         }
-
-        unset($requestData[$this->methodKey]);
-        unset($requestData[$this->targetKey]);
 
         return new WebRequest($this->context, $target, $method, $arguments, new Liste($formats), $headers);
     }
@@ -118,5 +121,23 @@ class RequestBuilder {
             return $extension;
         }
         return $extension;
+    }
+
+    private function decodeParamsFromBody(Map $args, $body, $serverData) {
+        $key = self::$headerKeys[WebRequest::HEADER_CONTENT_TYPE];
+        $contentType = isset($serverData[$key]) ? $serverData[$key] : null;
+
+        if (!array_key_exists($contentType, $this->decoders)) {
+            return $args;
+        }
+
+        foreach ($this->decoders[$contentType]->decode($body) as $key => $value) {
+            $args->set($key, $value);
+        }
+        return $args;
+    }
+
+    public function registerDecoder($contentType, ParameterDecoder $decoder) {
+        $this->decoders[$contentType] = $decoder;
     }
 }
