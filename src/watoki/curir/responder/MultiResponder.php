@@ -1,6 +1,8 @@
 <?php
 namespace watoki\curir\responder;
 
+use watoki\collections\Liste;
+use watoki\curir\error\HttpError;
 use watoki\curir\MimeTypes;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
@@ -14,20 +16,24 @@ class MultiResponder implements Responder {
     private $renderers = array();
 
     /**
-     * @param string $body Default body
+     * @param string $defaultBody
      */
-    function __construct($body = '') {
-        $this->setBody('', $body);
+    function __construct($defaultBody = null) {
+        if ($defaultBody) {
+            $this->setBody('', $defaultBody);
+        }
     }
 
     public function setBody($format, $body) {
         $this->setRenderer($format, function () use ($body) {
             return $body;
         });
+        return $this;
     }
 
     public function setRenderer($format, callable $renderer) {
         $this->renderers[$format] = $renderer;
+        return $this;
     }
 
     /**
@@ -45,11 +51,7 @@ class MultiResponder implements Responder {
             }
         }
 
-        return new WebResponse($this->getDefaultBody());
-    }
-
-    private function getDefaultBody() {
-        return isset($this->renderers['']) ? call_user_func($this->renderers['']) : '';
+        return $this->respondWithDefault($resource, $formats);
     }
 
     private function respondWith($accepted) {
@@ -57,5 +59,21 @@ class MultiResponder implements Responder {
         $response = new WebResponse($body);
         $response->getHeaders()->set(WebResponse::HEADER_CONTENT_TYPE, MimeTypes::getType($accepted));
         return $response;
+    }
+
+    /**
+     * @param \watoki\curir\Resource $resource
+     * @param \watoki\collections\Liste $formats
+     * @throws HttpError If no renderer for accepted format and no default renderer is set
+     * @return WebResponse
+     */
+    private function respondWithDefault(Resource $resource, Liste $formats) {
+        if (!isset($this->renderers[''])) {
+            throw new HttpError(WebResponse::STATUS_NOT_ACCEPTABLE, "Could not render the resource in an accepted format.",
+                    "Invalid accepted types for [" . get_class($resource) . "]: " .
+                    "[" . $formats->join(', ') . "] not supported by " .
+                    "[" . implode(', ', array_keys($this->renderers)) . "]");
+        }
+        return new WebResponse(call_user_func($this->renderers['']));
     }
 }
