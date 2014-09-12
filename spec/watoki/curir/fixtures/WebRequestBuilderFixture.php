@@ -1,24 +1,22 @@
 <?php
 namespace spec\watoki\curir\fixtures;
 
-use watoki\curir\HttpError;
+use watoki\curir\error\HttpError;
 use watoki\curir\ParameterDecoder;
-use watoki\curir\RequestBuilder;
+use watoki\curir\WebRequestBuilder;
 use watoki\curir\WebRequest;
+use watoki\deli\Path;
 use watoki\scrut\ExceptionFixture;
 use watoki\scrut\Fixture;
 
 /**
  * @property ExceptionFixture try <-
  */
-class RequestBuilderFixture extends Fixture {
+class WebRequestBuilderFixture extends Fixture {
 
     private $_SERVER = array();
 
     private $_REQUEST = array();
-
-    /** @var RequestBuilder */
-    private $builder;
 
     /** @var WebRequest */
     private $request;
@@ -26,14 +24,16 @@ class RequestBuilderFixture extends Fixture {
     /** @var string */
     private $body = '';
 
+    /** @var array|ParameterDecoder[] */
+    private $decoders = array();
+
     public function setUp() {
         parent::setUp();
-        $this->builder = new RequestBuilder();
-        $this->_REQUEST[RequestBuilder::DEFAULT_TARGET_KEY] = '';
+        $this->_REQUEST[WebRequestBuilder::DEFAULT_TARGET_KEY] = '';
     }
 
     public function givenNoTargetPathIsGiven() {
-        unset($this->_REQUEST[RequestBuilder::DEFAULT_TARGET_KEY]);
+        unset($this->_REQUEST[WebRequestBuilder::DEFAULT_TARGET_KEY]);
     }
 
     public function givenTheHeader_Is($key, $value) {
@@ -45,11 +45,11 @@ class RequestBuilderFixture extends Fixture {
     }
 
     public function givenTheMethodArgumentIs($value) {
-        $this->givenTheQueryArgument_Is(RequestBuilder::DEFAULT_METHOD_KEY, $value);
+        $this->givenTheQueryArgument_Is(WebRequestBuilder::DEFAULT_METHOD_KEY, $value);
     }
 
     public function givenTheTargetPathIs($string) {
-        $this->givenTheQueryArgument_Is(RequestBuilder::DEFAULT_TARGET_KEY, $string);
+        $this->givenTheQueryArgument_Is(WebRequestBuilder::DEFAULT_TARGET_KEY, $string);
     }
 
     public function givenTheBodyIs($string) {
@@ -57,14 +57,19 @@ class RequestBuilderFixture extends Fixture {
     }
 
     public function given_IsRegisteredForTheContentType(ParameterDecoder $decoder, $contentType) {
-        $this->builder->registerDecoder($contentType, $decoder);
+        $this->decoders[$contentType] = $decoder;
     }
 
     public function whenIBuildTheRequest() {
         $body = $this->body;
-        $this->request = $this->builder->build($this->_SERVER, $this->_REQUEST, function () use ($body) {
+        $builder = new WebRequestBuilder($this->_SERVER, $this->_REQUEST, function () use ($body) {
             return $body;
         });
+        foreach ($this->decoders as $contentType => $decoder) {
+            $builder->registerDecoder($contentType, $decoder);
+        }
+        $this->request = $builder->build(new Path());
+        return $this->request;
     }
 
     public function whenITryToBuildTheRequest() {
@@ -89,7 +94,7 @@ class RequestBuilderFixture extends Fixture {
 
     public function thenAnErrorWithStatus_AndUserMessage_ShouldBeThrown($status, $message) {
         $this->try->thenA_ShouldBeThrown(HttpError::$CLASS);
-        /** @var HttpError $error */
+        /** @var \watoki\curir\error\HttpError $error */
         $error = $this->try->getCaughtException();
         $this->spec->assertEquals($status, $error->getStatus());
         $this->spec->assertEquals($message, $error->getUserMessage());

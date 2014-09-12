@@ -1,9 +1,9 @@
 <?php
 namespace watoki\curir;
 
-use watoki\deli\Response;
+use watoki\collections\Map;
 
-class WebResponse extends Response {
+class WebResponse {
 
     const HEADER_CONTENT_TYPE = 'Content-Type';
     const HEADER_LOCATION = 'Location';
@@ -19,5 +19,54 @@ class WebResponse extends Response {
     const STATUS_NOT_ACCEPTABLE = '406 Not Acceptable';
     const STATUS_SERVER_ERROR = '500 Internal Server Error';
     const STATUS_NOT_IMPLEMENTED = '501 Not Implemented';
+
+    /** @var string */
+    private $body;
+
+    /** @var Map */
+    private $headers;
+
+    /** @var string */
+    private $status = self::STATUS_OK;
+
+    public function __construct($body) {
+        $this->body = $body;
+        $this->headers = new Map();
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody() {
+        return $this->body;
+    }
+
+    /**
+     * @param string $body
+     */
+    public function setBody($body) {
+        $this->body = $body;
+    }
+
+    /**
+     * @return \watoki\collections\Map
+     */
+    public function getHeaders() {
+        return $this->headers;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus() {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     */
+    public function setStatus($status) {
+        $this->status = $status;
+    }
 
 } 

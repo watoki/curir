@@ -3,9 +3,11 @@ namespace watoki\curir;
 
 use watoki\collections\Liste;
 use watoki\collections\Map;
+use watoki\curir\error\HttpError;
 use watoki\deli\Path;
+use watoki\deli\RequestBuilder;
 
-class RequestBuilder {
+class WebRequestBuilder implements RequestBuilder {
 
     const DEFAULT_TARGET_KEY = '-';
 
@@ -27,49 +29,64 @@ class RequestBuilder {
         WebRequest::HEADER_CONTENT_TYPE => 'CONTENT_TYPE'
     );
 
-    /** @var Path */
-    private $context;
-
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
-    function __construct(Path $context = null) {
-        $this->context = $context ? : new Path();
-    }
+    /** @var array */
+    private $serverData;
+
+    /** @var array */
+    private $requestData;
+
+    /** @var callable */
+    private $bodyReader;
+
+    /** @var Path */
+    private $context;
 
     /**
      * @param array $serverData
      * @param array $requestData
      * @param callable $bodyReader
+     * @param Path $context
+     */
+    function __construct($serverData, $requestData, $bodyReader, Path $context = null) {
+        $this->serverData = $serverData;
+        $this->requestData = $requestData;
+        $this->bodyReader = $bodyReader;
+        $this->context = $context ?  : new Path();
+    }
+
+    /**
      * @throws HttpError
      * @return WebRequest
      */
-    public function build($serverData, $requestData, $bodyReader) {
-        $method = $this->getMethod($serverData, $requestData);
+    public function build() {
+        $method = $this->getMethod($this->serverData, $this->requestData);
 
-        if (!array_key_exists($this->targetKey, $requestData)) {
+        if (!array_key_exists($this->targetKey, $this->requestData)) {
             throw new HttpError(WebResponse::STATUS_BAD_REQUEST, "No target given.",
                     'Request parameter $_REQUEST["' . $this->targetKey . '"] not set');
         }
 
-        $target = Path::fromString($requestData[$this->targetKey]);
+        $target = Path::fromString($this->requestData[$this->targetKey]);
 
-        $formats = $this->getFormats($target, $serverData);
+        $formats = $this->getFormats($target, $this->serverData);
 
-        unset($requestData[$this->methodKey]);
-        unset($requestData[$this->targetKey]);
-        $arguments = Map::toCollections($requestData);
+        unset($this->requestData[$this->methodKey]);
+        unset($this->requestData[$this->targetKey]);
+        $arguments = Map::toCollections($this->requestData);
 
-        $body = $bodyReader();
+        $body = call_user_func($this->bodyReader);
 
         if ($method != WebRequest::METHOD_GET && $method != WebRequest::METHOD_HEAD) {
-            $arguments = $this->decodeParamsFromBody($arguments, $body, $serverData);
+            $arguments = $this->decodeParamsFromBody($arguments, $body, $this->serverData);
         }
 
         $headers = new Map();
         foreach (self::$headerKeys as $name => $key) {
-            if (isset($serverData[$key])) {
-                $headers->set($name, $serverData[$key]);
+            if (isset($this->serverData[$key])) {
+                $headers->set($name, $this->serverData[$key]);
             }
         }
 

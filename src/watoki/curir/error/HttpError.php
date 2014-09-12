@@ -1,7 +1,7 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\error;
 
-use Exception;
+use watoki\curir\WebResponse;
 
 class HttpError extends \Exception {
 
@@ -12,7 +12,7 @@ class HttpError extends \Exception {
     private $userMessage;
 
     public function __construct($status = WebResponse::STATUS_SERVER_ERROR, $userMessage = "", $message = "",
-                                $code = 0, Exception $previous = null) {
+                                $code = 0, \Exception $previous = null) {
         parent::__construct($message ? : $userMessage, $code, $previous);
         $this->status = $status;
         $this->userMessage = $userMessage;

@@ -1,14 +1,14 @@
 <?php
 namespace spec\watoki\curir;
 
-use spec\watoki\curir\fixtures\RequestBuilderFixture;
+use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use watoki\curir\WebResponse;
 use watoki\scrut\Specification;
 
 /**
  * A WebRequest is built from the global variables $_REQUEST and $_SERVER
  *
- * @property RequestBuilderFixture request <-
+ * @property WebRequestBuilderFixture request <-
 */
 class BuildRequestTest extends Specification {
 
