@@ -3,6 +3,7 @@ namespace spec\watoki\curir\fixtures;
 
 use watoki\curir\error\HttpError;
 use watoki\curir\ParameterDecoder;
+use watoki\curir\Url;
 use watoki\curir\WebRequestBuilder;
 use watoki\curir\WebRequest;
 use watoki\deli\Path;
@@ -27,9 +28,17 @@ class WebRequestBuilderFixture extends Fixture {
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
+    /** @var Url */
+    public $context;
+
     public function setUp() {
         parent::setUp();
         $this->_REQUEST[WebRequestBuilder::DEFAULT_TARGET_KEY] = '';
+        $this->context = Url::fromString('http://example.org');
+    }
+
+    public function givenTheContextIs($string) {
+        $this->context = Url::fromString($string);
     }
 
     public function givenNoTargetPathIsGiven() {
@@ -64,7 +73,7 @@ class WebRequestBuilderFixture extends Fixture {
         $body = $this->body;
         $builder = new WebRequestBuilder($this->_SERVER, $this->_REQUEST, function () use ($body) {
             return $body;
-        });
+        }, $this->context);
         foreach ($this->decoders as $contentType => $decoder) {
             $builder->registerDecoder($contentType, $decoder);
         }

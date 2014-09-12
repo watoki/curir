@@ -18,7 +18,6 @@ use watoki\scrut\Specification;
 class DisplayErrorPageTest extends Specification {
 
     protected function background() {
-        $this->delivery->givenTheContextIs('http://cur.ir');
         $this->request->givenTheTargetPathIs('some.html');
     }
 

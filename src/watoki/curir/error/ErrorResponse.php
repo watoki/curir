@@ -59,4 +59,11 @@ class ErrorResponse extends WebResponse {
         }
         return $template;
     }
+
+    /**
+     * @return \Exception
+     */
+    public function getException() {
+        return $this->exception;
+    }
 }

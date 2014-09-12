@@ -8,6 +8,10 @@ use watoki\scrut\Specification;
  */
 class DeliverObjectResourcesTest extends Specification {
 
+    function testMethodNotExisting() {
+        $this->markTestIncomplete();
+    }
+
     function testFormatNotRegistered() {
         $this->markTestIncomplete();
     }

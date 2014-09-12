@@ -15,26 +15,20 @@ use watoki\scrut\Fixture;
 class WebDeliveryFixture extends Fixture {
 
     /** @var TestDelivery */
-    private $test;
+    public $test;
 
     /** @var NoneRouter */
-    private $router;
-
-    /** @var Url */
-    private $context;
+    public $router;
 
     public function givenTheTargetRespondsWith($callback) {
         $this->router = new NoneRouter(CallbackTarget::factory($callback));
     }
 
-    public function givenTheContextIs($string) {
-        $this->context = Url::fromString($string);
-    }
-
     public function whenIRunTheDelivery() {
         $request = $this->request->whenIBuildTheRequest();
         $this->test = new TestDelivery($request);
-        $delivery = new WebDelivery($this->router, $this->context, $this->test, $this->test);
+        $context = Url::fromString('http://example.com');
+        $delivery = new WebDelivery($this->router, $context, $this->test, $this->test);
         $delivery->run();
     }
 
