@@ -33,7 +33,7 @@ class WebRequest extends Request {
     /** @var Map */
     private $headers;
 
-    function __construct(Path $context, Path $target, $method = null, Map $arguments = null, Liste $formats = null,
+    function __construct(Url $context, Path $target, $method = null, Map $arguments = null, Liste $formats = null,
                          Map $headers = null) {
         parent::__construct($context, $target, $method, $arguments);
         $this->formats = $formats ? : new Liste();
@@ -46,5 +46,12 @@ class WebRequest extends Request {
 
     public function getHeaders() {
         return $this->headers;
+    }
+
+    /**
+     * @return Url
+     */
+    public function getContext() {
+        return parent::getContext();
     }
 }

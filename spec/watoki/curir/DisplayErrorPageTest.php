@@ -4,10 +4,10 @@ namespace spec\watoki\curir;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use spec\watoki\deli\fixtures\TestDelivery;
 use watoki\curir\error\HttpError;
+use watoki\curir\Url;
 use watoki\curir\WebDelivery;
 use watoki\curir\WebRequest;
 use watoki\curir\WebResponse;
-use watoki\deli\Path;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\target\CallbackTarget;
 use watoki\scrut\Specification;
@@ -74,7 +74,7 @@ class DisplayErrorPageTest extends Specification {
     /** @var NoneRouter */
     private $router;
 
-    /** @var Path */
+    /** @var Url */
     private $context;
 
     private function givenTheTargetRespondsWith($callback) {
@@ -88,7 +88,7 @@ class DisplayErrorPageTest extends Specification {
     }
 
     private function givenTheContextIs($string) {
-        $this->context = new Path(array($string));
+        $this->context = Url::fromString($string);
     }
 
     private function whenIRunTheDelivery() {

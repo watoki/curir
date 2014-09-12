@@ -48,13 +48,13 @@ class WebRequestBuilder implements RequestBuilder {
      * @param array $serverData
      * @param array $requestData
      * @param callable $bodyReader
-     * @param Path $context
+     * @param Url $context
      */
-    function __construct($serverData, $requestData, $bodyReader, Path $context = null) {
+    function __construct($serverData, $requestData, $bodyReader, Url $context = null) {
         $this->serverData = $serverData;
         $this->requestData = $requestData;
         $this->bodyReader = $bodyReader;
-        $this->context = $context ?  : new Path();
+        $this->context = $context ?  : Url::fromString('http://example.com');
     }
 
     /**
