@@ -10,7 +10,6 @@ use watoki\deli\Target;
 use watoki\deli\target\ObjectTarget;
 use watoki\factory\Factory;
 use watoki\stores\file\FileStore;
-use watoki\stores\file\raw\File;
 
 class WebRouter extends MultiRouter {
 
@@ -36,10 +35,7 @@ class WebRouter extends MultiRouter {
             $reflection = new \ReflectionClass($rootClass);
             $rootDirectory = dirname($reflection->getFileName());
         }
-        $store = $factory->getInstance(FileStore::$CLASS, array(
-            'entityClass' => File::$CLASS,
-            'rootDirectory' => $rootDirectory
-        ));
+        $store = $factory->getInstance(FileStore::$CLASS, array('rootDirectory' => $rootDirectory));
         $namespace = implode('\\', array_slice(explode('\\', $rootClass), 0, -1));
 
         $this->factory = $factory;

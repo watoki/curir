@@ -2,6 +2,7 @@
 namespace watoki\curir;
 
 use watoki\curir\error\ErrorResponse;
+use watoki\curir\error\HttpError;
 use watoki\deli\Delivery;
 use watoki\deli\Request;
 use watoki\deli\RequestBuilder;
@@ -16,6 +17,20 @@ class WebDelivery extends Delivery {
         }, $context);
         $deliverer = $deliverer ? : new WebResponseDeliverer();
         parent::__construct($router, $builder, $deliverer);
+    }
+
+    /**
+     * @param Request|WebRequest $request
+     * @throws HttpError if the method does not exist in the target
+     * @return mixed
+     */
+    protected function getResponse(Request $request) {
+        try {
+            return parent::getResponse($request);
+        } catch (\BadMethodCallException $e) {
+            throw new HttpError(WebResponse::STATUS_METHOD_NOT_ALLOWED,
+                "Method [{$request->getMethod()}] is not allowed here.", $e->getMessage(), 0, $e);
+        }
     }
 
     /**

@@ -29,7 +29,7 @@ class WebResponse {
     /** @var string */
     private $status = self::STATUS_OK;
 
-    public function __construct($body) {
+    public function __construct($body = '') {
         $this->body = $body;
         $this->headers = new Map();
     }

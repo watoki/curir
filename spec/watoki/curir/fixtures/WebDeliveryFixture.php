@@ -2,11 +2,14 @@
 namespace spec\watoki\curir\fixtures;
 
 use spec\watoki\deli\fixtures\TestDelivery;
+use watoki\curir\error\ErrorResponse;
 use watoki\curir\Url;
 use watoki\curir\WebDelivery;
 use watoki\curir\WebResponse;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\target\CallbackTarget;
+use watoki\deli\target\ObjectTarget;
+use watoki\deli\target\RespondingTarget;
 use watoki\scrut\Fixture;
 
 /**
@@ -22,6 +25,16 @@ class WebDeliveryFixture extends Fixture {
 
     public function givenTheTargetRespondsWith($callback) {
         $this->router = new NoneRouter(CallbackTarget::factory($callback));
+    }
+
+    public function givenTheTargetIsTheRespondingClass($fullClassName) {
+        $object = $this->spec->factory->getInstance($fullClassName);
+        $this->router = new NoneRouter(RespondingTarget::factory($this->spec->factory, $object));
+    }
+
+    public function givenTheTargetIsTheClass($fullClassName) {
+        $object = $this->spec->factory->getInstance($fullClassName);
+        $this->router = new NoneRouter(ObjectTarget::factory($this->spec->factory, $object));
     }
 
     public function whenIRunTheDelivery() {
@@ -46,6 +59,18 @@ class WebDeliveryFixture extends Fixture {
 
     public function thenTheResponseStatusShouldBe($status) {
         $this->spec->assertEquals($status, $this->webResponse()->getStatus());
+    }
+
+    public function thenTheResponseHeader_ShouldBe($key, $value) {
+        $this->spec->assertEquals($value, $this->webResponse()->getHeaders()->get($key));
+    }
+
+    public function thenTheResponseShouldBe($value) {
+        $response = $this->test->response;
+        if ($response instanceof ErrorResponse) {
+            $this->spec->fail($response->getException());
+        }
+        $this->spec->assertEquals($value, $response);
     }
 
     /**
