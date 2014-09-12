@@ -33,6 +33,14 @@ class Url extends Path {
     /** @var string|null */
     private $fragment;
 
+    /**
+     * @param string $scheme
+     * @param string $host
+     * @param int $port
+     * @param Path $path
+     * @param Map $parameters
+     * @param string|null $fragment
+     */
     function __construct($scheme, $host, $port, Path $path, Map $parameters = null, $fragment = null) {
         parent::__construct($path->toArray());
         $this->scheme = $scheme;
@@ -225,7 +233,7 @@ class Url extends Path {
      * @return static
      */
     public function copy() {
-        return new Url($this->scheme, $this->host, $this->port, parent::copy(), $this->parameters->deepCopy(), $this->fragment);
+        return new Url($this->scheme, $this->host, $this->port, new Path($this->toArray()), $this->parameters->deepCopy(), $this->fragment);
     }
 
 }

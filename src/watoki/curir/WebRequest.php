@@ -54,4 +54,15 @@ class WebRequest extends Request {
     public function getContext() {
         return parent::getContext();
     }
+
+    public function copy() {
+        return new WebRequest(
+            $this->getContext()->copy(),
+            $this->getTarget()->copy(),
+            $this->getMethod(),
+            $this->getArguments()->copy(),
+            $this->formats->copy(),
+            $this->headers->copy()
+        );
+    }
 }
