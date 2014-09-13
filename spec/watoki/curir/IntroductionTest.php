@@ -28,14 +28,14 @@ class IntroductionTest extends Specification {
          * to a single file (e.g. `index.php`) with the target path in the query as `$_REQUEST['-']`. For apache
          * it would look like
          * <a href="javascript:" onclick="$('#htaccess').toggle();">this</a>
-         * <div id="htaccess" style="display: none;">
+         * <pre id="htaccess" style="display: none;">
          * <code>
          * # content of .htaccess
          * RewriteEngine On
          * RewriteBase /
          * RewriteRule ^(.*)$ index.php?-=$1 [L,QSA]
          * </code>
-         * </div>
+         * </pre>
          */
 
         /**
