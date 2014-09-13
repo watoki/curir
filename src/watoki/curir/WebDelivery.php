@@ -22,20 +22,6 @@ use watoki\factory\Factory;
 
 class WebDelivery extends Delivery {
 
-    public static function quickStart($rootResourceClass, Factory $factory = null) {
-        $factory = $factory ? : new Factory();
-
-        $scheme = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "");
-        $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
-        $path = dirname($_SERVER['SCRIPT_NAME']);
-        $url = $scheme . "://" . $_SERVER['SERVER_NAME'] . $port . $path;
-
-        $router = new NoneRouter(RespondingTarget::factory($factory, $factory->getInstance($rootResourceClass)));
-
-        $delivery = new WebDelivery($router, Url::fromString($url));
-        $delivery->run();
-    }
-
     /**
      * @param Router $router
      * @param Url $context
@@ -52,6 +38,21 @@ class WebDelivery extends Delivery {
         }
         $deliverer = $deliverer ? : new WebResponseDeliverer();
         parent::__construct($router, $builder, $deliverer);
+    }
+
+    public static function quickStart($rootResourceClass, Factory $factory = null) {
+        $factory = $factory ? : new Factory();
+        self::quickRoute(new NoneRouter(RespondingTarget::factory($factory, $factory->getInstance($rootResourceClass))));
+    }
+
+    public static function quickRoute(Router $router) {
+        $scheme = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "");
+        $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
+        $path = dirname($_SERVER['SCRIPT_NAME']);
+        $url = $scheme . "://" . $_SERVER['SERVER_NAME'] . $port . $path;
+
+        $delivery = new WebDelivery($router, Url::fromString($url));
+        $delivery->run();
     }
 
     /**

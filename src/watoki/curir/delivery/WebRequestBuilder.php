@@ -14,7 +14,7 @@ class WebRequestBuilder implements RequestBuilder {
 
     const DEFAULT_TARGET_KEY = '-';
 
-    const DEFAULT_METHOD_KEY = '!';
+    const DEFAULT_METHOD_KEY = 'method';
     
     private $targetKey = self::DEFAULT_TARGET_KEY;
     

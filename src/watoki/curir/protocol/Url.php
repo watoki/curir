@@ -214,6 +214,10 @@ class Url extends Path {
         return new Path($this->elements);
     }
 
+    public function setPath(Path $path) {
+        return $this->elements = $path->elements;
+    }
+
     private function flattenParams(Map $parameters, $i = 0) {
         $flat = new Map();
         foreach ($parameters as $key => $value) {

@@ -4,6 +4,7 @@ namespace spec\watoki\curir;
 use spec\watoki\curir\fixtures\ClassesFixture;
 use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
+use watoki\curir\delivery\WebResponse;
 use watoki\scrut\Specification;
 
 /**
@@ -53,7 +54,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->request->givenTheTargetPathIs('no/existing/child');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseStatusShouldBe(\watoki\curir\delivery\WebResponse::STATUS_NOT_FOUND);
+        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_NOT_FOUND);
         $this->delivery->thenTheResponseBodyShouldContain('The resource [no/existing/child] does not exist in [http://cur.ir]');
     }
 

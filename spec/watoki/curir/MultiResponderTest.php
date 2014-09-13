@@ -3,7 +3,9 @@ namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\ClassesFixture;
 use watoki\collections\Liste;
+use watoki\curir\delivery\WebRequest;
 use watoki\curir\error\HttpError;
+use watoki\curir\protocol\Url;
 use watoki\curir\responder\MultiResponder;
 use watoki\deli\Path;
 use watoki\scrut\ExceptionFixture;
@@ -18,7 +20,7 @@ use watoki\scrut\Specification;
 class MultiResponderTest extends Specification {
 
     public function background() {
-        $this->class->givenTheClass_Extending_In_WithTheBody('MyResource', '\watoki\curir\Resource', 'folder', "
+        $this->class->givenTheClass_Extending_In_WithTheBody('my\MultiResponderResource', '\watoki\curir\Resource', 'folder', "
             public function getDirectory() {
                 return 'folder';
             }");
@@ -40,7 +42,8 @@ class MultiResponderTest extends Specification {
 
         $this->whenITryToCreateTheResponse();
         $this->try->thenA_ShouldBeThrown(HttpError::$CLASS);
-        $this->try->thenTheException_ShouldBeThrown('Invalid accepted types for [MyResource]: [not, neither] not supported by [foo, bar]');
+        $this->try->thenTheException_ShouldBeThrown(
+            'Invalid accepted types for [my\MultiResponderResource]: [not, neither] not supported by [foo, bar]');
     }
 
     function testRenderFormat() {
@@ -76,8 +79,9 @@ class MultiResponderTest extends Specification {
     }
 
     public function whenICreateTheResponse() {
-        $request = new \watoki\curir\delivery\WebRequest(\watoki\curir\protocol\Url::fromString('curir'), new Path(), null, null, new Liste($this->formats));
-        $this->response = $this->responder->createResponse($request, $this->factory->getInstance('MyResource'), $this->factory);
+        $request = new WebRequest(Url::fromString('curir'), new Path(), null, null, new Liste($this->formats));
+        $resource = $this->factory->getInstance('my\MultiResponderResource');
+        $this->response = $this->responder->createResponse($request, $resource, $this->factory);
     }
 
     private function whenITryToCreateTheResponse() {

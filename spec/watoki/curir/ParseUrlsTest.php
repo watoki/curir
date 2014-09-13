@@ -37,7 +37,7 @@ class ParseUrlsTest extends Specification {
     }
 
     function testTrailingSlash() {
-        $url = \watoki\curir\protocol\Url::fromString('http://example.com/');
+        $url = Url::fromString('http://example.com/');
         $this->assertEquals(new Path(array('')), $url->getPath());
         $this->assertEquals('http://example.com', $url->toString());
     }

@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir;
 
+use watoki\curir\delivery\WebRequest;
 use watoki\deli\Request;
 use watoki\deli\Responding;
 use watoki\deli\Router;
@@ -16,7 +17,7 @@ class Container implements Responding {
     }
 
     /**
-     * @param Request $request
+     * @param Request|WebRequest $request
      * @return mixed
      */
     public function respond(Request $request) {

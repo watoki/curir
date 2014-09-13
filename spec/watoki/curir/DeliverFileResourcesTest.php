@@ -39,7 +39,7 @@ class DeliverFileResourcesTest extends Specification {
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World');
-        $this->delivery->thenTheResponseHeader_ShouldBe(\watoki\curir\delivery\WebResponse::HEADER_CONTENT_TYPE, 'text/plain');
+        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_CONTENT_TYPE, 'text/plain');
     }
 
     function testEdgeCaseFileNameStartingWithDot() {
