@@ -1,6 +1,8 @@
 <?php
 namespace watoki\curir;
 
+use watoki\curir\delivery\WebRequest;
+use watoki\curir\delivery\WebResponse;
 use watoki\factory\Factory;
 
 interface Responder {

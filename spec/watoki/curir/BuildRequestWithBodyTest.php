@@ -2,8 +2,8 @@
 namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
-use watoki\curir\decoder\FormDecoder;
-use watoki\curir\decoder\JsonDecoder;
+use watoki\curir\protocol\decoder\FormDecoder;
+use watoki\curir\protocol\decoder\JsonDecoder;
 use watoki\scrut\Specification;
 
 /**

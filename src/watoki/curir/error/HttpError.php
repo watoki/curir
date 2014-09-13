@@ -1,7 +1,7 @@
 <?php
 namespace watoki\curir\error;
 
-use watoki\curir\WebResponse;
+use watoki\curir\delivery\WebResponse;
 
 class HttpError extends \Exception {
 

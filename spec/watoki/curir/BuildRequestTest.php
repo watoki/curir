@@ -2,7 +2,6 @@
 namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
-use watoki\curir\WebResponse;
 use watoki\scrut\Specification;
 
 /**
@@ -40,7 +39,7 @@ class BuildRequestTest extends Specification {
         $this->request->givenNoTargetPathIsGiven();
 
         $this->request->whenITryToBuildTheRequest();
-        $this->request->thenAnErrorWithStatus_AndUserMessage_ShouldBeThrown(WebResponse::STATUS_BAD_REQUEST, "No target given.");
+        $this->request->thenAnErrorWithStatus_AndUserMessage_ShouldBeThrown(\watoki\curir\delivery\WebResponse::STATUS_BAD_REQUEST, "No target given.");
         $this->request->try->thenTheException_ShouldBeThrown('Request parameter $_REQUEST["-"] not set');
     }
 

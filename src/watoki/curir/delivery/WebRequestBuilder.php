@@ -1,9 +1,12 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\delivery;
 
 use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\curir\error\HttpError;
+use watoki\curir\protocol\MimeTypes;
+use watoki\curir\protocol\ParameterDecoder;
+use watoki\curir\protocol\Url;
 use watoki\deli\Path;
 use watoki\deli\RequestBuilder;
 
@@ -55,6 +58,14 @@ class WebRequestBuilder implements RequestBuilder {
         $this->requestData = $requestData;
         $this->bodyReader = $bodyReader;
         $this->context = $context;
+    }
+
+    /**
+     * @param string $contentType
+     * @param ParameterDecoder $decoder
+     */
+    public function registerDecoder($contentType, ParameterDecoder $decoder) {
+        $this->decoders[$contentType] = $decoder;
     }
 
     /**
@@ -152,9 +163,5 @@ class WebRequestBuilder implements RequestBuilder {
             $args->set($key, $value);
         }
         return $args;
-    }
-
-    public function registerDecoder($contentType, ParameterDecoder $decoder) {
-        $this->decoders[$contentType] = $decoder;
     }
 }

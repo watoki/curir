@@ -1,10 +1,13 @@
 <?php
-namespace watoki\curir\decoder;
+namespace watoki\curir\protocol\decoder;
 
 use watoki\collections\Map;
-use watoki\curir\ParameterDecoder;
+use watoki\curir\protocol\ParameterDecoder;
 
 class FormDecoder implements ParameterDecoder {
+
+    const CONTENT_TYPE = 'multipart/form-data';
+    const CONTENT_TYPE_X = 'application/x-www-form-urlencoded';
 
     /**
      * @param string $body

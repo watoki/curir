@@ -3,9 +3,9 @@ namespace spec\watoki\curir\fixtures;
 
 use spec\watoki\deli\fixtures\TestDelivery;
 use watoki\curir\error\ErrorResponse;
-use watoki\curir\Url;
+use watoki\curir\protocol\Url;
 use watoki\curir\WebDelivery;
-use watoki\curir\WebResponse;
+use watoki\curir\delivery\WebResponse;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\target\CallbackTarget;
 use watoki\deli\target\ObjectTarget;
@@ -74,7 +74,7 @@ class WebDeliveryFixture extends Fixture {
     }
 
     /**
-     * @return WebResponse|null
+     * @return \watoki\curir\delivery\WebResponse|null
      */
     private function webResponse() {
         if ($this->test->response instanceof WebResponse) {

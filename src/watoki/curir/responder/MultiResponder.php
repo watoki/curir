@@ -3,11 +3,11 @@ namespace watoki\curir\responder;
 
 use watoki\collections\Liste;
 use watoki\curir\error\HttpError;
-use watoki\curir\MimeTypes;
+use watoki\curir\protocol\MimeTypes;
 use watoki\curir\Resource;
 use watoki\curir\Responder;
-use watoki\curir\WebRequest;
-use watoki\curir\WebResponse;
+use watoki\curir\delivery\WebRequest;
+use watoki\curir\delivery\WebResponse;
 use watoki\factory\Factory;
 
 class MultiResponder implements Responder {
@@ -37,10 +37,10 @@ class MultiResponder implements Responder {
     }
 
     /**
-     * @param WebRequest $request
+     * @param \watoki\curir\delivery\WebRequest $request
      * @param \watoki\curir\Resource $resource
      * @param Factory $factory
-     * @return WebResponse
+     * @return \watoki\curir\delivery\WebResponse
      */
     public function createResponse(WebRequest $request, Resource $resource, Factory $factory) {
         $formats = $request->getFormats();

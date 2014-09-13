@@ -1,8 +1,8 @@
 <?php
 namespace watoki\curir\error;
 
-use watoki\curir\WebRequest;
-use watoki\curir\WebResponse;
+use watoki\curir\delivery\WebRequest;
+use watoki\curir\delivery\WebResponse;
 
 class ErrorResponse extends WebResponse {
 

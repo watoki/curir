@@ -1,5 +1,5 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\delivery;
 
 use watoki\deli\ResponseDeliverer;
 

@@ -2,10 +2,10 @@
 namespace spec\watoki\curir\fixtures;
 
 use watoki\curir\error\HttpError;
-use watoki\curir\ParameterDecoder;
-use watoki\curir\Url;
-use watoki\curir\WebRequestBuilder;
-use watoki\curir\WebRequest;
+use watoki\curir\protocol\ParameterDecoder;
+use watoki\curir\protocol\Url;
+use watoki\curir\delivery\WebRequestBuilder;
+use watoki\curir\delivery\WebRequest;
 use watoki\deli\Path;
 use watoki\scrut\ExceptionFixture;
 use watoki\scrut\Fixture;
@@ -25,10 +25,10 @@ class WebRequestBuilderFixture extends Fixture {
     /** @var string */
     private $body = '';
 
-    /** @var array|ParameterDecoder[] */
+    /** @var array|\watoki\curir\protocol\ParameterDecoder[] */
     private $decoders = array();
 
-    /** @var Url */
+    /** @var \watoki\curir\protocol\Url */
     public $context;
 
     public function setUp() {

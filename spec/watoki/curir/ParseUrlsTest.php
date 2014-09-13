@@ -1,7 +1,7 @@
 <?php
 namespace spec\watoki\curir;
 
-use watoki\curir\Url;
+use watoki\curir\protocol\Url;
 use watoki\deli\Path;
 use watoki\scrut\Specification;
 
@@ -37,7 +37,7 @@ class ParseUrlsTest extends Specification {
     }
 
     function testTrailingSlash() {
-        $url = Url::fromString('http://example.com/');
+        $url = \watoki\curir\protocol\Url::fromString('http://example.com/');
         $this->assertEquals(new Path(array('')), $url->getPath());
         $this->assertEquals('http://example.com', $url->toString());
     }

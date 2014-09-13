@@ -3,14 +3,14 @@ namespace watoki\curir\responder;
 
 use watoki\curir\Resource;
 use watoki\curir\Responder;
-use watoki\curir\Url;
-use watoki\curir\WebRequest;
-use watoki\curir\WebResponse;
+use watoki\curir\protocol\Url;
+use watoki\curir\delivery\WebRequest;
+use watoki\curir\delivery\WebResponse;
 use watoki\factory\Factory;
 
 class Redirecter implements Responder {
 
-    /** @var Url */
+    /** @var \watoki\curir\protocol\Url */
     private $target;
 
     /** @var string */
@@ -29,7 +29,7 @@ class Redirecter implements Responder {
      * @param WebRequest $request
      * @param \watoki\curir\Resource $resource
      * @param \watoki\factory\Factory $factory
-     * @return WebResponse
+     * @return \watoki\curir\delivery\WebResponse
      */
     public function createResponse(WebRequest $request, Resource $resource, Factory $factory) {
         $response = new WebResponse();

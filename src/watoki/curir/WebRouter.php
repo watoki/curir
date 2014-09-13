@@ -1,7 +1,10 @@
 <?php
 namespace watoki\curir;
 
+use watoki\curir\delivery\WebRequest;
+use watoki\curir\delivery\WebResponse;
 use watoki\curir\error\HttpError;
+use watoki\curir\protocol\MimeTypes;
 use watoki\deli\Request;
 use watoki\deli\router\StaticRouter;
 use watoki\deli\target\CallbackTarget;

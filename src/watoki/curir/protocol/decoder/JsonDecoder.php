@@ -1,10 +1,12 @@
 <?php
-namespace watoki\curir\decoder;
+namespace watoki\curir\protocol\decoder;
 
 use watoki\collections\Map;
-use watoki\curir\ParameterDecoder;
+use watoki\curir\protocol\ParameterDecoder;
 
 class JsonDecoder implements ParameterDecoder {
+
+    const CONTENT_TYPE = 'application/json';
 
     /**
      * @param string $body

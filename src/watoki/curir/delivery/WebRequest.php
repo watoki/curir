@@ -1,8 +1,9 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\delivery;
 
 use watoki\collections\Liste;
 use watoki\collections\Map;
+use watoki\curir\protocol\Url;
 use watoki\deli\Path;
 use watoki\deli\Request;
 

@@ -5,7 +5,7 @@ use spec\watoki\curir\fixtures\ClassesFixture;
 use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use spec\watoki\stores\FileStoreFixture;
-use watoki\curir\WebResponse;
+use watoki\curir\delivery\WebResponse;
 use watoki\scrut\Specification;
 
 /**
@@ -39,7 +39,7 @@ class DeliverFileResourcesTest extends Specification {
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World');
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_CONTENT_TYPE, 'text/plain');
+        $this->delivery->thenTheResponseHeader_ShouldBe(\watoki\curir\delivery\WebResponse::HEADER_CONTENT_TYPE, 'text/plain');
     }
 
     function testEdgeCaseFileNameStartingWithDot() {

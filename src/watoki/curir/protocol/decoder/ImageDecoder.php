@@ -1,10 +1,12 @@
 <?php
-namespace watoki\curir\decoder;
+namespace watoki\curir\protocol\decoder;
 
 use watoki\collections\Map;
-use watoki\curir\ParameterDecoder;
+use watoki\curir\protocol\ParameterDecoder;
 
 class ImageDecoder implements ParameterDecoder {
+
+    const CONTENT_TYPE = 'image/jpeg';
 
     private $targetParameter;
 

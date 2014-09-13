@@ -1,5 +1,5 @@
 <?php
-namespace watoki\curir;
+namespace watoki\curir\protocol;
  
 use watoki\collections\Map;
 use watoki\deli\Path;

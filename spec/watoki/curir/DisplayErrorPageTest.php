@@ -3,9 +3,8 @@ namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
+use watoki\curir\delivery\WebResponse;
 use watoki\curir\error\HttpError;
-use watoki\curir\WebRequest;
-use watoki\curir\WebResponse;
 use watoki\scrut\Specification;
 
 /**
@@ -23,7 +22,7 @@ class DisplayErrorPageTest extends Specification {
 
     function testNoExceptionThrown() {
         $this->request->givenTheQueryArgument_Is('name', 'World');
-        $this->delivery->givenTheTargetRespondsWith(function (WebRequest $r) {
+        $this->delivery->givenTheTargetRespondsWith(function (\watoki\curir\delivery\WebRequest $r) {
             return new WebResponse('Hello ' . $r->getArguments()->get('name'));
         });
 
@@ -36,8 +35,8 @@ class DisplayErrorPageTest extends Specification {
 
         $this->delivery->whenIRunTheDelivery();
 
-        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_SERVER_ERROR);
-        $this->delivery->thenTheResponseBodyShouldContain(WebResponse::STATUS_SERVER_ERROR);
+        $this->delivery->thenTheResponseStatusShouldBe(\watoki\curir\delivery\WebResponse::STATUS_SERVER_ERROR);
+        $this->delivery->thenTheResponseBodyShouldContain(\watoki\curir\delivery\WebResponse::STATUS_SERVER_ERROR);
         $this->delivery->thenTheResponseBodyShouldContain('Exception: Something went wrong');
         $this->delivery->thenTheResponseBodyShouldNotContain('$');
     }
@@ -48,17 +47,17 @@ class DisplayErrorPageTest extends Specification {
 
         $this->delivery->whenIRunTheDelivery();
 
-        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_SERVER_ERROR);
+        $this->delivery->thenTheResponseStatusShouldBe(\watoki\curir\delivery\WebResponse::STATUS_SERVER_ERROR);
         $this->delivery->thenTheResponseBodyShouldBe('RuntimeException: Something went wrong');
     }
 
     function testHttpErrorThrown() {
-        $this->givenTheTargetThrows(new HttpError(WebResponse::STATUS_FORBIDDEN, 'Some bad thing'));
+        $this->givenTheTargetThrows(new HttpError(\watoki\curir\delivery\WebResponse::STATUS_FORBIDDEN, 'Some bad thing'));
 
         $this->delivery->whenIRunTheDelivery();
 
-        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_FORBIDDEN);
-        $this->delivery->thenTheResponseBodyShouldContain(WebResponse::STATUS_FORBIDDEN);
+        $this->delivery->thenTheResponseStatusShouldBe(\watoki\curir\delivery\WebResponse::STATUS_FORBIDDEN);
+        $this->delivery->thenTheResponseBodyShouldContain(\watoki\curir\delivery\WebResponse::STATUS_FORBIDDEN);
         $this->delivery->thenTheResponseBodyShouldContain('Some bad thing');
     }
 

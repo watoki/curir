@@ -5,9 +5,6 @@ use spec\watoki\curir\fixtures\ClassesFixture;
 use watoki\collections\Liste;
 use watoki\curir\error\HttpError;
 use watoki\curir\responder\MultiResponder;
-use watoki\curir\Url;
-use watoki\curir\WebRequest;
-use watoki\curir\WebResponse;
 use watoki\deli\Path;
 use watoki\scrut\ExceptionFixture;
 use watoki\scrut\Specification;
@@ -60,7 +57,7 @@ class MultiResponderTest extends Specification {
 
     private $formats = array();
 
-    /** @var WebResponse */
+    /** @var \watoki\curir\delivery\WebResponse */
     private $response;
 
     /** @var MultiResponder */
@@ -79,7 +76,7 @@ class MultiResponderTest extends Specification {
     }
 
     public function whenICreateTheResponse() {
-        $request = new WebRequest(Url::fromString('curir'), new Path(), null, null, new Liste($this->formats));
+        $request = new \watoki\curir\delivery\WebRequest(\watoki\curir\protocol\Url::fromString('curir'), new Path(), null, null, new Liste($this->formats));
         $this->response = $this->responder->createResponse($request, $this->factory->getInstance('MyResource'), $this->factory);
     }
 
