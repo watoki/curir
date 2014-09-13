@@ -57,7 +57,8 @@ class WebDelivery extends Delivery {
 
     /**
      * @param Request|WebRequest $request
-     * @throws HttpError if the method does not exist in the target
+     * @throws HttpError
+     * @throws \Exception
      * @return mixed
      */
     protected function getResponse(Request $request) {
@@ -66,6 +67,13 @@ class WebDelivery extends Delivery {
         } catch (\BadMethodCallException $e) {
             throw new HttpError(WebResponse::STATUS_METHOD_NOT_ALLOWED,
                 "Method [{$request->getMethod()}] is not allowed here.", $e->getMessage(), 0, $e);
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), 'Cannot inject parameter') !== false) {
+                throw new HttpError(WebResponse::STATUS_BAD_REQUEST,
+                    "A request parameter is invalid or missing.", $e->getMessage(), 0, $e);
+            } else {
+                throw $e;
+            }
         }
     }
 

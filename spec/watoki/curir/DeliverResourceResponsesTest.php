@@ -44,6 +44,19 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseBodyShouldBe('Method [notExisting] is not allowed here.');
     }
 
+    function testMissingArgument() {
+        $this->givenTheTargetResource_In_WithTheBody('MissingArgument', 'folder', '
+            public function doThis($arg) {
+                return "Made it";
+            }
+        ');
+        $this->request->givenTheMethodArgumentIs('this');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('A request parameter is invalid or missing.');
+        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_BAD_REQUEST);
+    }
+
     function testRedirect() {
         $this->givenTheTargetResource_In_WithTheBody('Redirect', 'folder', '
             public function doThis() {
