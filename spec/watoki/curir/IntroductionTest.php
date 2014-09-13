@@ -39,6 +39,8 @@ class IntroductionTest extends Specification {
          */
 
         /**
+         * ## Responding Objects
+         *
          * You can then easily route all requests to a class implementing `Responding`, e.g. like
          * <a href="javascript:" onclick="$('#myResource').toggle();">this</a>
          * <div id="myResource" style="display: none;">
@@ -64,6 +66,8 @@ class IntroductionTest extends Specification {
         $this->thenTheResponseShouldBe('Hello World');
 
         /**
+         * ## DynamicRouter
+         *
          * Or if you think creating a whole file to return "Hello World" is a little over-engineered, you can
          * use a `DynamicRouter` to map incoming URLs to anything.
          */
@@ -98,9 +102,13 @@ class IntroductionTest extends Specification {
         WebDelivery::quickRoute($router);
         $this->thenTheResponseShouldBe('Hello stranger');
 
+        // <hr/>
+
         $this->givenTheTargetIs('hello/Joe');
         WebDelivery::quickRoute($router);
         $this->thenTheResponseShouldBe('Hello Joe');
+
+        // <hr/>
 
         $this->givenTheTargetIs('my/anything');
         WebDelivery::quickRoute($router);
