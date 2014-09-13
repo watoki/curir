@@ -24,6 +24,11 @@ class MultiResponder implements Responder {
         }
     }
 
+    /**
+     * @param string $format
+     * @param string $body
+     * @return $this
+     */
     public function setBody($format, $body) {
         $this->setRenderer($format, function () use ($body) {
             return $body;
@@ -31,7 +36,12 @@ class MultiResponder implements Responder {
         return $this;
     }
 
-    public function setRenderer($format, callable $renderer) {
+    /**
+     * @param string $format
+     * @param callable $renderer
+     * @return $this
+     */
+    public function setRenderer($format, $renderer) {
         $this->renderers[$format] = $renderer;
         return $this;
     }
