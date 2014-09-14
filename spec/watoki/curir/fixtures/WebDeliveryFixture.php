@@ -47,7 +47,7 @@ class WebDeliveryFixture extends Fixture {
         $request = $this->request->whenIBuildTheRequest();
         $this->test = new TestDelivery($request);
         $context = Url::fromString('http://example.com');
-        $delivery = new WebDelivery($this->router, $context, $this->test, $this->test);
+        $delivery = new WebDelivery($this->spec->factory, $this->router, $context, $this->test, $this->test);
         $delivery->run();
     }
 

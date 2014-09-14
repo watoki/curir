@@ -12,6 +12,7 @@ use watoki\curir\protocol\decoder\ImageDecoder;
 use watoki\curir\protocol\decoder\JsonDecoder;
 use watoki\curir\protocol\Url;
 use watoki\deli\Delivery;
+use watoki\deli\filter\DefaultFilterFactory;
 use watoki\deli\Request;
 use watoki\deli\RequestBuilder;
 use watoki\deli\ResponseDeliverer;
@@ -19,16 +20,19 @@ use watoki\deli\Router;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\target\RespondingTarget;
 use watoki\factory\Factory;
+use watoki\factory\FilterFactory;
 
 class WebDelivery extends Delivery {
 
     /**
+     * @param Factory $factory
      * @param Router $router
      * @param Url $context
      * @param RequestBuilder $builder
      * @param ResponseDeliverer $deliverer
      */
-    public function __construct(Router $router, Url $context, RequestBuilder $builder = null, ResponseDeliverer $deliverer = null) {
+    public function __construct(Factory $factory, Router $router, Url $context,
+                                RequestBuilder $builder = null, ResponseDeliverer $deliverer = null) {
         if (!$builder) {
             $bodyReader = function () {
                 return file_get_contents('php://input');
@@ -38,20 +42,25 @@ class WebDelivery extends Delivery {
         }
         $deliverer = $deliverer ? : new WebResponseDeliverer();
         parent::__construct($router, $builder, $deliverer);
+
+        $factory->setSingleton(FilterFactory::$CLASS, new DefaultFilterFactory());
     }
 
     public static function quickStart($rootResourceClass, Factory $factory = null) {
         $factory = $factory ? : new Factory();
-        self::quickRoute(new NoneRouter(RespondingTarget::factory($factory, $factory->getInstance($rootResourceClass))));
+        $router = new NoneRouter(RespondingTarget::factory($factory, $factory->getInstance($rootResourceClass)));
+        self::quickRoute($router, $factory);
     }
 
-    public static function quickRoute(Router $router) {
+    public static function quickRoute(Router $router, Factory $factory = null) {
+        $factory = $factory ? : new Factory();
+
         $scheme = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "");
         $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
         $path = dirname($_SERVER['SCRIPT_NAME']);
         $url = $scheme . "://" . $_SERVER['SERVER_NAME'] . $port . $path;
 
-        $delivery = new WebDelivery($router, Url::fromString($url));
+        $delivery = new WebDelivery($factory, $router, Url::fromString($url));
         $delivery->run();
     }
 

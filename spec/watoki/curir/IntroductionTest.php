@@ -153,8 +153,8 @@ class IntroductionTest_TestDelivery extends \watoki\curir\WebDelivery {
         self::quickRoute(new NoneRouter($targetFactory));
     }
 
-    public static function quickRoute(Router $router) {
-        $delivery = new WebDelivery($router, Url::fromString('http://example.com'), self::$test, self::$test);
+    public static function quickRoute(Router $router, $factory = null) {
+        $delivery = new WebDelivery(self::$factory, $router, Url::fromString('http://example.com'), self::$test, self::$test);
         try {
             $delivery->run();
         } catch (\Exception $e) {
