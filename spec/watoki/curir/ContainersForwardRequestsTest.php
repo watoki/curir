@@ -23,13 +23,14 @@ class ContainersForwardRequestsTest extends Specification {
                 return "Hello World " . $request->getContext();
             }
         ');
+        $this->request->givenTheContextIs('http://example.com/here');
         $this->delivery->givenTheTargetIsTheRespondingClass('name\space\MyResource');
 
         $this->request->givenTheTargetPathIs('some/target');
         $this->request->givenTheMethodArgumentIs('this');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Hello World http://example.org/some/target');
+        $this->delivery->thenTheResponseShouldBe('Hello World http://example.com/here/some/target');
     }
 
     function testRespondsItself() {
