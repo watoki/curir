@@ -9,14 +9,14 @@ use watoki\curir\delivery\WebResponse;
 use watoki\scrut\Specification;
 
 /**
- * If the target of the Request is a file, a Response is created with the correct MIME type.
+ * If the target of the Request is a file, a Response is created with its content and the correct MIME type.
  *
  * @property ClassesFixture class <-
  * @property FileStoreFixture file <-
  * @property WebRequestBuilderFixture request <-
  * @property WebDeliveryFixture delivery <-
  */
-class DeliverFileResourcesTest extends Specification {
+class DeliverStaticFilesTest extends Specification {
 
     protected function background() {
         $this->class->givenTheContainer_In('just\SomeContainer', 'some/folder');

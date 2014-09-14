@@ -9,8 +9,9 @@ use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
 use watoki\factory\Factory;
 use watoki\stores\file\raw\RawFileStore;
+use watoki\tempan\Renderer;
 
-abstract class Presenter implements Responder {
+class Presenter implements Responder {
 
     /** @var mixed */
     private $model;
@@ -24,6 +25,15 @@ abstract class Presenter implements Responder {
      */
     public function getModel() {
         return $this->model;
+    }
+
+    public function renderJson() {
+        return json_encode($this->getModel());
+    }
+
+    public function renderHtml($template) {
+        $renderer = new Renderer($template);
+        return $renderer->render($this->getModel());
     }
 
     /**

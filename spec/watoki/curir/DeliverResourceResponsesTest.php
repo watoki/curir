@@ -135,6 +135,38 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseBodyShouldBe('Exception: Could not find template [noTemplate.foo] for [NoTemplateResource]');
     }
 
+    /**
+     * By default, the [tempan] Renderer is used for HTML responses
+     *
+     * [tempan]: http://github.com/watoki/temap
+     */
+    function testDefaultHtmlRenderer() {
+        $this->file->givenAFile_WithContent('folder/defaultHtml.html', '<h1 property="message">Hello</h1>');
+        $this->givenTheTargetResource_In_WithTheBody('DefaultHtmlResource', 'folder', '
+            public function doThis() {
+                return new \watoki\curir\responder\Presenter(array("message" => "Hello World"));
+            }
+        ');
+        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheTargetPathIs('something.html');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('<h1 property="message">Hello World</h1>');
+    }
+
+    function testDefaultJsonRenderer() {
+        $this->givenTheTargetResource_In_WithTheBody('DefaultJsonRenderer', 'folder', '
+            public function doThis() {
+                return new \watoki\curir\responder\Presenter(array("foo" => array(42, 73)));
+            }
+        ');
+        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheTargetPathIs('something.json');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('{"foo":[42,73]}');
+    }
+
     private function givenTheTargetResource_In_WithTheBody($fullName, $folder, $body) {
         $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, "
             public function getDirectory() {

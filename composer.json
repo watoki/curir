@@ -17,7 +17,8 @@
         "watoki/collections": "*",
 		"watoki/factory": "*",
 		"watoki/stores": "*",
-		"watoki/deli": "*"
+		"watoki/deli": "*",
+        "watoki/tempan": "*"
     },
     "require-dev": {
         "watoki/scrut": "*"
