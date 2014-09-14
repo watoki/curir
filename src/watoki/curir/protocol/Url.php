@@ -166,9 +166,10 @@ class Url extends Path {
     }
 
     private static function consolidate($path) {
-        $re = array('#(/\./)#', '#/(?!\.\.)[^/]+/\.\./#');
+        $re = array('#(/\./)#', '#/(?!\.\.)[^/]+/\.\.#');
+        $in = array('/', '');
         for ($n = 1; $n > 0;) {
-            $path = preg_replace($re, '/', $path, -1, $n);
+            $path = preg_replace($re, $in, $path, -1, $n);
         }
         return $path;
     }

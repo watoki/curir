@@ -62,7 +62,7 @@ class ParseUrlsTest extends Specification {
     }
 
     function testConsolidatePath() {
-        $url = Url::fromString('http://example.com/some/./../foo/./a/b/../../path');
+        $url = Url::fromString('http://example.com/some/./../foo/./a/b/../../path/bar/..');
         $this->assertEquals('http://example.com/foo/path', $url->toString());
     }
 
