@@ -16,8 +16,13 @@ class Redirecter implements Responder {
     /** @var string */
     private $status;
 
-    public static function fromString($string, $status = WebResponse::STATUS_SEE_OTHER) {
-        return new Redirecter(Url::fromString($string), $status);
+    /**
+     * @param string $target Can be a absolute URL or relative to the Resource
+     * @param string $status
+     * @return Redirecter
+     */
+    public static function fromString($target, $status = WebResponse::STATUS_SEE_OTHER) {
+        return new Redirecter(Url::fromString($target), $status);
     }
 
     function __construct(Url $target, $status) {
@@ -34,8 +39,28 @@ class Redirecter implements Responder {
     public function createResponse(WebRequest $request, Resource $resource, Factory $factory) {
         $response = new WebResponse();
         $response->setStatus($this->status);
-        $response->getHeaders()->set(WebResponse::HEADER_LOCATION, $this->target->toString());
+        $response->getHeaders()->set(WebResponse::HEADER_LOCATION, $this->getAbsoluteTarget($request)->toString());
         return $response;
+    }
+
+    /**
+     * @param WebRequest $request
+     * @return Url
+     */
+    private function getAbsoluteTarget(WebRequest $request) {
+        $target = $this->getTarget();
+        if ($target->isAbsolute()) {
+            return $target;
+        }
+        return Url::fromString($this->consolidate($request->getContext() . '/' . $target));
+    }
+
+    private function consolidate($path) {
+        $path = str_replace('/./', '/', $path);
+        while (strpos($path, '../') !== false) {
+            $path = preg_replace('#/(?!\.\.)[^/]+/\.\./#', '/', $path);
+        }
+        return $path;
     }
 
     /**

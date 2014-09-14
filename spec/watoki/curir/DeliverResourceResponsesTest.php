@@ -57,8 +57,8 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_BAD_REQUEST);
     }
 
-    function testRedirect() {
-        $this->givenTheTargetResource_In_WithTheBody('Redirect', 'folder', '
+    function testRedirectToAbsoluteUrl() {
+        $this->givenTheTargetResource_In_WithTheBody('RedirectAbsolute', 'folder', '
             public function doThis() {
                 return \watoki\curir\responder\Redirecter::fromString("http://example.com");
             }
@@ -69,6 +69,20 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseBodyShouldBe('');
         $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_SEE_OTHER);
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://example.com');
+    }
+
+    function testRedirectToRelativeUrl() {
+        $this->givenTheTargetResource_In_WithTheBody('RedirectRelative', 'folder', '
+            public function doThis() {
+                return \watoki\curir\responder\Redirecter::fromString("./../relative/./a/b/../../path?with=query#andFragmet");
+            }
+        ');
+        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheContextIs('http://some.host/some/path');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION,
+            'http://some.host/some/relative/path?with=query#andFragmet');
     }
 
     function testRespondInAcceptedFormat() {
