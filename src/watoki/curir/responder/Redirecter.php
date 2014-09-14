@@ -25,7 +25,7 @@ class Redirecter implements Responder {
         return new Redirecter(Url::fromString($target), $status);
     }
 
-    function __construct(Url $target, $status) {
+    function __construct(Url $target, $status = WebResponse::STATUS_SEE_OTHER) {
         $this->target = $target;
         $this->status = $status;
     }
