@@ -11,8 +11,8 @@ use watoki\deli\target\CallbackTarget;
 use watoki\deli\Target;
 use watoki\deli\target\ObjectTarget;
 use watoki\factory\Factory;
-use watoki\stores\file\FileStore;
 use watoki\stores\file\raw\File;
+use watoki\stores\file\raw\RawFileStore;
 
 class WebRouter extends StaticRouter {
 
@@ -34,7 +34,7 @@ class WebRouter extends StaticRouter {
             $reflection = new \ReflectionClass($rootClass);
             $rootDirectory = dirname($reflection->getFileName());
         }
-        $store = $factory->getInstance(FileStore::$CLASS, array('rootDirectory' => $rootDirectory));
+        $store = $factory->getInstance(RawFileStore::$CLASS, array('rootDirectory' => $rootDirectory));
         $namespace = implode('\\', array_slice(explode('\\', $rootClass), 0, -1));
 
         parent::__construct($factory, $store, $namespace, self::SUFFIX);
