@@ -21,26 +21,25 @@ class WebRouter extends StaticRouter {
     /** @var Factory */
     private $factory;
 
-    /** @var string */
-    private $rootClass;
+    /** @var Resource */
+    private $root;
 
     /**
      * @param Factory $factory
-     * @param string $rootClass
-     * @param string|null $rootDirectory
+     * @param $root
      */
-    function __construct(Factory $factory, $rootClass, $rootDirectory = null) {
-        if (!$rootDirectory) {
-            $reflection = new \ReflectionClass($rootClass);
-            $rootDirectory = dirname($reflection->getFileName());
-        }
-        $store = $factory->getInstance(RawFileStore::$CLASS, array('rootDirectory' => $rootDirectory));
-        $namespace = implode('\\', array_slice(explode('\\', $rootClass), 0, -1));
+    function __construct(Factory $factory, Resource $root) {
+        $rootName = lcfirst($root->getName());
+
+        $directory = $root->getDirectory() . '/' . $rootName;
+        $store = $factory->getInstance(RawFileStore::$CLASS, array('rootDirectory' => $directory));
+        $class = new \ReflectionClass($root);
+        $namespace = $class->getNamespaceName() . '\\' . $rootName;
 
         parent::__construct($factory, $store, $namespace, self::SUFFIX);
 
         $this->factory = $factory;
-        $this->rootClass = $rootClass;
+        $this->root = $root;
 
         $this->setFileTargetCreator(function (WebRequest $request, File $file) {
             return CallbackTarget::factory(function (WebRequest $request) use ($file) {
@@ -59,8 +58,7 @@ class WebRouter extends StaticRouter {
 
     public function route(Request $request) {
         if ($request->getTarget()->isEmpty()) {
-            $object = $this->factory->getInstance($this->rootClass);
-            return new ObjectTarget($request, $object, $this->factory);
+            return new ObjectTarget($request, $this->root, $this->factory);
         }
         try {
             return parent::route($request);

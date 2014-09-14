@@ -15,7 +15,7 @@ class Container extends Resource implements Responding {
 
     function __construct(Factory $factory) {
         parent::__construct($factory);
-        $this->router = new WebRouter($factory, get_class($this), $this->getDirectory());
+        $this->router = new WebRouter($factory, $this);
     }
 
     /**

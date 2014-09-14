@@ -17,13 +17,13 @@ use watoki\scrut\Specification;
 class ContainersForwardRequestsTest extends Specification {
 
     function testChildResponds() {
-        $this->class->givenTheContainer_In('name\space\MyContainer', 'some/folder');
-        $this->class->givenTheClass_In_WithTheBody('name\space\some\TargetResource', 'some/folder/some', '
+        $this->class->givenTheContainer_In('name\space\MyResource', 'some/folder');
+        $this->class->givenTheClass_In_WithTheBody('name\space\my\some\TargetResource', 'some/folder/my/some', '
             public function doThis() {
                 return "Hello World";
             }
         ');
-        $this->delivery->givenTheTargetIsTheRespondingClass('name\space\MyContainer');
+        $this->delivery->givenTheTargetIsTheRespondingClass('name\space\MyResource');
 
         $this->request->givenTheTargetPathIs('some/target');
         $this->request->givenTheMethodArgumentIs('this');

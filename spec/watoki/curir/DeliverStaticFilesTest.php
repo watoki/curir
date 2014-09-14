@@ -19,13 +19,13 @@ use watoki\scrut\Specification;
 class DeliverStaticFilesTest extends Specification {
 
     protected function background() {
-        $this->class->givenTheContainer_In('just\SomeContainer', 'some/folder');
-        $this->delivery->givenTheTargetIsTheRespondingClass('just\SomeContainer');
+        $this->class->givenTheContainer_In('just\SomeResource', 'some/folder');
+        $this->delivery->givenTheTargetIsTheRespondingClass('just\SomeResource');
     }
 
     function testRespondWithFileContentAndMimeType() {
-        $this->file->givenAFile_WithContent('some/folder/some/file', 'Hello World');
-        $this->request->givenTheTargetPathIs('some/file');
+        $this->file->givenAFile_WithContent('some/folder/some/static/file', 'Hello World');
+        $this->request->givenTheTargetPathIs('static/file');
         $this->request->givenTheHeader_Is('HTTP_ACCEPT', 'text/plain');
 
         $this->delivery->whenIRunTheDelivery();
@@ -34,8 +34,8 @@ class DeliverStaticFilesTest extends Specification {
     }
 
     function testFileWithExtension() {
-        $this->file->givenAFile_WithContent('some/folder/some/file.txt', 'Hello World');
-        $this->request->givenTheTargetPathIs('some/file.txt');
+        $this->file->givenAFile_WithContent('some/folder/some/static/file.txt', 'Hello World');
+        $this->request->givenTheTargetPathIs('static/file.txt');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World');
@@ -43,8 +43,8 @@ class DeliverStaticFilesTest extends Specification {
     }
 
     function testEdgeCaseFileNameStartingWithDot() {
-        $this->file->givenAFile_WithContent('some/folder/some/.file', 'Hello World');
-        $this->request->givenTheTargetPathIs('some/.file');
+        $this->file->givenAFile_WithContent('some/folder/some/static/.file', 'Hello World');
+        $this->request->givenTheTargetPathIs('static/.file');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World');
@@ -52,8 +52,8 @@ class DeliverStaticFilesTest extends Specification {
     }
 
     function testEdgeCaseFileNameWithTwoDots() {
-        $this->file->givenAFile_WithContent('some/folder/some/file.foo.bar', 'Hello World');
-        $this->request->givenTheTargetPathIs('some/file.foo.bar');
+        $this->file->givenAFile_WithContent('some/folder/some/static/file.foo.bar', 'Hello World');
+        $this->request->givenTheTargetPathIs('static/file.foo.bar');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World');
