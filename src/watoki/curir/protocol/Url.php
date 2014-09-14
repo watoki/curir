@@ -111,6 +111,10 @@ class Url extends Path {
     }
 
     static public function fromString($string) {
+        if (!$string) {
+            return new Url(null, null, null, new Path());
+        }
+
         $fragment = null;
         $fragmentPos = strpos($string, self::FRAGMENT_SEPARATOR);
         if ($fragmentPos !== false) {

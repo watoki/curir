@@ -69,6 +69,13 @@ class ParseUrlsTest extends Specification {
         $this->assertEquals(null, $url->getHost());
     }
 
+    function testParseEmptyString() {
+        $url = Url::fromString('');
+
+        $this->assertFalse($url->isAbsolute());
+        $this->assertEquals(array(), $url->getPath()->toArray());
+    }
+
     function testHostAndRelativePath() {
         $url = new Url('http', 'example.com', 80, Path::fromString('my/relative/path'));
         $this->assertEquals('my/relative/path', $url->toString());

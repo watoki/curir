@@ -85,6 +85,19 @@ class DeliverResourceResponsesTest extends Specification {
             'http://some.host/some/relative/path?with=query#andFragmet');
     }
 
+    function testRedirectToSameUrl() {
+        $this->givenTheTargetResource_In_WithTheBody('RedirectSame', 'folder', '
+            public function doThis() {
+                return \watoki\curir\responder\Redirecter::fromString("");
+            }
+        ');
+        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheContextIs('http://some.host/some/path');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path');
+    }
+
     function testRespondInAcceptedFormat() {
         $this->givenTheTargetResource_In_WithTheBody('RespondInAcceptedFormat', 'folder', '
             public function doThis() {
