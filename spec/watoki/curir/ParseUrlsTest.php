@@ -61,6 +61,11 @@ class ParseUrlsTest extends Specification {
         $this->assertEquals(array('my', 'relative', 'path'), $url->getPath()->toArray());
     }
 
+    function testConsolidatePath() {
+        $url = Url::fromString('http://example.com/some/./../foo/./a/b/../../path');
+        $this->assertEquals('http://example.com/foo/path', $url->toString());
+    }
+
     function testWithoutScheme() {
         $url = $this->parseAndCheck('example.com/my/path');
 

@@ -52,15 +52,7 @@ class Redirecter implements Responder {
         if ($target->isAbsolute()) {
             return $target;
         }
-        return Url::fromString($this->consolidate($request->getContext() . '/' . $target));
-    }
-
-    private function consolidate($path) {
-        $path = str_replace('/./', '/', $path);
-        while (strpos($path, '../') !== false) {
-            $path = preg_replace('#/(?!\.\.)[^/]+/\.\./#', '/', $path);
-        }
-        return $path;
+        return Url::fromString($request->getContext() . '/' . $target);
     }
 
     /**

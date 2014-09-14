@@ -1,6 +1,6 @@
 <?php
 namespace watoki\curir\protocol;
- 
+
 use watoki\collections\Map;
 use watoki\deli\Path;
 
@@ -46,7 +46,7 @@ class Url extends Path {
         $this->scheme = $scheme;
         $this->host = $host;
         $this->port = $port;
-        $this->parameters = $parameters ?: new Map();
+        $this->parameters = $parameters ? : new Map();
         $this->fragment = $fragment;
     }
 
@@ -115,6 +115,8 @@ class Url extends Path {
             return new Url(null, null, null, new Path());
         }
 
+        $string = self::consolidate($string);
+
         $fragment = null;
         $fragmentPos = strpos($string, self::FRAGMENT_SEPARATOR);
         if ($fragmentPos !== false) {
@@ -144,7 +146,7 @@ class Url extends Path {
         $port = null;
         if (substr($string, 0, 2) == self::HOST_PREFIX) {
             $string = substr($string, 2);
-            $hostPos = strpos($string, self::SEPARATOR) ?: strlen($string);
+            $hostPos = strpos($string, self::SEPARATOR) ? : strlen($string);
             $host = substr($string, 0, $hostPos);
             $string = substr($string, $hostPos);
 
@@ -161,6 +163,14 @@ class Url extends Path {
         }
 
         return new Url($scheme, $host, $port, $path, $parameters, $fragment);
+    }
+
+    private static function consolidate($path) {
+        $re = array('#(/\./)#', '#/(?!\.\.)[^/]+/\.\./#');
+        for ($n = 1; $n > 0;) {
+            $path = preg_replace($re, '/', $path, -1, $n);
+        }
+        return $path;
     }
 
     /**
@@ -207,11 +217,10 @@ class Url extends Path {
         $port = $this->port ? self::PORT_SEPARATOR . $this->port : '';
         $scheme = $this->scheme ? $this->scheme . self::SCHEME_SEPARATOR : '';
 
-        $isAbsolutePath = $this->isEmpty() || $this->first() == '';
-        return ($this->host && $isAbsolutePath ? $scheme . self::HOST_PREFIX . $this->host . $port : '')
-                . parent::toString()
-                . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
-                . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
+        return ($this->host && $this->isAbsolute() ? $scheme . self::HOST_PREFIX . $this->host . $port : '')
+        . parent::toString()
+        . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
+        . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
     }
 
     public function getPath() {
@@ -219,14 +228,25 @@ class Url extends Path {
     }
 
     public function setPath(Path $path) {
-        return $this->elements = $path->elements;
+        $elements = $path->elements;
+        if ($this->isAbsolute()) {
+            array_unshift($elements, '');
+        }
+        $this->elements = $elements;
     }
+
+//    /**
+//     * @return bool
+//     */
+//    public function isAbsolute() {
+//        return $this->isEmpty() || parent::isAbsolute();
+//    }
 
     private function flattenParams(Map $parameters, $i = 0) {
         $flat = new Map();
         foreach ($parameters as $key => $value) {
             if ($value instanceof Map) {
-                foreach ($this->flattenParams($value, $i+1) as $subKey => $subValue) {
+                foreach ($this->flattenParams($value, $i + 1) as $subKey => $subValue) {
                     $flatKey = $i ? "{$key}][{$subKey}" : "{$key}[{$subKey}]";
                     $flat->set($flatKey, $subValue);
                 }

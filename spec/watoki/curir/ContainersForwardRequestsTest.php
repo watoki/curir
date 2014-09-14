@@ -19,11 +19,8 @@ class ContainersForwardRequestsTest extends Specification {
     function testChildResponds() {
         $this->class->givenTheContainer_In('name\space\MyResource', 'some/folder');
         $this->class->givenTheClass_In_WithTheBody('name\space\my\some\TargetResource', 'some/folder/my/some', '
-            public function before(\watoki\curir\delivery\WebRequest $request) {
-                return $request;
-            }
-            public function doThis() {
-                return "Hello World";
+            public function doThis(\watoki\curir\delivery\WebRequest $request) {
+                return "Hello World " . $request->getContext();
             }
         ');
         $this->delivery->givenTheTargetIsTheRespondingClass('name\space\MyResource');
@@ -32,7 +29,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->request->givenTheMethodArgumentIs('this');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Hello World');
+        $this->delivery->thenTheResponseShouldBe('Hello World http://example.org/some/target');
     }
 
     function testRespondsItself() {

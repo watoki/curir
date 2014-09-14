@@ -61,8 +61,9 @@ class WebRequest extends Request {
      */
     public function setContext(Path $context) {
         if (!($context instanceof Url)) {
-            $context = $this->getContext()->copy();
-            $context->setPath($context);
+            $newContext = $this->getContext()->copy();
+            $newContext->setPath($context);
+            $context = $newContext;
         }
         parent::setContext($context);
     }

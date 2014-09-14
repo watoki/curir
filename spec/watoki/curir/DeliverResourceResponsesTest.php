@@ -74,7 +74,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testRedirectToRelativeUrl() {
         $this->givenTheTargetResource_In_WithTheBody('RedirectRelative', 'folder', '
             public function doThis() {
-                return \watoki\curir\responder\Redirecter::fromString("./../relative/./a/b/../../path?with=query#andFragmet");
+                return \watoki\curir\responder\Redirecter::fromString("../relative/path?with=query#andFragmet");
             }
         ');
         $this->request->givenTheMethodArgumentIs('this');
