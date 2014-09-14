@@ -35,7 +35,7 @@ class ContainersForwardRequestsTest extends Specification {
     function testRespondsItself() {
         $this->class->givenTheContainer_In_WithTheBody('itself\MyContainer', 'some/folder', '
             public function doThat() {
-                return "Hello myself";
+                return new \watoki\curir\responder\MultiResponder("Hello myself");
             }
         ');
         $this->delivery->givenTheTargetIsTheRespondingClass('itself\MyContainer');
@@ -44,7 +44,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->request->givenTheMethodArgumentIs('that');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Hello myself');
+        $this->delivery->thenTheResponseBodyShouldBe('Hello myself');
     }
 
     function testNotExistingChild() {

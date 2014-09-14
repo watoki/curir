@@ -8,7 +8,7 @@ use watoki\factory\Factory;
 class Resource {
 
     /** @var Factory */
-    private $factory;
+    protected $factory;
 
     function __construct(Factory $factory) {
         $this->factory = $factory;
@@ -28,6 +28,15 @@ class Resource {
      * @return WebResponse|null
      */
     public function after(Responder $responder, WebRequest $request) {
+        return $this->createResponse($responder, $request);
+    }
+
+    /**
+     * @param Responder $responder
+     * @param WebRequest $request
+     * @return WebResponse
+     */
+    protected function createResponse(Responder $responder, WebRequest $request) {
         return $responder->createResponse($request, $this, $this->factory);
     }
 

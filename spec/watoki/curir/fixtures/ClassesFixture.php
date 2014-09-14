@@ -15,7 +15,7 @@ class ClassesFixture extends Fixture {
 
     public function givenTheContainer_In_WithTheBody($fullClassName, $folder, $body) {
         $this->givenTheClass_Extending_In_WithTheBody($fullClassName, '\watoki\curir\Container', $folder, "
-            protected function getDirectory() {
+            public function getDirectory() {
                 return '$folder';
             }
             $body
