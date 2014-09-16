@@ -17,7 +17,7 @@ use watoki\scrut\Specification;
  */
 class DisplayErrorPageTest extends Specification {
 
-    protected function background() {
+    public function background() {
         $this->request->givenTheTargetPathIs('some.html');
     }
 

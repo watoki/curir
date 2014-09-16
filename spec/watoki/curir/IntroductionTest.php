@@ -115,7 +115,7 @@ class IntroductionTest extends Specification {
         $this->thenTheResponseShouldBe('Hello World');
     }
 
-    protected function background() {
+    public function background() {
         // We need to disable actual delivery so we don't get a bunch of output while executing this Specification
         $this->disableActualDelivery();
     }

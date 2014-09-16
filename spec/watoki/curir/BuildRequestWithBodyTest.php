@@ -14,7 +14,7 @@ use watoki\scrut\Specification;
  */
 class BuildRequestWithBodyTest extends Specification {
 
-    protected function background() {
+    public function background() {
         $this->request->givenTheMethodArgumentIs('put');
     }
 

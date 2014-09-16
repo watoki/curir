@@ -18,7 +18,7 @@ use watoki\scrut\Specification;
  */
 class DeliverStaticFilesTest extends Specification {
 
-    protected function background() {
+    public function background() {
         $this->class->givenTheContainer_In('just\SomeResource', 'some/folder');
         $this->delivery->givenTheTargetIsTheRespondingClass('just\SomeResource');
     }

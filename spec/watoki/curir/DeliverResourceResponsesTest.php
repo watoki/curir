@@ -18,7 +18,7 @@ use watoki\scrut\Specification;
  */
 class DeliverResourceResponsesTest extends Specification {
 
-    protected function background() {
+    public function background() {
         $this->class->givenTheClass_Extending_In_WithTheBody('SomePresenter', '\watoki\curir\responder\Presenter', 'folder', '
             public function renderBig() {
                 return strtoupper($this->getModel());
