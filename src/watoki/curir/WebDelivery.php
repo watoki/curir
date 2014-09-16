@@ -12,7 +12,7 @@ use watoki\curir\protocol\decoder\ImageDecoder;
 use watoki\curir\protocol\decoder\JsonDecoder;
 use watoki\curir\protocol\Url;
 use watoki\deli\Delivery;
-use watoki\deli\filter\DefaultFilterFactory;
+use watoki\deli\filter\DefaultFilterRegistry;
 use watoki\deli\Request;
 use watoki\deli\RequestBuilder;
 use watoki\deli\ResponseDeliverer;
@@ -20,7 +20,7 @@ use watoki\deli\Router;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\target\RespondingTarget;
 use watoki\factory\Factory;
-use watoki\factory\FilterFactory;
+use watoki\deli\filter\FilterRegistry;
 
 class WebDelivery extends Delivery {
 
@@ -43,7 +43,7 @@ class WebDelivery extends Delivery {
         $deliverer = $deliverer ? : new WebResponseDeliverer();
         parent::__construct($router, $builder, $deliverer);
 
-        $factory->setSingleton(FilterFactory::$CLASS, new DefaultFilterFactory());
+        $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
     }
 
     public static function quickStart($rootResourceClass, Factory $factory = null) {
@@ -77,7 +77,7 @@ class WebDelivery extends Delivery {
             throw new HttpError(WebResponse::STATUS_METHOD_NOT_ALLOWED,
                 "Method [{$request->getMethod()}] is not allowed here.", $e->getMessage(), 0, $e);
         } catch (\Exception $e) {
-            if (strpos($e->getMessage(), 'Cannot inject parameter') !== false) {
+            if (strpos($e->getMessage(), 'Cannot fill parameter') !== false) {
                 throw new HttpError(WebResponse::STATUS_BAD_REQUEST,
                     "A request parameter is invalid or missing.", $e->getMessage(), 0, $e);
             } else {
