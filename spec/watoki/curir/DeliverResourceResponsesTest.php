@@ -36,7 +36,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testMethodNotExisting() {
-        $this->givenTheTargetResource_In_WithTheBody('some\EmptyClass', 'some/folder', '');
+        $this->givenTheTargetClass_In_WithTheBody('some\EmptyClass', 'some/folder', '');
         $this->request->givenTheMethodArgumentIs('notExisting');
 
         $this->delivery->whenIRunTheDelivery();
@@ -45,7 +45,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testMissingArgument() {
-        $this->givenTheTargetResource_In_WithTheBody('MissingArgument', 'folder', '
+        $this->givenTheTargetClass_In_WithTheBody('MissingArgument', 'folder', '
             public function doThis($arg) {
                 return "Made it";
             }
@@ -194,11 +194,42 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseBodyShouldBe('{"foo":[42,73]}');
     }
 
+    function testConvenienceWrappingStringIntoWebResponse() {
+        $this->givenTheTargetResource_In_WithTheBody('WrappingStringIntoWebResponse', 'folder', '
+            public function doReturnString() {
+                return "Hello World";
+            }
+        ');
+        $this->request->givenTheMethodArgumentIs('returnString');
+        $this->request->givenTheTargetPathIs('something.json');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('Hello World');
+    }
+
+    function testConvenienceWrappingModelIntoResponder() {
+        $this->givenTheTargetResource_In_WithTheBody('WrappingModelIntoResponde', 'folder', '
+            public function doReturnModel() {
+                return array("foo" => array(42, 73));
+            }
+        ');
+        $this->request->givenTheMethodArgumentIs('returnModel');
+        $this->request->givenTheTargetPathIs('something.json');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('{"foo":[42,73]}');
+    }
+
     private function givenTheTargetResource_In_WithTheBody($fullName, $folder, $body) {
         $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, "
             public function getDirectory() {
                 return '$folder';
             }" . $body);
+        $this->delivery->givenTheTargetIsTheClass($fullName);
+    }
+
+    private function givenTheTargetClass_In_WithTheBody($fullName, $folder, $body) {
+        $this->class->givenTheClass_In_WithTheBody($fullName, $folder, $body);
         $this->delivery->givenTheTargetIsTheClass($fullName);
     }
 
