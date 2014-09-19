@@ -41,12 +41,12 @@ class WebRouter extends StaticRouter {
         $this->factory = $factory;
         $this->root = $root;
 
-        $this->setFileTargetCreator(function (WebRequest $request, File $file) {
-            return CallbackTarget::factory(function (WebRequest $request) use ($file) {
+        $this->setFileTargetCreator(function (WebRequest $request, File $file, $fileKey) {
+            return CallbackTarget::factory(function (WebRequest $request) use ($file, $fileKey) {
                 $response = new WebResponse($file->content);
 
-                if (strpos($file->id, '.') !== false) {
-                    $parts = explode('.', $file->id);
+                if (strpos($fileKey, '.') !== false) {
+                    $parts = explode('.', $fileKey);
                     $response->getHeaders()->set(WebResponse::HEADER_CONTENT_TYPE, MimeTypes::getType(end($parts)));
                 } else if (!$request->getFormats()->isEmpty()) {
                     $response->getHeaders()->set(WebResponse::HEADER_CONTENT_TYPE, MimeTypes::getType($request->getFormats()->first()));
