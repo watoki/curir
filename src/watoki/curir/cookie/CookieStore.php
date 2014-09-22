@@ -14,6 +14,10 @@ class CookieStore extends Store {
     /** @var array|array[] setcookie arguments without key indexed by key */
     private $sink = array();
 
+    /**
+     * @param SerializerRepository $serializers <-
+     * @param array $source
+     */
     public function __construct(SerializerRepository $serializers, array $source) {
         parent::__construct(Cookie::$CLASS, $serializers);
         $this->source = $source;

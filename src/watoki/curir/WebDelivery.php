@@ -72,18 +72,14 @@ class WebDelivery extends Delivery {
         } catch (\BadMethodCallException $e) {
             throw new HttpError(WebResponse::STATUS_METHOD_NOT_ALLOWED,
                 "Method [{$request->getMethod()}] is not allowed here.", $e->getMessage(), 0, $e);
-        } catch (\Exception $e) {
-            if (strpos($e->getMessage(), 'Cannot fill parameter') !== false) {
-                throw new HttpError(WebResponse::STATUS_BAD_REQUEST,
-                    "A request parameter is invalid or missing.", $e->getMessage(), 0, $e);
-            } else {
-                throw $e;
-            }
+        } catch (\InvalidArgumentException $e) {
+            throw new HttpError(WebResponse::STATUS_BAD_REQUEST,
+                "A request parameter is invalid or missing.", $e->getMessage(), 0, $e);
         }
     }
 
     /**
-     * @param Request|WebRequest $request
+     * @param \watoki\deli\Request|WebRequest $request
      * @param \Exception $exception
      * @return WebResponse
      */

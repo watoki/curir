@@ -11,6 +11,9 @@ class Resource {
     /** @var Factory */
     protected $factory;
 
+    /**
+     * @param Factory $factory <-
+     */
     function __construct(Factory $factory) {
         $this->factory = $factory;
     }

@@ -7,6 +7,7 @@ use watoki\curir\error\HttpError;
 use watoki\curir\protocol\MimeTypes;
 use watoki\deli\Request;
 use watoki\deli\router\StaticRouter;
+use watoki\deli\router\TargetNotFoundException;
 use watoki\deli\target\CallbackTarget;
 use watoki\deli\Target;
 use watoki\deli\target\ObjectTarget;
@@ -62,7 +63,7 @@ class WebRouter extends StaticRouter {
         }
         try {
             return parent::route($request);
-        } catch (\Exception $e) {
+        } catch (TargetNotFoundException $e) {
             throw new HttpError(WebResponse::STATUS_NOT_FOUND,
                 "The resource [{$request->getTarget()}] does not exist in [{$request->getContext()}]",
                 null, 0, $e);
