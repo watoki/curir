@@ -84,6 +84,10 @@ class MultiResponder implements Responder {
                     "[" . $formats->join(', ') . "] not supported by " .
                     "[" . implode(', ', array_keys($this->renderers)) . "]");
         }
-        return new WebResponse(call_user_func($this->renderers['']));
+        $response = new WebResponse(call_user_func($this->renderers['']));
+        if (!$formats->isEmpty()) {
+            $response->getHeaders()->set(WebResponse::HEADER_CONTENT_TYPE, MimeTypes::getType($formats->first()));
+        }
+        return $response;
     }
 }

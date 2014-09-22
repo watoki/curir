@@ -4,6 +4,7 @@ namespace spec\watoki\curir;
 use spec\watoki\curir\fixtures\ClassesFixture;
 use watoki\collections\Liste;
 use watoki\curir\delivery\WebRequest;
+use watoki\curir\delivery\WebResponse;
 use watoki\curir\error\HttpError;
 use watoki\curir\protocol\Url;
 use watoki\curir\responder\MultiResponder;
@@ -28,10 +29,11 @@ class MultiResponderTest extends Specification {
 
     function testFallBackToDefault() {
         $this->givenTheMultiResponderIWithTheDefaultBody('Hello World');
-        $this->givenTheAcceptedFormatsAre(array('not', 'neither'));
+        $this->givenTheAcceptedFormatsAre(array('txt', 'not', 'neither'));
 
         $this->whenICreateTheResponse();
         $this->thenTheResponseBodyShouldBe('Hello World');
+        $this->thenTheContentTypeShouldBe('text/plain');
     }
 
     function testNoDefaultBodySet() {
@@ -50,10 +52,12 @@ class MultiResponderTest extends Specification {
         $this->givenTheMultiResponderIWithTheDefaultBody(null);
         $this->givenTheBodyFor_Is('foo', 'Foo you');
         $this->givenTheBodyFor_Is('bar', 'Bar me');
-        $this->givenTheAcceptedFormatsAre(array('not', 'bar'));
+        $this->givenTheBodyFor_Is('html', 'Some text');
+        $this->givenTheAcceptedFormatsAre(array('not', 'html', 'bar'));
 
         $this->whenITryToCreateTheResponse();
-        $this->thenTheResponseBodyShouldBe('Bar me');
+        $this->thenTheResponseBodyShouldBe('Some text');
+        $this->thenTheContentTypeShouldBe('text/html');
     }
 
     ######################### SET-UP #######################
@@ -90,6 +94,10 @@ class MultiResponderTest extends Specification {
 
     private function thenTheResponseBodyShouldBe($str) {
         $this->assertEquals($str, $this->response->getBody());
+    }
+
+    private function thenTheContentTypeShouldBe($string) {
+        $this->assertEquals($string, $this->response->getHeaders()->get(WebResponse::HEADER_CONTENT_TYPE));
     }
 
 } 
