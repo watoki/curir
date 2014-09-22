@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir;
 
+use watoki\curir\cookie\CookieStore;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebRequestBuilder;
 use watoki\curir\delivery\WebResponse;
@@ -33,17 +34,12 @@ class WebDelivery extends Delivery {
      */
     public function __construct(Factory $factory, Router $router, Url $context,
                                 RequestBuilder $builder = null, ResponseDeliverer $deliverer = null) {
-        if (!$builder) {
-            $bodyReader = function () {
-                return file_get_contents('php://input');
-            };
-            $builder = new WebRequestBuilder($_SERVER, $_REQUEST, $bodyReader, $context);
-            $this->registerDecoders($builder);
-        }
-        $deliverer = $deliverer ? : new WebResponseDeliverer();
-        parent::__construct($router, $builder, $deliverer);
+        parent::__construct($router,
+            $builder ? : $this->createBuilder($context),
+            $deliverer ? : new WebResponseDeliverer());
 
         $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
+        $factory->setSingleton(CookieStore::$CLASS, $factory->getInstance(CookieStore::$CLASS, array('source' => $_COOKIE)));
     }
 
     public static function quickStart($rootResourceClass, Factory $factory = null) {
@@ -95,9 +91,15 @@ class WebDelivery extends Delivery {
         return new ErrorResponse($request, $exception);
     }
 
-    /**
-     * @param WebRequestBuilder $builder
-     */
+    private function createBuilder(Url $context) {
+        $bodyReader = function () {
+            return file_get_contents('php://input');
+        };
+        $builder = new WebRequestBuilder($_SERVER, $_REQUEST, $bodyReader, $context);
+        $this->registerDecoders($builder);
+        return $builder;
+    }
+
     protected function registerDecoders(WebRequestBuilder $builder) {
         $builder->registerDecoder(FormDecoder::CONTENT_TYPE, new FormDecoder());
         $builder->registerDecoder(FormDecoder::CONTENT_TYPE_X, new FormDecoder());

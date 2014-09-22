@@ -1,9 +1,13 @@
 <?php
 namespace watoki\curir\delivery;
 
+use watoki\curir\cookie\CookieStore;
 use watoki\deli\ResponseDeliverer;
 
 class WebResponseDeliverer implements ResponseDeliverer {
+
+    /** @var CookieStore <- */
+    public $cookies;
 
     /**
      * @param WebResponse $response
@@ -18,6 +22,8 @@ class WebResponseDeliverer implements ResponseDeliverer {
                 header($header . ': ' . $value);
             }
         }
+        $this->cookies->applyCookies('setcookie');
+
         echo $response->getBody();
     }
 }
