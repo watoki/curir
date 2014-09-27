@@ -1,6 +1,7 @@
 <?php
 namespace spec\watoki\curir\fixtures;
 
+use spec\watoki\curir\stubs\TestWebEnvironmentStub;
 use watoki\curir\error\HttpError;
 use watoki\curir\protocol\ParameterDecoder;
 use watoki\curir\protocol\Url;
@@ -15,54 +16,42 @@ use watoki\scrut\Fixture;
  */
 class WebRequestBuilderFixture extends Fixture {
 
-    private $_SERVER = array();
-
-    private $_REQUEST = array();
-
     /** @var WebRequest */
     private $request;
-
-    /** @var string */
-    private $body = '';
 
     /** @var array|\watoki\curir\protocol\ParameterDecoder[] */
     private $decoders = array();
 
-    /** @var \watoki\curir\protocol\Url */
-    public $context;
+    /** @var TestWebEnvironmentStub */
+    private $environment;
 
     public function setUp() {
         parent::setUp();
-        $this->_REQUEST[WebRequestBuilder::DEFAULT_TARGET_KEY] = '';
-        $this->context = Url::fromString('http://example.org');
+        $this->environment = new TestWebEnvironmentStub();
     }
 
     public function givenTheContextIs($string) {
-        $this->context = Url::fromString($string);
+        $this->environment->context = Url::fromString($string);
     }
 
-    public function givenNoTargetPathIsGiven() {
-        unset($this->_REQUEST[WebRequestBuilder::DEFAULT_TARGET_KEY]);
+    public function givenTheRequestMethodIs($string) {
+        $this->environment->method = $string;
     }
 
     public function givenTheHeader_Is($key, $value) {
-        $this->_SERVER[$key] = $value;
+        $this->environment->headers->set($key, $value);
     }
 
     public function givenTheQueryArgument_Is($key, $value) {
-        $this->_REQUEST[$key] = $value;
-    }
-
-    public function givenTheMethodArgumentIs($value) {
-        $this->givenTheQueryArgument_Is(WebRequestBuilder::DEFAULT_METHOD_KEY, $value);
+        $this->environment->arguments->set($key, $value);
     }
 
     public function givenTheTargetPathIs($string) {
-        $this->givenTheQueryArgument_Is(WebRequestBuilder::DEFAULT_TARGET_KEY, $string);
+        $this->environment->target = Path::fromString($string);
     }
 
     public function givenTheBodyIs($string) {
-        $this->body = $string;
+        $this->environment->body = $string;
     }
 
     public function given_IsRegisteredForTheContentType(ParameterDecoder $decoder, $contentType) {
@@ -70,13 +59,12 @@ class WebRequestBuilderFixture extends Fixture {
     }
 
     public function whenIBuildTheRequest() {
-        $body = $this->body;
-        $builder = new WebRequestBuilder($this->_SERVER, $this->_REQUEST, function () use ($body) {
-            return $body;
-        }, $this->context);
+        $builder = new WebRequestBuilder($this->environment);
+
         foreach ($this->decoders as $contentType => $decoder) {
             $builder->registerDecoder($contentType, $decoder);
         }
+
         $this->request = $builder->build(new Path());
         return $this->request;
     }

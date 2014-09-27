@@ -3,13 +3,12 @@ namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use spec\watoki\curir\IntroductionTest_TestDelivery as WebDelivery;
-use spec\watoki\deli\fixtures\TestDelivery;
+use spec\watoki\deli\fixtures\TestDelivererStub;
 use watoki\curir\delivery\WebRequest;
-use watoki\curir\protocol\Url;
 use watoki\deli\Request;
-use watoki\deli\router\DynamicRouter;
-use watoki\deli\Router;
 use watoki\deli\router\NoneRouter;
+use watoki\deli\Router;
+use watoki\deli\router\DynamicRouter;
 use watoki\deli\target\CallbackTarget;
 use watoki\deli\target\RespondingTarget;
 use watoki\factory\Factory;
@@ -122,12 +121,12 @@ class IntroductionTest extends Specification {
 
     private function disableActualDelivery() {
         WebDelivery::$factory = $this->factory;
-        WebDelivery::$test = new TestDelivery($this->request->whenIBuildTheRequest());
+        WebDelivery::$test = new TestDelivererStub($this->request->whenIBuildTheRequest());
     }
 
     private function givenTheTargetIs($string) {
         $this->request->givenTheTargetPathIs($string);
-        WebDelivery::$test = new TestDelivery($this->request->whenIBuildTheRequest());
+        WebDelivery::$test = new TestDelivererStub($this->request->whenIBuildTheRequest());
     }
 
     private function thenTheResponseShouldBe($string) {
@@ -145,7 +144,7 @@ class IntroductionTest_TestDelivery extends \watoki\curir\WebDelivery {
     /** @var Factory */
     public static $factory;
 
-    /** @var TestDelivery */
+    /** @var TestDelivererStub */
     public static $test;
 
     public static function quickStart($rootResourceClass, Factory $factory = null) {
@@ -154,7 +153,7 @@ class IntroductionTest_TestDelivery extends \watoki\curir\WebDelivery {
     }
 
     public static function quickRoute(Router $router, Factory $factory = null) {
-        $delivery = new WebDelivery(self::$factory, $router, Url::fromString('http://example.com'), self::$test, self::$test);
+        $delivery = new WebDelivery(self::$factory, $router, self::$test, self::$test);
         try {
             $delivery->run();
         } catch (\Exception $e) {

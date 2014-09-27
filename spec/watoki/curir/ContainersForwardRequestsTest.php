@@ -30,7 +30,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->delivery->givenTheTargetIsTheRespondingClass('name\space\MyResource');
 
         $this->request->givenTheTargetPathIs('some/target');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseShouldBe('Hello World http://example.com/here/some/target');
@@ -45,7 +45,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->delivery->givenTheTargetIsTheRespondingClass('itself\MyContainer');
 
         $this->request->givenTheTargetPathIs('');
-        $this->request->givenTheMethodArgumentIs('that');
+        $this->request->givenTheRequestMethodIs('that');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello myself');

@@ -1,11 +1,10 @@
 <?php
 namespace spec\watoki\curir\fixtures;
 
-use spec\watoki\deli\fixtures\TestDelivery;
-use watoki\curir\error\ErrorResponse;
-use watoki\curir\protocol\Url;
-use watoki\curir\WebDelivery;
+use spec\watoki\deli\fixtures\TestDelivererStub;
 use watoki\curir\delivery\WebResponse;
+use watoki\curir\error\ErrorResponse;
+use watoki\curir\WebDelivery;
 use watoki\deli\Delivery;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\target\CallbackTarget;
@@ -18,7 +17,7 @@ use watoki\scrut\Fixture;
  */
 class WebDeliveryFixture extends Fixture {
 
-    /** @var TestDelivery */
+    /** @var TestDelivererStub */
     public $test;
 
     /** @var NoneRouter */
@@ -45,9 +44,8 @@ class WebDeliveryFixture extends Fixture {
 
     public function whenIRunTheDelivery() {
         $request = $this->request->whenIBuildTheRequest();
-        $this->test = new TestDelivery($request);
-        $context = Url::fromString('http://example.com');
-        $delivery = new WebDelivery($this->spec->factory, $this->router, $context, $this->test, $this->test);
+        $this->test = new TestDelivererStub($request);
+        $delivery = new WebDelivery($this->spec->factory, $this->router, $this->test, $this->test);
         $delivery->run();
     }
 

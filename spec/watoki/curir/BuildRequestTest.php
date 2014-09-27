@@ -2,7 +2,7 @@
 namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
-use watoki\curir\delivery\WebResponse;
+use watoki\curir\delivery\WebRequest;
 use watoki\scrut\Specification;
 
 /**
@@ -13,15 +13,15 @@ use watoki\scrut\Specification;
 class BuildRequestTest extends Specification {
 
     function testMethodInHeader() {
-        $this->request->givenTheHeader_Is('REQUEST_METHOD', 'GET');
+        $this->request->givenTheRequestMethodIs('get');
 
         $this->request->whenIBuildTheRequest();
         $this->request->thenItsMethodShouldBe('get');
     }
 
     function testMethodInArguments() {
-        $this->request->givenTheHeader_Is('REQUEST_METHOD', 'GET');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('GET');
+        $this->request->givenTheQueryArgument_Is('do', 'this');
 
         $this->request->whenIBuildTheRequest();
         $this->request->thenItsMethodShouldBe('this');
@@ -36,14 +36,6 @@ class BuildRequestTest extends Specification {
         $this->request->thenTheFormatsShouldBe('txt');
     }
 
-    function testNoTargetPath() {
-        $this->request->givenNoTargetPathIsGiven();
-
-        $this->request->whenITryToBuildTheRequest();
-        $this->request->thenAnErrorWithStatus_AndUserMessage_ShouldBeThrown(WebResponse::STATUS_BAD_REQUEST, "No target given.");
-        $this->request->try->thenTheException_ShouldBeThrown('Request parameter $_REQUEST["-"] not set');
-    }
-
     function testWithoutExtension() {
         $this->request->givenTheTargetPathIs('some/foo/bar');
 
@@ -53,7 +45,7 @@ class BuildRequestTest extends Specification {
     }
 
     function testFormatInHeader() {
-        $this->request->givenTheHeader_Is('HTTP_ACCEPT',
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_ACCEPT,
             'text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8');
         $this->request->givenTheTargetPathIs('some/target.json');
 
@@ -69,12 +61,11 @@ class BuildRequestTest extends Specification {
     }
 
     function testHeaders() {
-        $this->request->givenTheHeader_Is('HTTP_ACCEPT', '*/*');
-        $this->request->givenTheHeader_Is('HTTP_PRAGMA', null);
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_ACCEPT, '*/*');
 
         $this->request->whenIBuildTheRequest();
-        $this->request->thenItsTheHeader_ShouldBe('Accept', '*/*');
-        $this->request->thenIsShouldHaveNoHeader('Pragma');
+        $this->request->thenItsTheHeader_ShouldBe(WebRequest::HEADER_ACCEPT, '*/*');
+        $this->request->thenIsShouldHaveNoHeader(WebRequest::HEADER_PRAGMA);
     }
 
     function testEdgeCaseTargetWithTwoDots() {

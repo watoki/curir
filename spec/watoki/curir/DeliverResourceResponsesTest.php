@@ -37,7 +37,7 @@ class DeliverResourceResponsesTest extends Specification {
 
     function testMethodNotExisting() {
         $this->givenTheTargetClass_In_WithTheBody('some\EmptyClass', 'some/folder', '');
-        $this->request->givenTheMethodArgumentIs('notExisting');
+        $this->request->givenTheRequestMethodIs('notExisting');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_METHOD_NOT_ALLOWED);
@@ -50,7 +50,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return "Made it";
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('A request parameter is invalid or missing.');
@@ -63,7 +63,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return \watoki\curir\responder\Redirecter::fromString("http://example.com");
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('');
@@ -77,7 +77,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return \watoki\curir\responder\Redirecter::fromString("../relative/path?with=query#andFragmet");
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheContextIs('http://some.host/some/path');
 
         $this->delivery->whenIRunTheDelivery();
@@ -91,7 +91,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return \watoki\curir\responder\Redirecter::fromString("");
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheContextIs('http://some.host/some/path');
 
         $this->delivery->whenIRunTheDelivery();
@@ -104,17 +104,19 @@ class DeliverResourceResponsesTest extends Specification {
                 return new SomePresenter("Hello World");
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
 
         $this->request->givenTheTargetPathIs('this.big');
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('HELLO WORLD');
 
         $this->request->givenTheTargetPathIs('this.small');
+        $this->request->givenTheRequestMethodIs('this');
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('hello world');
 
         $this->request->givenTheTargetPathIs('this.txt');
+        $this->request->givenTheRequestMethodIs('this');
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World!');
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_CONTENT_TYPE, 'text/plain');
@@ -126,7 +128,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return new SomePresenter("Hello World");
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheTargetPathIs('something.unknown');
 
         $this->delivery->whenIRunTheDelivery();
@@ -140,7 +142,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return new SomePresenter();
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheTargetPathIs('something.foo');
         $this->file->givenAFile_WithContent('some/folder/renderTemplate.foo', 'Hello World');
 
@@ -154,7 +156,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return new SomePresenter();
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheTargetPathIs('something.foo');
 
         $this->delivery->whenIRunTheDelivery();
@@ -174,7 +176,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return new \watoki\curir\responder\Presenter(array("message" => "Hello World"));
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheTargetPathIs('something.html');
 
         $this->delivery->whenIRunTheDelivery();
@@ -187,7 +189,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return new \watoki\curir\responder\Presenter(array("foo" => array(42, 73)));
             }
         ');
-        $this->request->givenTheMethodArgumentIs('this');
+        $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheTargetPathIs('something.json');
 
         $this->delivery->whenIRunTheDelivery();
@@ -200,7 +202,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return "Hello World";
             }
         ');
-        $this->request->givenTheMethodArgumentIs('returnString');
+        $this->request->givenTheRequestMethodIs('returnString');
         $this->request->givenTheTargetPathIs('something.json');
 
         $this->delivery->whenIRunTheDelivery();
@@ -213,7 +215,7 @@ class DeliverResourceResponsesTest extends Specification {
                 return array("foo" => array(42, 73));
             }
         ');
-        $this->request->givenTheMethodArgumentIs('returnModel');
+        $this->request->givenTheRequestMethodIs('returnModel');
         $this->request->givenTheTargetPathIs('something.json');
 
         $this->delivery->whenIRunTheDelivery();

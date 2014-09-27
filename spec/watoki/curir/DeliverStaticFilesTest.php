@@ -5,6 +5,7 @@ use spec\watoki\curir\fixtures\ClassesFixture;
 use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use spec\watoki\stores\FileStoreFixture;
+use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
 use watoki\scrut\Specification;
 
@@ -26,7 +27,7 @@ class DeliverStaticFilesTest extends Specification {
     function testRespondWithFileContentAndMimeType() {
         $this->file->givenAFile_WithContent('some/folder/some/static/file', 'Hello World');
         $this->request->givenTheTargetPathIs('static/file');
-        $this->request->givenTheHeader_Is('HTTP_ACCEPT', 'text/plain');
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_ACCEPT, 'text/plain');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World');

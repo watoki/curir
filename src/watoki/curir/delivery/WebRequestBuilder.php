@@ -6,58 +6,40 @@ use watoki\collections\Map;
 use watoki\curir\error\HttpError;
 use watoki\curir\protocol\MimeTypes;
 use watoki\curir\protocol\ParameterDecoder;
-use watoki\curir\protocol\Url;
+use watoki\curir\WebEnvironment;
 use watoki\deli\Path;
 use watoki\deli\RequestBuilder;
 
 class WebRequestBuilder implements RequestBuilder {
 
-    const DEFAULT_TARGET_KEY = '-';
-
-    const DEFAULT_METHOD_KEY = 'method';
-    
-    private $targetKey = self::DEFAULT_TARGET_KEY;
-    
-    private $methodKey = self::DEFAULT_METHOD_KEY;
-
-    private static $headerKeys = array(
-        WebRequest::HEADER_ACCEPT => 'HTTP_ACCEPT',
-        WebRequest::HEADER_ACCEPT_CHARSET => 'HTTP_ACCEPT_CHARSET',
-        WebRequest::HEADER_ACCEPT_ENCODING => 'HTTP_ACCEPT_ENCODING',
-        WebRequest::HEADER_ACCEPT_LANGUAGE => 'HTTP_ACCEPT_LANGUAGE',
-        WebRequest::HEADER_CACHE_CONTROL => 'HTTP_CACHE_CONTROL',
-        WebRequest::HEADER_CONNECTION => 'HTTP_CONNECTION',
-        WebRequest::HEADER_PRAGMA => 'HTTP_PRAGMA',
-        WebRequest::HEADER_USER_AGENT => 'HTTP_USER_AGENT',
-        WebRequest::HEADER_CONTENT_TYPE => 'CONTENT_TYPE'
-    );
+    public static $METHOD_KEY = 'do';
 
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
-    /** @var array */
-    private $serverData;
+    /** @var WebEnvironment */
+    private $environment;
 
-    /** @var array */
-    private $requestData;
+    private static $headers = array(
+            WebRequest::HEADER_ACCEPT,
+            WebRequest::HEADER_ACCEPT_CHARSET,
+            WebRequest::HEADER_ACCEPT_ENCODING,
+            WebRequest::HEADER_ACCEPT_LANGUAGE,
+            WebRequest::HEADER_CACHE_CONTROL,
+            WebRequest::HEADER_CONNECTION,
+            WebRequest::HEADER_PRAGMA,
+            WebRequest::HEADER_USER_AGENT,
+            WebRequest::HEADER_CONTENT_TYPE
+    );
 
-    /** @var callable */
-    private $bodyReader;
+    private static $readingMethods = array(
+            WebRequest::METHOD_GET,
+            WebRequest::METHOD_HEAD,
+            WebRequest::METHOD_OPTIONS,
+    );
 
-    /** @var Path */
-    private $context;
-
-    /**
-     * @param array $serverData
-     * @param array $requestData
-     * @param callable $bodyReader
-     * @param Url $context
-     */
-    function __construct($serverData, $requestData, $bodyReader, Url $context) {
-        $this->serverData = $serverData;
-        $this->requestData = $requestData;
-        $this->bodyReader = $bodyReader;
-        $this->context = $context;
+    function __construct(WebEnvironment $environment) {
+        $this->environment = $environment;
     }
 
     /**
@@ -73,62 +55,77 @@ class WebRequestBuilder implements RequestBuilder {
      * @return WebRequest
      */
     public function build() {
-        $method = $this->getMethod($this->serverData, $this->requestData);
+        return new WebRequest(
+                $this->environment->getContext(),
+                $this->environment->getTarget(),
+                $this->getMethod(),
+                $this->getArguments($this->getMethod()),
+                $this->getFormats($this->environment->getTarget()),
+                $this->getHeaders()
+        );
+    }
 
-        if (!array_key_exists($this->targetKey, $this->requestData)) {
-            throw new HttpError(WebResponse::STATUS_BAD_REQUEST, "No target given.",
-                    'Request parameter $_REQUEST["' . $this->targetKey . '"] not set');
+    private function getMethod() {
+        $arguments = $this->environment->getArguments();
+        if ($arguments->has(self::$METHOD_KEY)) {
+            return $arguments->remove(self::$METHOD_KEY);
         }
+        return $this->environment->getRequestMethod();
+    }
 
-        $target = Path::fromString($this->requestData[$this->targetKey]);
+    private function getArguments($method) {
+        return new Map(array_merge(
+                $this->environment->getArguments()->toArray(),
+                $this->decodeBody($method)->toArray()
+        ));
+    }
 
-        $formats = $this->getFormats($target, $this->serverData);
+    private function getFormats($target) {
+        return new Liste(array_unique(array_merge(
+                $this->getFormatFromTarget($target),
+                $this->getFormatsFromHeaders()
+        )));
+    }
 
-        unset($this->requestData[$this->methodKey]);
-        unset($this->requestData[$this->targetKey]);
-        $arguments = Map::toCollections($this->requestData);
-
-        $body = call_user_func($this->bodyReader);
-
-        if ($method != WebRequest::METHOD_GET && $method != WebRequest::METHOD_HEAD) {
-            $arguments = $this->decodeParamsFromBody($arguments, $body, $this->serverData);
-        }
-
+    private function getHeaders() {
         $headers = new Map();
-        foreach (self::$headerKeys as $name => $key) {
-            if (isset($this->serverData[$key])) {
-                $headers->set($name, $this->serverData[$key]);
+        foreach (self::$headers as $header) {
+            if ($this->environment->getHeaders()->has($header)) {
+                $headers->set($header, $this->environment->getHeaders()->get($header));
             }
         }
-
-        return new WebRequest($this->context, $target, $method, $arguments, new Liste($formats), $headers);
+        return $headers;
     }
 
-    private function getMethod($serverData, $requestData) {
-        $method = null;
-
-        if (array_key_exists('REQUEST_METHOD', $serverData)) {
-            $method = strtolower($serverData['REQUEST_METHOD']);
+    private function decodeBody($method) {
+        if (!in_array($method, self::$readingMethods)) {
+            return $this->decodeParamsFromBody($this->environment->getBody());
         }
-
-        if (array_key_exists($this->methodKey, $requestData)) {
-            $method = $requestData[$this->methodKey];
-            return $method;
-        }
-
-        return $method;
+        return new Map();
     }
 
-    private function getFormats($target, $serverData) {
-        $formats = array();
+    private function decodeParamsFromBody($body) {
+        $decoder = $this->getDecoder();
+        if (!$decoder) {
+            return new Map();
+        } else {
+            return $decoder->decode($body);
+        }
+    }
 
+    private function getFormatFromTarget($target) {
         $extension = $this->popExtensions($target);
         if ($extension) {
-            $formats[] = $extension;
+            return array($extension);
         }
+        return array();
+    }
 
-        if (array_key_exists('HTTP_ACCEPT', $serverData)) {
-            foreach (explode(',', $serverData['HTTP_ACCEPT']) as $accepted) {
+    private function getFormatsFromHeaders() {
+        $formats = array();
+        $headers = $this->environment->getHeaders();
+        if ($headers->has(WebRequest::HEADER_ACCEPT)) {
+            foreach (explode(',', $headers->get(WebRequest::HEADER_ACCEPT)) as $accepted) {
                 $accepted = trim($accepted);
                 if (strpos($accepted, ';') !== false) {
                     list($accepted,) = explode(';', $accepted);
@@ -136,8 +133,7 @@ class WebRequestBuilder implements RequestBuilder {
                 $formats = array_merge($formats, MimeTypes::getExtensions($accepted));
             }
         }
-
-        return array_unique($formats);
+        return $formats;
     }
 
     private function popExtensions(Path $target) {
@@ -151,17 +147,12 @@ class WebRequestBuilder implements RequestBuilder {
         return $extension;
     }
 
-    private function decodeParamsFromBody(Map $args, $body, $serverData) {
-        $key = self::$headerKeys[WebRequest::HEADER_CONTENT_TYPE];
-        $contentType = isset($serverData[$key]) ? $serverData[$key] : null;
-
-        if (!array_key_exists($contentType, $this->decoders)) {
-            return $args;
+    private function getDecoder() {
+        if ($this->environment->getHeaders()->has(WebRequest::HEADER_CONTENT_TYPE)
+                && array_key_exists($this->environment->getHeaders()->get(WebRequest::HEADER_CONTENT_TYPE), $this->decoders)
+        ) {
+            return $this->decoders[$this->environment->getHeaders()->get(WebRequest::HEADER_CONTENT_TYPE)];
         }
-
-        foreach ($this->decoders[$contentType]->decode($body) as $key => $value) {
-            $args->set($key, $value);
-        }
-        return $args;
+        return null;
     }
 }

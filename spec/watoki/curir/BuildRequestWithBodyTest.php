@@ -2,6 +2,7 @@
 namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
+use watoki\curir\delivery\WebRequest;
 use watoki\curir\protocol\decoder\FormDecoder;
 use watoki\curir\protocol\decoder\JsonDecoder;
 use watoki\scrut\Specification;
@@ -15,7 +16,7 @@ use watoki\scrut\Specification;
 class BuildRequestWithBodyTest extends Specification {
 
     public function background() {
-        $this->request->givenTheMethodArgumentIs('put');
+        $this->request->givenTheRequestMethodIs('put');
     }
 
     function testUndefinedContentType() {
@@ -25,7 +26,7 @@ class BuildRequestWithBodyTest extends Specification {
 
     function testFormData() {
         $this->request->given_IsRegisteredForTheContentType(new FormDecoder(), 'some/form');
-        $this->request->givenTheHeader_Is('CONTENT_TYPE', 'some/form');
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_CONTENT_TYPE, 'some/form');
         $this->request->givenTheBodyIs('a[]=1&a[]=2&a[b]=4');
 
         $this->request->whenIBuildTheRequest();
@@ -34,7 +35,7 @@ class BuildRequestWithBodyTest extends Specification {
 
     function testEmptyFormData() {
         $this->request->given_IsRegisteredForTheContentType(new FormDecoder(), 'some/form');
-        $this->request->givenTheHeader_Is('CONTENT_TYPE', 'some/form');
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_CONTENT_TYPE, 'some/form');
         $this->request->givenTheBodyIs('');
 
         $this->request->whenIBuildTheRequest();
@@ -43,7 +44,7 @@ class BuildRequestWithBodyTest extends Specification {
 
     function testJson() {
         $this->request->given_IsRegisteredForTheContentType(new JsonDecoder(), 'Jason');
-        $this->request->givenTheHeader_Is('CONTENT_TYPE', 'Jason');
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_CONTENT_TYPE, 'Jason');
         $this->request->givenTheBodyIs('{"a":["c", "d"],"b":1}');
 
         $this->request->whenIBuildTheRequest();
@@ -53,7 +54,7 @@ class BuildRequestWithBodyTest extends Specification {
 
     function testEmptyJson() {
         $this->request->given_IsRegisteredForTheContentType(new JsonDecoder(), 'Jason');
-        $this->request->givenTheHeader_Is('CONTENT_TYPE', 'Jason');
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_CONTENT_TYPE, 'Jason');
         $this->request->givenTheBodyIs('');
 
         $this->request->whenIBuildTheRequest();
@@ -62,7 +63,7 @@ class BuildRequestWithBodyTest extends Specification {
 
     function testInvalidJson() {
         $this->request->given_IsRegisteredForTheContentType(new JsonDecoder(), 'Jason');
-        $this->request->givenTheHeader_Is('CONTENT_TYPE', 'Jason');
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_CONTENT_TYPE, 'Jason');
         $this->request->givenTheBodyIs('not json');
 
         $this->request->whenIBuildTheRequest();
@@ -71,7 +72,7 @@ class BuildRequestWithBodyTest extends Specification {
 
     function testOverwriteQueryParameters() {
         $this->request->given_IsRegisteredForTheContentType(new JsonDecoder(), 'Jason');
-        $this->request->givenTheHeader_Is('CONTENT_TYPE', 'Jason');
+        $this->request->givenTheHeader_Is(WebRequest::HEADER_CONTENT_TYPE, 'Jason');
         $this->request->givenTheBodyIs('{"a":["c", "d"]}');
         $this->request->givenTheQueryArgument_Is('a', array(1, 2));
         $this->request->givenTheQueryArgument_Is('b', 'foo');

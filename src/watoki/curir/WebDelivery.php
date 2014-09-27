@@ -11,32 +11,27 @@ use watoki\curir\error\HttpError;
 use watoki\curir\protocol\decoder\FormDecoder;
 use watoki\curir\protocol\decoder\ImageDecoder;
 use watoki\curir\protocol\decoder\JsonDecoder;
-use watoki\curir\protocol\Url;
 use watoki\deli\Delivery;
 use watoki\deli\filter\DefaultFilterRegistry;
+use watoki\deli\filter\FilterRegistry;
 use watoki\deli\Request;
 use watoki\deli\RequestBuilder;
 use watoki\deli\ResponseDeliverer;
-use watoki\deli\Router;
 use watoki\deli\router\NoneRouter;
+use watoki\deli\Router;
 use watoki\deli\target\RespondingTarget;
 use watoki\factory\Factory;
-use watoki\deli\filter\FilterRegistry;
 
 class WebDelivery extends Delivery {
 
     /**
      * @param Factory $factory
      * @param Router $router
-     * @param Url $context
      * @param RequestBuilder $builder
      * @param ResponseDeliverer $deliverer
      */
-    public function __construct(Factory $factory, Router $router, Url $context,
-                                RequestBuilder $builder = null, ResponseDeliverer $deliverer = null) {
-        parent::__construct($router,
-            $builder ? : $this->createBuilder($context),
-            $deliverer ? : new WebResponseDeliverer());
+    public function __construct(Factory $factory, Router $router, RequestBuilder $builder, ResponseDeliverer $deliverer) {
+        parent::__construct($router, $builder, $deliverer);
 
         $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
         $factory->setSingleton(CookieStore::$CLASS, $factory->getInstance(CookieStore::$CLASS, array('source' => $_COOKIE)));
@@ -44,19 +39,18 @@ class WebDelivery extends Delivery {
 
     public static function quickStart($rootResourceClass, Factory $factory = null) {
         $factory = $factory ? : new Factory();
-        $router = new NoneRouter(RespondingTarget::factory($factory, $factory->getInstance($rootResourceClass)));
+
+        $root = $factory->getInstance($rootResourceClass);
+        $router = new NoneRouter(RespondingTarget::factory($factory, $root));
         self::quickRoute($router, $factory);
     }
 
     public static function quickRoute(Router $router, Factory $factory = null) {
         $factory = $factory ? : new Factory();
 
-        $scheme = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "");
-        $port = $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '';
-        $path = dirname($_SERVER['SCRIPT_NAME']);
-        $url = $scheme . "://" . $_SERVER['SERVER_NAME'] . $port . $path;
-
-        $delivery = new WebDelivery($factory, $router, Url::fromString($url));
+        $builder = new WebRequestBuilder(new WebEnvironment($_SERVER, $_REQUEST));
+        $deliverer = new WebResponseDeliverer();
+        $delivery = new WebDelivery($factory, $router, $builder, $deliverer);
         $delivery->run();
     }
 
@@ -85,15 +79,6 @@ class WebDelivery extends Delivery {
      */
     protected function error(Request $request, \Exception $exception) {
         return new ErrorResponse($request, $exception);
-    }
-
-    private function createBuilder(Url $context) {
-        $bodyReader = function () {
-            return file_get_contents('php://input');
-        };
-        $builder = new WebRequestBuilder($_SERVER, $_REQUEST, $bodyReader, $context);
-        $this->registerDecoders($builder);
-        return $builder;
     }
 
     protected function registerDecoders(WebRequestBuilder $builder) {
