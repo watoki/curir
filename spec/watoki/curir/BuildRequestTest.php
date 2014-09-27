@@ -80,7 +80,7 @@ class BuildRequestTest extends Specification {
         $this->request->givenTheTargetPathIs('one/two/three/');
 
         $this->request->whenIBuildTheRequest();
-        $this->request->thenItsTargetShouldBe('one/two/three');
+        $this->request->thenItsTargetShouldBe('one/two/three/');
     }
 
 } 

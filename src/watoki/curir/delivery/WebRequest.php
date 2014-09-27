@@ -10,22 +10,37 @@ use watoki\deli\Request;
 class WebRequest extends Request {
 
     const METHOD_GET = 'get';
+
     const METHOD_POST = 'post';
+
     const METHOD_PUT = 'put';
+
     const METHOD_PATCH = 'patch';
+
     const METHOD_DELETE = 'delete';
+
     const METHOD_HEAD = 'head';
+
     const METHOD_OPTIONS = 'options';
+
     const METHOD_TRACE = 'trace';
 
     const HEADER_ACCEPT = 'Accept';
+
     const HEADER_ACCEPT_CHARSET = 'Accept-Charset';
+
     const HEADER_ACCEPT_ENCODING = 'Accept-Encoding';
+
     const HEADER_ACCEPT_LANGUAGE = 'Accept-Language';
+
     const HEADER_CACHE_CONTROL = 'Cache-Control';
+
     const HEADER_CONNECTION = 'Connection';
+
     const HEADER_PRAGMA = 'Pragma';
+
     const HEADER_USER_AGENT = 'User-Agent';
+
     const HEADER_CONTENT_TYPE = 'Content-Type';
 
     /** @var Liste */
@@ -70,12 +85,19 @@ class WebRequest extends Request {
 
     public function copy() {
         return new WebRequest(
-            $this->getContext()->copy(),
-            $this->getTarget()->copy(),
-            $this->getMethod(),
-            $this->getArguments()->copy(),
-            $this->formats->copy(),
-            $this->headers->copy()
+                $this->getContext()->copy(),
+                $this->getTarget()->copy(),
+                $this->getMethod(),
+                $this->getArguments()->copy(),
+                $this->formats->copy(),
+                $this->headers->copy()
         );
     }
+
+    public function toString() {
+        $queryString = $this->getArguments()->isEmpty() ? '' : '?' . urldecode(http_build_query($this->getArguments()->toArray()));
+        $targetString = $this->getTarget()->isEmpty() ? '' : '/' . $this->getTarget()->toString();
+        return $this->getContext()->toString() . $targetString . $queryString;
+    }
+
 }

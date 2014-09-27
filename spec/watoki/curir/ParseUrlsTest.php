@@ -38,14 +38,14 @@ class ParseUrlsTest extends Specification {
 
     function testTrailingSlash() {
         $url = Url::fromString('http://example.com/');
-        $this->assertEquals(new Path(array('')), $url->getPath());
-        $this->assertEquals('http://example.com', $url->toString());
+        $this->assertEquals(new Path(array('', '')), $url->getPath());
+        $this->assertEquals('http://example.com/', $url->toString());
     }
 
     function testTrailingSlashWithPath() {
         $url = Url::fromString('http://example.com/my/path/');
-        $this->assertEquals('http://example.com/my/path', $url->toString());
-        $this->assertEquals('/my/path', $url->getPath()->toString());
+        $this->assertEquals('http://example.com/my/path/', $url->toString());
+        $this->assertEquals('/my/path/', $url->getPath()->toString());
     }
 
     function testSameHost() {

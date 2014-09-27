@@ -61,14 +61,22 @@ class WebDelivery extends Delivery {
      * @return mixed
      */
     protected function getResponse(Request $request) {
+        if ($request->getTarget()->count() > 0 && $request->getTarget()->last() == '') {
+            $request->getTarget()->pop();
+            $response = new WebResponse();
+            $response->getHeaders()->set(WebResponse::HEADER_LOCATION, $request->toString());
+            $response->setStatus(WebResponse::STATUS_MOVED_PERMANENTLY);
+            return $response;
+        }
+
         try {
             return parent::getResponse($request);
         } catch (\BadMethodCallException $e) {
             throw new HttpError(WebResponse::STATUS_METHOD_NOT_ALLOWED,
-                "Method [{$request->getMethod()}] is not allowed here.", $e->getMessage(), 0, $e);
+                    "Method [{$request->getMethod()}] is not allowed here.", $e->getMessage(), 0, $e);
         } catch (\InvalidArgumentException $e) {
             throw new HttpError(WebResponse::STATUS_BAD_REQUEST,
-                "A request parameter is invalid or missing.", $e->getMessage(), 0, $e);
+                    "A request parameter is invalid or missing.", $e->getMessage(), 0, $e);
         }
     }
 

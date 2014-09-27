@@ -121,7 +121,7 @@ class WebEnvironment {
         $scheme = "http" . (!empty($server['HTTPS']) ? "s" : "");
         $port = $server['SERVER_PORT'] != 80 ? ':' . $server['SERVER_PORT'] : '';
         $host = $server['SERVER_NAME'];
-        $path = $this->determinePath($server);
+        $path = rtrim($this->determinePath($server), '/');
 
         return Url::fromString($scheme . "://" . $host . $port . $path);
     }
