@@ -1,27 +1,15 @@
 <?php
 namespace watoki\curir\cookie;
 
-use watoki\stores\Serializer;
+use watoki\stores\ObjectSerializer;
 
-class CookieSerializer implements Serializer {
+class CookieSerializer extends ObjectSerializer {
 
-    /**
-     * @param Cookie $cookie
-     * @return array With the arguments of setcookie excluding key
-     */
-    public function serialize($cookie) {
-        $expire = $cookie->expire ? $cookie->expire->getTimestamp() : null;
-        $encoded = is_string($cookie->payload) ? $cookie->payload : json_encode($cookie->payload);
-
-        return array($encoded, $expire, $cookie->path, $cookie->domain, $cookie->secure, $cookie->httpOnly);
+    public function inflate($serialized) {
+        return parent::inflate(json_decode($serialized, true));
     }
 
-    /**
-     * @param string $serialized Either json decoded or a literal string
-     * @return Cookie
-     */
-    public function inflate($serialized) {
-        $decoded = json_decode($serialized, true);
-        return new Cookie($decoded ? : $serialized);
+    public function serialize($inflated) {
+        return json_encode(parent::serialize($inflated));
     }
 }

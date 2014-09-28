@@ -6,8 +6,15 @@ use watoki\deli\ResponseDeliverer;
 
 class WebResponseDeliverer implements ResponseDeliverer {
 
-    /** @var CookieStore <- */
-    public $cookies;
+    /** @var CookieStore */
+    private $cookies;
+
+    /**
+     * @param CookieStore $cookies <-
+     */
+    function __construct(CookieStore $cookies) {
+        $this->cookies = $cookies;
+    }
 
     /**
      * @param WebResponse $response

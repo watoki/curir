@@ -121,6 +121,7 @@ class IntroductionTest extends Specification {
 
     private function disableActualDelivery() {
         WebDelivery::$factory = $this->factory;
+        WebDelivery::init($this->factory);
         WebDelivery::$test = new TestDelivererStub($this->request->whenIBuildTheRequest());
     }
 
@@ -153,7 +154,7 @@ class IntroductionTest_TestDelivery extends \watoki\curir\WebDelivery {
     }
 
     public static function quickRoute(Router $router, Factory $factory = null) {
-        $delivery = new WebDelivery(self::$factory, $router, self::$test, self::$test);
+        $delivery = new WebDelivery($router, self::$test, self::$test);
         try {
             $delivery->run();
         } catch (\Exception $e) {

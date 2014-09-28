@@ -45,7 +45,7 @@ class WebDeliveryFixture extends Fixture {
     public function whenIRunTheDelivery() {
         $request = $this->request->whenIBuildTheRequest();
         $this->test = new TestDelivererStub($request);
-        $delivery = new WebDelivery($this->spec->factory, $this->router, $this->test, $this->test);
+        $delivery = new WebDelivery($this->router, $this->test, $this->test);
         $delivery->run();
     }
 

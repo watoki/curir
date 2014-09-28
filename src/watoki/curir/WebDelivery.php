@@ -15,8 +15,6 @@ use watoki\deli\Delivery;
 use watoki\deli\filter\DefaultFilterRegistry;
 use watoki\deli\filter\FilterRegistry;
 use watoki\deli\Request;
-use watoki\deli\RequestBuilder;
-use watoki\deli\ResponseDeliverer;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\Router;
 use watoki\deli\target\RespondingTarget;
@@ -24,21 +22,17 @@ use watoki\factory\Factory;
 
 class WebDelivery extends Delivery {
 
-    /**
-     * @param Factory $factory
-     * @param Router $router
-     * @param RequestBuilder $builder
-     * @param ResponseDeliverer $deliverer
-     */
-    public function __construct(Factory $factory, Router $router, RequestBuilder $builder, ResponseDeliverer $deliverer) {
-        parent::__construct($router, $builder, $deliverer);
+    public static function init(Factory $factory = null) {
+        $factory = $factory ? : new Factory();
 
         $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
-        $factory->setSingleton(CookieStore::$CLASS, $factory->getInstance(CookieStore::$CLASS, array('source' => $_COOKIE)));
+        $factory->getSingleton(CookieStore::$CLASS, array('source' => $_COOKIE));
+
+        return $factory;
     }
 
     public static function quickStart($rootResourceClass, Factory $factory = null) {
-        $factory = $factory ? : new Factory();
+        $factory = $factory ? : self::init();
 
         $root = $factory->getInstance($rootResourceClass);
         $router = new NoneRouter(RespondingTarget::factory($factory, $root));
@@ -46,11 +40,11 @@ class WebDelivery extends Delivery {
     }
 
     public static function quickRoute(Router $router, Factory $factory = null) {
-        $factory = $factory ? : new Factory();
+        $factory = $factory ? : self::init();
 
         $builder = new WebRequestBuilder(new WebEnvironment($_SERVER, $_REQUEST));
-        $deliverer = new WebResponseDeliverer();
-        $delivery = new WebDelivery($factory, $router, $builder, $deliverer);
+        $deliverer = new WebResponseDeliverer($factory->getSingleton(CookieStore::$CLASS));
+        $delivery = new WebDelivery($router, $builder, $deliverer);
         $delivery->run();
     }
 

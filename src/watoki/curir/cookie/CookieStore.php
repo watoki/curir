@@ -11,8 +11,8 @@ class CookieStore extends Store {
     /** @var array With cookie data indexed by key */
     private $source;
 
-    /** @var array|array[] setcookie arguments without key indexed by key */
-    private $sink = array();
+    /** @var array|array[] setcookie arguments without name indexed by name */
+    private $serialized = array();
 
     /**
      * @param SerializerRepository $serializers <-
@@ -32,7 +32,11 @@ class CookieStore extends Store {
         if (!array_key_exists($key, $this->source)) {
             throw new \Exception("Cookie with name [$key] does not exist");
         }
-        return $this->inflate($this->source[$key], $key);
+        $value = $this->source[$key];
+        if (!json_decode($value)) {
+            return $this->inflate(json_encode(array("payload" => $value)), $key);
+        }
+        return $this->inflate($value, $key);
     }
 
     /**
@@ -45,7 +49,22 @@ class CookieStore extends Store {
         if (!$key) {
             throw new \InvalidArgumentException('Cookie key cannot be empty.');
         }
-        $this->sink[$key] = $this->serialize($entity, $key);
+        $this->serialized[$key] = $this->serialize($entity, $key);
+    }
+
+    /**
+     * @param Cookie $cookie
+     * @param string $key
+     * @return array
+     */
+    protected function serialize($cookie, $key) {
+        return array(
+                parent::serialize($cookie, $key),
+                $cookie->expire ? $cookie->expire->getTimestamp() : null,
+                $cookie->path,
+                $cookie->domain,
+                $cookie->secure,
+                $cookie->httpOnly);
     }
 
     /**
@@ -63,7 +82,7 @@ class CookieStore extends Store {
      */
     public function delete($entity) {
         $key = $this->getKey($entity);
-        $this->sink[$key] = array(null, time() - 3600, $entity->path);
+        $this->serialized[$key] = array(null, time() - 3600, $entity->path);
         $this->removeKey($key);
     }
 
@@ -71,21 +90,21 @@ class CookieStore extends Store {
      * @return array|mixed[] All stored keys
      */
     public function keys() {
-        return array_keys($this->source);
+        return array_keys(array_merge($this->source, $this->serialized));
     }
 
     /**
      * @return Serializer
      */
     protected function createEntitySerializer() {
-        return new CookieSerializer();
+        return new CookieSerializer($this->getEntityClass(), $this->getSerializers());
     }
 
     /**
      * @param callable $callable Called with (key, payload, expire, path, domain, secure, httpOnly) for each cookie
      */
     public function applyCookies($callable) {
-        foreach ($this->sink as $key => $args) {
+        foreach ($this->serialized as $key => $args) {
             call_user_func_array($callable, array_merge(array($key), $args));
         }
     }
