@@ -12,8 +12,6 @@ use watoki\deli\RequestBuilder;
 
 class WebRequestBuilder implements RequestBuilder {
 
-    public static $METHOD_KEY = 'do';
-
     /** @var array|ParameterDecoder[] */
     private $decoders = array();
 
@@ -67,8 +65,8 @@ class WebRequestBuilder implements RequestBuilder {
 
     private function getMethod() {
         $arguments = $this->environment->getArguments();
-        if ($arguments->has(self::$METHOD_KEY)) {
-            return $arguments->remove(self::$METHOD_KEY);
+        if ($arguments->has(WebRequest::$METHOD_KEY)) {
+            return $arguments->remove(WebRequest::$METHOD_KEY);
         }
         return $this->environment->getRequestMethod();
     }

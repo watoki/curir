@@ -43,6 +43,8 @@ class WebRequest extends Request {
 
     const HEADER_CONTENT_TYPE = 'Content-Type';
 
+    public static $METHOD_KEY = 'do';
+
     /** @var Liste */
     private $formats;
 
