@@ -32,7 +32,9 @@ class Resource {
      * @return WebResponse|null
      */
     public function after($return, WebRequest $request) {
-        if ($return instanceof Responder) {
+        if ($return instanceof WebResponse) {
+            return $return;
+        } else if ($return instanceof Responder) {
             return $this->createResponse($return, $request);
         } else if (is_array($return)) {
             return $this->createResponse(new Presenter($return), $request);

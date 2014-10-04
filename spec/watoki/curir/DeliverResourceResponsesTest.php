@@ -98,6 +98,18 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path');
     }
 
+    function testReturnWebResponse() {
+        $this->givenTheTargetResource_In_WithTheBody('ReturnWebResponse', 'folder', '
+            public function doFoo() {
+                return new \watoki\curir\delivery\WebResponse("Hello World");
+            }
+        ');
+        $this->request->givenTheRequestMethodIs('foo');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('Hello World');
+    }
+
     function testRespondInAcceptedFormat() {
         $this->givenTheTargetResource_In_WithTheBody('RespondInAcceptedFormat', 'folder', '
             public function doThis() {

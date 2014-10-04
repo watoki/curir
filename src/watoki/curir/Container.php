@@ -11,7 +11,7 @@ use watoki\factory\Factory;
 class Container extends Resource implements Responding {
 
     /** @var Router */
-    private $router;
+    protected $router;
 
     /**
      * @param Factory $factory <-
