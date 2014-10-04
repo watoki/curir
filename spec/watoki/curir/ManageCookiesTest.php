@@ -159,6 +159,7 @@ class ManageCookiesTest extends Specification {
     }
 
     private function whenICreateTheCookieAs($key) {
+        date_default_timezone_set('UTC');
         $this->store = new CookieStore(new SerializerRepository(), $this->source);
         $this->store->create($this->cookie, $key);
         $this->apply($this->store);
