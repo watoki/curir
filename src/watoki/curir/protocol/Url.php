@@ -115,8 +115,6 @@ class Url extends Path {
             return new Url(null, null, null, new Path());
         }
 
-        $string = self::consolidate($string);
-
         $fragment = null;
         $fragmentPos = strpos($string, self::FRAGMENT_SEPARATOR);
         if ($fragmentPos !== false) {
@@ -163,15 +161,6 @@ class Url extends Path {
         }
 
         return new Url($scheme, $host, $port, $path, $parameters, $fragment);
-    }
-
-    private static function consolidate($path) {
-        $re = array('#(/\./)#', '#/(?!\.\.)[^/]+/\.\.#');
-        $in = array('/', '');
-        for ($n = 1; $n > 0;) {
-            $path = preg_replace($re, $in, $path, -1, $n);
-        }
-        return $path;
     }
 
     /**
@@ -235,13 +224,6 @@ class Url extends Path {
         }
         $this->elements = $elements;
     }
-
-//    /**
-//     * @return bool
-//     */
-//    public function isAbsolute() {
-//        return $this->isEmpty() || parent::isAbsolute();
-//    }
 
     private function flattenParams(Map $parameters, $i = 0) {
         $flat = new Map();

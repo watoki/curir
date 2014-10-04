@@ -23,6 +23,14 @@ class ParseUrlsTest extends Specification {
         $this->assertEquals('here', $url->getFragment());
     }
 
+    function testArrayParameters() {
+        $url = $this->parseAndCheck('some/where?over[the]=rainbow&over[my]=body');
+        $this->assertEquals(array(
+            'the' => 'rainbow',
+            'my' => 'body'
+        ), $url->getParameters()->get('over')->toArray());
+    }
+
     function testSameScheme() {
         $url = $this->parseAndCheck('//example.com:8080/my/path.html');
 
@@ -62,8 +70,13 @@ class ParseUrlsTest extends Specification {
     }
 
     function testConsolidatePath() {
-        $url = Url::fromString('http://example.com/some/./../foo/./a/b/../../path/bar/..');
-        $this->assertEquals('http://example.com/foo/path', $url->toString());
+        $url = Url::fromString('http://example.com/some/./../foo/./a/b/../../path/bar/../me');
+        $this->assertEquals('http://example.com/foo/path/me', $url->toString());
+    }
+
+    function testConsolidateRelativePath() {
+        $this->assertEquals('bar', Url::fromString('foo/../bar')->toString());
+        $this->assertEquals('bar', Url::fromString('./bar')->toString());
     }
 
     function testWithoutScheme() {
