@@ -2,6 +2,8 @@
 namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
+use watoki\collections\Liste;
+use watoki\collections\Map;
 use watoki\curir\delivery\WebRequest;
 use watoki\scrut\Specification;
 
@@ -54,10 +56,14 @@ class BuildRequestTest extends Specification {
     }
 
     function testParameters() {
-        $this->request->givenTheQueryArgument_Is('one', 'two');
+        $this->request->givenTheQueryArgument_Is('one', 'uno');
+        $this->request->givenTheQueryArgument_Is('two', array('dos', 'due'));
+        $this->request->givenTheQueryArgument_Is('three', array('es' => 'tres', 'it' => 'tre'));
 
         $this->request->whenIBuildTheRequest();
-        $this->request->thenItsArgument_ShouldBe('one', 'two');
+        $this->request->thenItsArgument_ShouldBe('one', 'uno');
+        $this->request->thenItsArgument_ShouldBe('two', new Liste(array('dos', 'due')));
+        $this->request->thenItsArgument_ShouldBe('three', new Map(array('es' => 'tres', 'it' => 'tre')));
     }
 
     function testHeaders() {

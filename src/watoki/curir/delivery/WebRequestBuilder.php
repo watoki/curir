@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir\delivery;
 
+use watoki\collections\Collection;
 use watoki\collections\Liste;
 use watoki\collections\Map;
 use watoki\curir\error\HttpError;
@@ -72,7 +73,7 @@ class WebRequestBuilder implements RequestBuilder {
     }
 
     private function getArguments($method) {
-        return new Map(array_merge(
+        return Collection::toCollections(array_merge(
                 $this->environment->getArguments()->toArray(),
                 $this->decodeBody($method)->toArray()
         ));

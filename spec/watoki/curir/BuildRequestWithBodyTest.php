@@ -2,6 +2,8 @@
 namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
+use watoki\collections\Liste;
+use watoki\collections\Map;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\protocol\decoder\FormDecoder;
 use watoki\curir\protocol\decoder\JsonDecoder;
@@ -30,7 +32,7 @@ class BuildRequestWithBodyTest extends Specification {
         $this->request->givenTheBodyIs('a[]=1&a[]=2&a[b]=4');
 
         $this->request->whenIBuildTheRequest();
-        $this->request->thenItsArgument_ShouldBe('a', array(0 => '1', 1 => '2', 'b' => '4'));
+        $this->request->thenItsArgument_ShouldBe('a', new Map(array(0 => '1', 1 => '2', 'b' => '4')));
     }
 
     function testEmptyFormData() {
@@ -48,7 +50,7 @@ class BuildRequestWithBodyTest extends Specification {
         $this->request->givenTheBodyIs('{"a":["c", "d"],"b":1}');
 
         $this->request->whenIBuildTheRequest();
-        $this->request->thenItsArgument_ShouldBe('a', array('c', 'd'));
+        $this->request->thenItsArgument_ShouldBe('a', new Liste(array('c', 'd')));
         $this->request->thenItsArgument_ShouldBe('b', 1);
     }
 
@@ -78,7 +80,7 @@ class BuildRequestWithBodyTest extends Specification {
         $this->request->givenTheQueryArgument_Is('b', 'foo');
 
         $this->request->whenIBuildTheRequest();
-        $this->request->thenItsArgument_ShouldBe('a', array('c', 'd'));
+        $this->request->thenItsArgument_ShouldBe('a', new Liste(array('c', 'd')));
         $this->request->thenItsArgument_ShouldBe('b', 'foo');
     }
 
