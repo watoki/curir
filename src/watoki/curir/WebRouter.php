@@ -8,9 +8,8 @@ use watoki\curir\protocol\MimeTypes;
 use watoki\deli\Request;
 use watoki\deli\router\StaticRouter;
 use watoki\deli\router\TargetNotFoundException;
-use watoki\deli\target\CallbackTarget;
 use watoki\deli\Target;
-use watoki\deli\target\ObjectTarget;
+use watoki\deli\target\CallbackTarget;
 use watoki\factory\Factory;
 use watoki\stores\file\raw\File;
 use watoki\stores\file\raw\RawFileStore;
@@ -22,25 +21,17 @@ class WebRouter extends StaticRouter {
     /** @var Factory */
     private $factory;
 
-    /** @var Resource */
-    private $root;
-
     /**
-     * @param Factory $factory
-     * @param $root
+     * @param Factory $factory <-
+     * @param string $directory
+     * @param string $namespace
+     * @param string $suffix
+     * @internal param $root
      */
-    function __construct(Factory $factory, Resource $root) {
-        $rootName = lcfirst($root->getName());
-
-        $directory = $root->getDirectory() . '/' . $rootName;
-        $store = $factory->getInstance(RawFileStore::$CLASS, array('rootDirectory' => $directory));
-        $class = new \ReflectionClass($root);
-        $namespace = $class->getNamespaceName() . '\\' . $rootName;
-
-        parent::__construct($factory, $store, $namespace, self::SUFFIX);
+    function __construct(Factory $factory, $directory, $namespace, $suffix = self::SUFFIX) {
+        parent::__construct($factory, $factory->getInstance(RawFileStore::$CLASS, array('rootDirectory' => $directory)), $namespace, $suffix);
 
         $this->factory = $factory;
-        $this->root = $root;
 
         $this->setFileTargetCreator(function (WebRequest $request, File $file, $fileKey) {
             return CallbackTarget::factory(function (WebRequest $request) use ($file, $fileKey) {
@@ -57,10 +48,17 @@ class WebRouter extends StaticRouter {
         });
     }
 
+    public static function fromResource(Resource $root, Factory $factory) {
+        $rootName = lcfirst($root->getName());
+
+        $directory = $root->getDirectory() . '/' . $rootName;
+        $class = new \ReflectionClass($root);
+        $namespace = $class->getNamespaceName() . '\\' . $rootName;
+
+        return new WebRouter($factory, $directory, $namespace);
+    }
+
     public function route(Request $request) {
-        if ($request->getTarget()->isEmpty()) {
-            return new ObjectTarget($request, $this->root, $this->factory);
-        }
         try {
             return parent::route($request);
         } catch (TargetNotFoundException $e) {

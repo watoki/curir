@@ -15,8 +15,8 @@ use watoki\deli\Delivery;
 use watoki\deli\filter\DefaultFilterRegistry;
 use watoki\deli\filter\FilterRegistry;
 use watoki\deli\Request;
-use watoki\deli\router\NoneRouter;
 use watoki\deli\Router;
+use watoki\deli\router\NoneRouter;
 use watoki\deli\target\RespondingTarget;
 use watoki\factory\Factory;
 
@@ -37,6 +37,12 @@ class WebDelivery extends Delivery {
         $root = $factory->getInstance($rootResourceClass);
         $router = new NoneRouter(RespondingTarget::factory($factory, $root));
         self::quickRoute($router, $factory);
+    }
+
+    public static function quickRoot($rootDirectory, $namespace = '', Factory $factory = null) {
+        $factory = $factory ? : self::init();
+
+        self::quickRoute(new WebRouter($factory, $rootDirectory, $namespace), $factory);
     }
 
     public static function quickRoute(Router $router, Factory $factory = null) {
