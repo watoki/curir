@@ -25,7 +25,7 @@ class DeliverStaticFilesTest extends Specification {
     }
 
     function testRespondWithFileContentAndMimeType() {
-        $this->file->givenAFile_WithContent('some/folder/some/static/file', 'Hello World');
+        $this->file->givenAFile_WithContent('some/folder/static/file', 'Hello World');
         $this->request->givenTheTargetPathIs('static/file');
         $this->request->givenTheHeader_Is(WebRequest::HEADER_ACCEPT, 'text/plain');
 
@@ -35,7 +35,7 @@ class DeliverStaticFilesTest extends Specification {
     }
 
     function testFileWithExtension() {
-        $this->file->givenAFile_WithContent('some/folder/some/static/file.txt', 'Hello World');
+        $this->file->givenAFile_WithContent('some/folder/static/file.txt', 'Hello World');
         $this->request->givenTheTargetPathIs('static/file.txt');
 
         $this->delivery->whenIRunTheDelivery();
@@ -44,7 +44,7 @@ class DeliverStaticFilesTest extends Specification {
     }
 
     function testEdgeCaseFileNameStartingWithDot() {
-        $this->file->givenAFile_WithContent('some/folder/some/static/.file', 'Hello World');
+        $this->file->givenAFile_WithContent('some/folder/static/.file', 'Hello World');
         $this->request->givenTheTargetPathIs('static/.file');
 
         $this->delivery->whenIRunTheDelivery();
@@ -53,7 +53,7 @@ class DeliverStaticFilesTest extends Specification {
     }
 
     function testEdgeCaseFileNameWithTwoDots() {
-        $this->file->givenAFile_WithContent('some/folder/some/static/file.foo.bar', 'Hello World');
+        $this->file->givenAFile_WithContent('some/folder/static/file.foo.bar', 'Hello World');
         $this->request->givenTheTargetPathIs('static/file.foo.bar');
 
         $this->delivery->whenIRunTheDelivery();

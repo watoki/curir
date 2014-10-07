@@ -49,11 +49,9 @@ class WebRouter extends StaticRouter {
     }
 
     public static function fromResource(Resource $root, Factory $factory) {
-        $rootName = lcfirst($root->getName());
-
-        $directory = $root->getDirectory() . '/' . $rootName;
+        $directory = $root->getDirectory();
         $class = new \ReflectionClass($root);
-        $namespace = $class->getNamespaceName() . '\\' . $rootName;
+        $namespace = $class->getNamespaceName();
 
         return new WebRouter($factory, $directory, $namespace);
     }
