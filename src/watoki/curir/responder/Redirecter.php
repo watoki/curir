@@ -1,12 +1,10 @@
 <?php
 namespace watoki\curir\responder;
 
-use watoki\curir\Resource;
 use watoki\curir\Responder;
 use watoki\curir\protocol\Url;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
-use watoki\factory\Factory;
 
 class Redirecter implements Responder {
 
@@ -32,11 +30,9 @@ class Redirecter implements Responder {
 
     /**
      * @param WebRequest $request
-     * @param \watoki\curir\Resource $resource
-     * @param \watoki\factory\Factory $factory
      * @return \watoki\curir\delivery\WebResponse
      */
-    public function createResponse(WebRequest $request, Resource $resource, Factory $factory) {
+    public function createResponse(WebRequest $request) {
         $response = new WebResponse();
         $response->setStatus($this->status);
         $response->getHeaders()->set(WebResponse::HEADER_LOCATION, $this->getAbsoluteTarget($request)->toString());

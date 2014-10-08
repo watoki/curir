@@ -11,6 +11,8 @@ use watoki\curir\error\HttpError;
 use watoki\curir\protocol\decoder\FormDecoder;
 use watoki\curir\protocol\decoder\ImageDecoder;
 use watoki\curir\protocol\decoder\JsonDecoder;
+use watoki\curir\renderer\DefaultRenderer;
+use watoki\curir\renderer\Renderer;
 use watoki\deli\Delivery;
 use watoki\deli\filter\DefaultFilterRegistry;
 use watoki\deli\filter\FilterRegistry;
@@ -27,6 +29,7 @@ class WebDelivery extends Delivery {
     public static function init(Factory $factory = null) {
         $factory = $factory ? : new Factory();
 
+        $factory->setSingleton(Renderer::RENDERER, new DefaultRenderer());
         $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
         $factory->getSingleton(CookieStore::$CLASS, array('source' => $_COOKIE));
 

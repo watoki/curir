@@ -2,13 +2,11 @@
 namespace watoki\curir\responder;
 
 use watoki\collections\Liste;
-use watoki\curir\error\HttpError;
-use watoki\curir\protocol\MimeTypes;
-use watoki\curir\Resource;
-use watoki\curir\Responder;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
-use watoki\factory\Factory;
+use watoki\curir\error\HttpError;
+use watoki\curir\protocol\MimeTypes;
+use watoki\curir\Responder;
 
 class MultiResponder implements Responder {
 
@@ -48,11 +46,9 @@ class MultiResponder implements Responder {
 
     /**
      * @param \watoki\curir\delivery\WebRequest $request
-     * @param \watoki\curir\Resource $resource
-     * @param Factory $factory
      * @return \watoki\curir\delivery\WebResponse
      */
-    public function createResponse(WebRequest $request, Resource $resource, Factory $factory) {
+    public function createResponse(WebRequest $request) {
         $formats = $request->getFormats();
 
         foreach ($formats as $accepted) {
@@ -61,7 +57,7 @@ class MultiResponder implements Responder {
             }
         }
 
-        return $this->respondWithDefault($resource, $formats);
+        return $this->respondWithDefault($formats);
     }
 
     private function respondWith($accepted) {
@@ -72,15 +68,14 @@ class MultiResponder implements Responder {
     }
 
     /**
-     * @param \watoki\curir\Resource $resource
      * @param \watoki\collections\Liste $formats
      * @throws HttpError If no renderer for accepted format and no default renderer is set
      * @return WebResponse
      */
-    private function respondWithDefault(Resource $resource, Liste $formats) {
+    private function respondWithDefault( Liste $formats) {
         if (!isset($this->renderers[''])) {
             throw new HttpError(WebResponse::STATUS_NOT_ACCEPTABLE, "Could not render the resource in an accepted format.",
-                    "Invalid accepted types for [" . get_class($resource) . "]: " .
+                    "Invalid accepted types: " .
                     "[" . $formats->join(', ') . "] not supported by " .
                     "[" . implode(', ', array_keys($this->renderers)) . "]");
         }

@@ -35,21 +35,28 @@ class Resource {
         if ($return instanceof WebResponse) {
             return $return;
         } else if ($return instanceof Responder) {
-            return $this->createResponse($return, $request);
+            return $return->createResponse($request);
         } else if (is_array($return)) {
-            return $this->createResponse(new Presenter($return), $request);
+            return $this->createDefaultResponder($return)->createResponse($request);
         } else {
-            return new WebResponse((string) $return);
+            return $this->createResponseFromString((string) $return);
         }
     }
 
     /**
-     * @param Responder $responder
-     * @param WebRequest $request
+     * @param $return
+     * @return Responder
+     */
+    protected function createDefaultResponder($return) {
+        return new Presenter($return, $this, $this->factory);
+    }
+
+    /**
+     * @param $return
      * @return WebResponse
      */
-    protected function createResponse(Responder $responder, WebRequest $request) {
-        return $responder->createResponse($request, $this, $this->factory);
+    protected function createResponseFromString($return) {
+        return new WebResponse($return);
     }
 
     public function getName() {

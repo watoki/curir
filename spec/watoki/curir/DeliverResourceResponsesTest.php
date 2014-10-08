@@ -6,6 +6,8 @@ use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use spec\watoki\stores\FileStoreFixture;
 use watoki\curir\delivery\WebResponse;
+use watoki\curir\renderer\DefaultRenderer;
+use watoki\curir\renderer\Renderer;
 use watoki\scrut\Specification;
 
 /**
@@ -29,8 +31,8 @@ class DeliverResourceResponsesTest extends Specification {
             public function renderTxt() {
                 return $this->getModel() . "!";
             }
-            public function renderFoo($template) {
-                return $template;
+            public function renderFoo() {
+                return $this->getTemplate("foo");
             }
         ');
     }
@@ -113,7 +115,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testRespondInAcceptedFormat() {
         $this->givenTheTargetResource_In_WithTheBody('RespondInAcceptedFormat', 'folder', '
             public function doThis() {
-                return new SomePresenter("Hello World");
+                return new SomePresenter("Hello World", $this, $this->factory);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -137,7 +139,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testRenderMethodMissing() {
         $this->givenTheTargetResource_In_WithTheBody('RenderMethodMissing', 'folder', '
             public function doThis() {
-                return new SomePresenter("Hello World");
+                return new SomePresenter("Hello World", $this, $this->factory);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -151,7 +153,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testRenderTemplate() {
         $this->givenTheTargetResource_In_WithTheBody('RenderTemplateResource', 'some/folder', '
             public function doThis() {
-                return new SomePresenter();
+                return new SomePresenter("", $this, $this->factory);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -165,7 +167,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testTemplateFileDoesNotExist() {
         $this->givenTheTargetResource_In_WithTheBody('NoTemplateResource', 'that/folder', '
             public function doThis() {
-                return new SomePresenter();
+                return new SomePresenter("", $this, $this->factory);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -182,10 +184,11 @@ class DeliverResourceResponsesTest extends Specification {
      * [tempan]: http://github.com/watoki/temap
      */
     function testDefaultHtmlRenderer() {
+        $this->givenTheDefaultRendererIs(DefaultRenderer::$CLASS);
         $this->file->givenAFile_WithContent('folder/defaultHtml.html', '<h1 property="message">Hello</h1>');
         $this->givenTheTargetResource_In_WithTheBody('DefaultHtmlResource', 'folder', '
             public function doThis() {
-                return new \watoki\curir\responder\Presenter(array("message" => "Hello World"));
+                return new \watoki\curir\responder\Presenter(array("message" => "Hello World"), $this, $this->factory);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -198,7 +201,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testDefaultJsonRenderer() {
         $this->givenTheTargetResource_In_WithTheBody('DefaultJsonRenderer', 'folder', '
             public function doThis() {
-                return new \watoki\curir\responder\Presenter(array("foo" => array(42, 73)));
+                return new \watoki\curir\responder\Presenter(array("foo" => array(42, 73)), $this, $this->factory);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -245,6 +248,10 @@ class DeliverResourceResponsesTest extends Specification {
     private function givenTheTargetClass_In_WithTheBody($fullName, $folder, $body) {
         $this->class->givenTheClass_In_WithTheBody($fullName, $folder, $body);
         $this->delivery->givenTheTargetIsTheClass($fullName);
+    }
+
+    private function givenTheDefaultRendererIs($class) {
+        $this->factory->setSingleton(Renderer::RENDERER, $this->factory->getInstance($class));
     }
 
 } 

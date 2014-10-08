@@ -45,7 +45,7 @@ class MultiResponderTest extends Specification {
         $this->whenITryToCreateTheResponse();
         $this->try->thenA_ShouldBeThrown(HttpError::$CLASS);
         $this->try->thenTheException_ShouldBeThrown(
-            'Invalid accepted types for [my\MultiResponderResource]: [not, neither] not supported by [foo, bar]');
+            'Invalid accepted types: [not, neither] not supported by [foo, bar]');
     }
 
     function testRenderFormat() {
@@ -84,8 +84,7 @@ class MultiResponderTest extends Specification {
 
     public function whenICreateTheResponse() {
         $request = new WebRequest(Url::fromString('curir'), new Path(), null, null, new Liste($this->formats));
-        $resource = $this->factory->getInstance('my\MultiResponderResource');
-        $this->response = $this->responder->createResponse($request, $resource, $this->factory);
+        $this->response = $this->responder->createResponse($request);
     }
 
     private function whenITryToCreateTheResponse() {
