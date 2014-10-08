@@ -6,7 +6,6 @@ use watoki\curir\delivery\WebResponse;
 use watoki\deli\Request;
 use watoki\deli\Responding;
 use watoki\deli\Router;
-use watoki\deli\target\ObjectTarget;
 use watoki\factory\Factory;
 
 class Container extends Resource implements Responding {
@@ -27,12 +26,7 @@ class Container extends Resource implements Responding {
      * @return WebResponse
      */
     public function respond(Request $request) {
-        if ($request->getTarget()->isEmpty()) {
-            $target = new ObjectTarget($request, $this, $this->factory);
-        } else {
-            $target = $this->router->route($request);
-        }
-        return $target->respond();
+        return $this->router->route($request)->respond();
     }
 
 }

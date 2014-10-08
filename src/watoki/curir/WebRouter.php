@@ -8,8 +8,10 @@ use watoki\curir\protocol\MimeTypes;
 use watoki\deli\Request;
 use watoki\deli\router\StaticRouter;
 use watoki\deli\router\TargetNotFoundException;
-use watoki\deli\Target;
 use watoki\deli\target\CallbackTarget;
+use watoki\deli\target\ObjectTarget;
+use watoki\deli\target\TargetFactory;
+use watoki\deli\Target;
 use watoki\factory\Factory;
 use watoki\stores\file\raw\File;
 use watoki\stores\file\raw\RawFileStore;
@@ -20,6 +22,9 @@ class WebRouter extends StaticRouter {
 
     /** @var Factory */
     private $factory;
+
+    /** @var TargetFactory|null */
+    private $default;
 
     /**
      * @param Factory $factory <-
@@ -53,17 +58,26 @@ class WebRouter extends StaticRouter {
         $class = new \ReflectionClass($root);
         $namespace = $class->getNamespaceName();
 
-        return new WebRouter($factory, $directory, $namespace);
+        $router = new WebRouter($factory, $directory, $namespace);
+        $router->setDefaultTarget(ObjectTarget::factory($factory, $root));
+        return $router;
     }
 
     public function route(Request $request) {
+        if ($this->default && $request->getTarget()->isEmpty()) {
+            return $this->default->create($request);
+        }
         try {
             return parent::route($request);
         } catch (TargetNotFoundException $e) {
             throw new HttpError(WebResponse::STATUS_NOT_FOUND,
-                "The resource [{$request->getTarget()}] does not exist in [{$request->getContext()}]",
-                null, 0, $e);
+                    "The resource [{$request->getTarget()}] does not exist in [{$request->getContext()}]",
+                    null, 0, $e);
         }
+    }
+
+    public function setDefaultTarget(TargetFactory $default) {
+        $this->default = $default;
     }
 
     /**

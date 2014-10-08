@@ -18,9 +18,14 @@ class WebResponseDeliverer implements ResponseDeliverer {
 
     /**
      * @param WebResponse $response
+     * @throws \Exception if $response is not a WebResponse
      * @return null
      */
     public function deliver($response) {
+        if (!($response instanceof WebResponse)) {
+            $type = is_object($response) ? get_class($response) : json_encode($response);
+            throw new \Exception('The response needs to be an instance of \watoki\curir\delivery\WebResponse. Got [' . $type . ']');
+        }
         if ($response->getStatus()) {
             header('HTTP/1.1 ' . $response->getStatus());
         }
