@@ -155,9 +155,14 @@ class Url extends Path {
             }
         }
 
-        $path = Path::fromString($string);
-        if ($path->isEmpty()) {
-            $path->append('');
+        if (!$host && !$string) {
+            $path = new Path();
+        } else {
+            $path = Path::fromString($string);
+
+            if ($path->isEmpty()) {
+                $path->append('');
+            }
         }
 
         return new Url($scheme, $host, $port, $path, $parameters, $fragment);

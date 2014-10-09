@@ -100,6 +100,19 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path');
     }
 
+    function testRedirectWithParametersOnly() {
+        $this->givenTheTargetResource_In_WithTheBody('RedirectOnlyParams', 'folder', '
+            public function doThis() {
+                return \watoki\curir\responder\Redirecter::fromString("?foo=bar");
+            }
+        ');
+        $this->request->givenTheRequestMethodIs('this');
+        $this->request->givenTheContextIs('http://some.host/some/path');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path?foo=bar');
+    }
+
     function testReturnWebResponse() {
         $this->givenTheTargetResource_In_WithTheBody('ReturnWebResponse', 'folder', '
             public function doFoo() {
