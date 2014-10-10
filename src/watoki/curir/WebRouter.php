@@ -9,7 +9,6 @@ use watoki\deli\Request;
 use watoki\deli\router\StaticRouter;
 use watoki\deli\router\TargetNotFoundException;
 use watoki\deli\target\CallbackTarget;
-use watoki\deli\target\ObjectTarget;
 use watoki\deli\target\TargetFactory;
 use watoki\deli\Target;
 use watoki\factory\Factory;
@@ -51,16 +50,6 @@ class WebRouter extends StaticRouter {
                 return $response;
             })->create($request);
         });
-    }
-
-    public static function fromResource(Resource $root, Factory $factory) {
-        $directory = $root->getDirectory();
-        $class = new \ReflectionClass($root);
-        $namespace = $class->getNamespaceName();
-
-        $router = new WebRouter($factory, $directory, $namespace);
-        $router->setDefaultTarget(ObjectTarget::factory($factory, $root));
-        return $router;
     }
 
     public function route(Request $request) {

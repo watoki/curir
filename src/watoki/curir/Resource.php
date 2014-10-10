@@ -61,11 +61,11 @@ class Resource {
 
     public function getName() {
         $reflection = new \ReflectionClass($this);
-        return substr(basename($reflection->getShortName()), 0, -strlen(WebRouter::SUFFIX));
+        return lcfirst(substr(basename($reflection->getShortName()), 0, -strlen(WebRouter::SUFFIX)));
     }
 
     public function getTemplateName() {
-        return lcfirst($this->getName());
+        return $this->getName();
     }
 
     public function getDirectory() {
