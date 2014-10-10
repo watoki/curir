@@ -48,7 +48,12 @@ class Redirecter implements Responder {
         if ($target->isAbsolute()) {
             return $target;
         }
-        return Url::fromString($request->getContext()->toString() . ($target->isEmpty() ? '' : '/') . $target);
+        $absoluteTarget = $request->getContext()->copy();
+        if (!$request->getTarget()->isEmpty()) {
+            $absoluteTarget->append($request->getTarget()->first());
+        }
+
+        return Url::fromString($absoluteTarget . ($target->isEmpty() ? '' : '/') . $target);
     }
 
     /**

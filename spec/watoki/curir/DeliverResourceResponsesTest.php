@@ -59,60 +59,6 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_BAD_REQUEST);
     }
 
-    function testRedirectToAbsoluteUrl() {
-        $this->givenTheTargetResource_In_WithTheBody('RedirectAbsolute', 'folder', '
-            public function doThis() {
-                return \watoki\curir\responder\Redirecter::fromString("http://example.com");
-            }
-        ');
-        $this->request->givenTheRequestMethodIs('this');
-
-        $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseBodyShouldBe('');
-        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_SEE_OTHER);
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://example.com');
-    }
-
-    function testRedirectToRelativeUrl() {
-        $this->givenTheTargetResource_In_WithTheBody('RedirectRelative', 'folder', '
-            public function doThis() {
-                return \watoki\curir\responder\Redirecter::fromString("../relative/path?with=query#andFragmet");
-            }
-        ');
-        $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
-
-        $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION,
-            'http://some.host/some/relative/path?with=query#andFragmet');
-    }
-
-    function testRedirectToSameUrl() {
-        $this->givenTheTargetResource_In_WithTheBody('RedirectSame', 'folder', '
-            public function doThis() {
-                return \watoki\curir\responder\Redirecter::fromString("");
-            }
-        ');
-        $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
-
-        $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path');
-    }
-
-    function testRedirectWithParametersOnly() {
-        $this->givenTheTargetResource_In_WithTheBody('RedirectOnlyParams', 'folder', '
-            public function doThis() {
-                return \watoki\curir\responder\Redirecter::fromString("?foo=bar");
-            }
-        ');
-        $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
-
-        $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path?foo=bar');
-    }
-
     function testReturnWebResponse() {
         $this->givenTheTargetResource_In_WithTheBody('ReturnWebResponse', 'folder', '
             public function doFoo() {
