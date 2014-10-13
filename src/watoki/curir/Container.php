@@ -46,7 +46,10 @@ class Container extends Resource implements Responding {
      */
     public function respond(Request $request) {
         if (!$request->getTarget()->isEmpty() && $request->getTarget()->first() == $this->getName()) {
-            $request->getContext()->append($request->getTarget()->shift());
+            $request->getTarget()->shift();
+            if (!$request->getTarget()->isEmpty()) {
+                $request->getContext()->append($this->getName());
+            }
             $target = $this->childRouter->route($request);
         } else {
             $target = $this->router->route($request);

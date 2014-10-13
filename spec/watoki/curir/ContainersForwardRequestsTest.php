@@ -18,17 +18,19 @@ class ContainersForwardRequestsTest extends Specification {
 
     function testContainerRespondsItself() {
         $this->class->givenTheContainer_In_WithTheBody('itself\MyResource', 'some/folder', '
-            public function doThat() {
-                return "Hello My";
+            /** @param $request <- */
+            public function doThat(\watoki\curir\delivery\WebRequest $request) {
+                return "Hello " . $request->getContext();
             }
         ');
         $this->delivery->givenTheTargetIsTheRespondingClass('itself\MyResource');
 
+        $this->request->givenTheContextIs('foo');
         $this->request->givenTheTargetPathIs('my');
         $this->request->givenTheRequestMethodIs('that');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseBodyShouldBe('Hello My');
+        $this->delivery->thenTheResponseBodyShouldBe('Hello foo');
     }
 
     function testContainerRespondsToEmptyPath() {
