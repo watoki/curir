@@ -26,62 +26,29 @@ class ContainersForwardRequestsTest extends Specification {
         $this->delivery->givenTheTargetIsTheRespondingClass('itself\MyResource');
 
         $this->request->givenTheContextIs('foo');
-        $this->request->givenTheTargetPathIs('my');
+        $this->request->givenTheTargetPathIs('');
         $this->request->givenTheRequestMethodIs('that');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello foo');
     }
 
-    function testContainerRespondsToEmptyPath() {
-        $this->class->givenTheContainer_In_WithTheBody('emptyPath\MyResource', 'some/folder', '
-            public function doThat() {
-                return "Hello empty path";
-            }
-        ');
-        $this->delivery->givenTheTargetIsTheRespondingClass('emptyPath\MyResource');
-
-        $this->request->givenTheTargetPathIs('');
-        $this->request->givenTheRequestMethodIs('that');
-
-        $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseBodyShouldBe('Hello empty path');
-    }
-
     function testChildResponds() {
-        $this->class->givenTheContainer_In('name\space\MyResource', 'some/folder');
-        $this->class->givenTheClass_In_WithTheBody('name\space\my\some\TargetResource', 'some/folder/my/some', '
+        $this->class->givenTheContainer_In('name\space\IndexResource', 'some/folder');
+        $this->class->givenTheClass_In_WithTheBody('name\space\some\TargetResource', 'some/folder/some', '
             /** @param $request <- */
             public function doThis(\watoki\curir\delivery\WebRequest $request) {
-                return "Hello " . $request->getContext() . " " . $request->getTarget();
+                return "Hello " . $request->getContext();
             }
         ');
         $this->request->givenTheContextIs('/here');
-        $this->delivery->givenTheTargetIsTheRespondingClass('name\space\MyResource');
+        $this->delivery->givenTheTargetIsTheRespondingClass('name\space\IndexResource');
 
-        $this->request->givenTheTargetPathIs('my/some/target');
+        $this->request->givenTheTargetPathIs('some/target');
         $this->request->givenTheRequestMethodIs('this');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Hello /here/my/some target');
-    }
-
-    function testSiblingResponds() {
-        $this->class->givenTheContainer_In('family\space\MyResource', 'some/folder');
-        $this->class->givenTheClass_In_WithTheBody('family\space\SiblingResource', 'some/folder', '
-            /** @param $request <- */
-            public function doThis(\watoki\curir\delivery\WebRequest $request) {
-                return $request->getContext() . " " . $request->getTarget();
-            }
-        ');
-        $this->request->givenTheContextIs('/context');
-        $this->delivery->givenTheTargetIsTheRespondingClass('family\space\MyResource');
-
-        $this->request->givenTheTargetPathIs('sibling');
-        $this->request->givenTheRequestMethodIs('this');
-
-        $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('/context sibling');
+        $this->delivery->thenTheResponseShouldBe('Hello /here/some/target');
     }
 
     function testNotExistingChild() {

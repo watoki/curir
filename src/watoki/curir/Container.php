@@ -3,6 +3,7 @@ namespace watoki\curir;
 
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
+use watoki\curir\delivery\WebRouter;
 use watoki\deli\Request;
 use watoki\deli\Responding;
 use watoki\deli\Router;
@@ -12,9 +13,7 @@ use watoki\factory\Factory;
 class Container extends Resource implements Responding {
 
     /** @var Router */
-    protected $router;
-
-    private $childRouter;
+    private $router;
 
     /**
      * @param Factory $factory <-
@@ -22,21 +21,20 @@ class Container extends Resource implements Responding {
     function __construct(Factory $factory) {
         parent::__construct($factory);
         $this->router = $this->createRouter();
-        $this->childRouter = $this->createRouter($this->getName());
     }
 
-    private function createRouter($suffix = null) {
-        $directory = $this->getDirectory();
+    /**
+     * @return Router
+     */
+    protected function createRouter() {
         $class = new \ReflectionClass($this);
         $namespace = $class->getNamespaceName();
-
-        if ($suffix) {
-            $directory .= '/' . $suffix;
-            $namespace .= '\\' . $suffix;
-        }
+        $directory = $this->getDirectory();
 
         $router = new WebRouter($this->factory, $directory, $namespace);
+        $router->setUseFirstIndex(false);
         $router->setDefaultTarget(ObjectTarget::factory($this->factory, $this));
+
         return $router;
     }
 
@@ -45,16 +43,7 @@ class Container extends Resource implements Responding {
      * @return WebResponse
      */
     public function respond(Request $request) {
-        if (!$request->getTarget()->isEmpty() && $request->getTarget()->first() == $this->getName()) {
-            $request->getTarget()->shift();
-            if (!$request->getTarget()->isEmpty()) {
-                $request->getContext()->append($this->getName());
-            }
-            $target = $this->childRouter->route($request);
-        } else {
-            $target = $this->router->route($request);
-        }
-        return $target->respond();
+        return $this->router->route($request)->respond();
     }
 
 }

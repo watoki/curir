@@ -3,6 +3,7 @@ namespace watoki\curir;
 
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
+use watoki\curir\delivery\WebRouter;
 use watoki\curir\responder\Presenter;
 use watoki\factory\Factory;
 

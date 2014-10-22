@@ -6,6 +6,7 @@ use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebRequestBuilder;
 use watoki\curir\delivery\WebResponse;
 use watoki\curir\delivery\WebResponseDeliverer;
+use watoki\curir\delivery\WebRouter;
 use watoki\curir\error\ErrorResponse;
 use watoki\curir\error\HttpError;
 use watoki\curir\protocol\decoder\FormDecoder;
