@@ -69,4 +69,8 @@ class WebResponse {
         $this->status = $status;
     }
 
+    function __toString() {
+        return $this->body;
+    }
+
 } 

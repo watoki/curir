@@ -17,25 +17,23 @@ class WebResponseDeliverer implements ResponseDeliverer {
     }
 
     /**
-     * @param WebResponse $response
+     * @param WebResponse|mixed $response
      * @throws \Exception if $response is not a WebResponse
      * @return null
      */
     public function deliver($response) {
-        if (!($response instanceof WebResponse)) {
-            $type = is_object($response) ? get_class($response) : json_encode($response);
-            throw new \Exception('The response needs to be an instance of \watoki\curir\delivery\WebResponse. Got [' . $type . ']');
-        }
-        if ($response->getStatus()) {
-            header('HTTP/1.1 ' . $response->getStatus());
-        }
-        foreach ($response->getHeaders() as $header => $value) {
-            if (!is_null($value)) {
-                header($header . ': ' . $value);
+        if ($response instanceof WebResponse) {
+            if ($response->getStatus()) {
+                header('HTTP/1.1 ' . $response->getStatus());
+            }
+            foreach ($response->getHeaders() as $header => $value) {
+                if (!is_null($value)) {
+                    header($header . ': ' . $value);
+                }
             }
         }
         $this->cookies->applyCookies('setcookie');
 
-        echo $response->getBody();
+        echo $response;
     }
 }
