@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir\protocol;
 
+use watoki\collections\Collection;
 use watoki\collections\Map;
 use watoki\deli\Path;
 
@@ -42,7 +43,7 @@ class Url extends Path {
      * @param string|null $fragment
      */
     function __construct($scheme, $host, $port, Path $path, Map $parameters = null, $fragment = null) {
-        parent::__construct($path->toArray());
+        parent::__construct($path);
         $this->scheme = $scheme;
         $this->host = $host;
         $this->port = $port;
@@ -108,6 +109,18 @@ class Url extends Path {
 
     public function setFragment($fragment) {
         $this->fragment = $fragment;
+    }
+
+    public function getPath() {
+        return new Path($this);
+    }
+
+    public function setPath(Collection $path) {
+        $elements = array_values($path->elements);
+        if ($this->isAbsolute()) {
+            array_unshift($elements, '');
+        }
+        $this->elements = $elements;
     }
 
     static public function fromString($string) {
@@ -218,18 +231,6 @@ class Url extends Path {
         . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
     }
 
-    public function getPath() {
-        return new Path($this->elements);
-    }
-
-    public function setPath(Path $path) {
-        $elements = $path->elements;
-        if ($this->isAbsolute()) {
-            array_unshift($elements, '');
-        }
-        $this->elements = $elements;
-    }
-
     private function flattenParams(Map $parameters, $i = 0) {
         $flat = new Map();
         foreach ($parameters as $key => $value) {
@@ -249,7 +250,7 @@ class Url extends Path {
      * @return static
      */
     public function copy() {
-        return new Url($this->scheme, $this->host, $this->port, new Path($this->toArray()), $this->parameters->deepCopy(), $this->fragment);
+        return new Url($this->scheme, $this->host, $this->port, new Path($this->elements), $this->parameters->deepCopy(), $this->fragment);
     }
 
 }
