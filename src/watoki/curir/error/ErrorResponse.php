@@ -13,6 +13,7 @@ class ErrorResponse extends WebResponse {
     private $request;
 
     function __construct(WebRequest $request, \Exception $exception) {
+        parent::__construct('');
         $this->request = $request;
         $this->exception = $exception;
     }

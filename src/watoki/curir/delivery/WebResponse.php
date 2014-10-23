@@ -70,7 +70,7 @@ class WebResponse {
     }
 
     function __toString() {
-        return $this->body;
+        return $this->getBody();
     }
 
 } 
