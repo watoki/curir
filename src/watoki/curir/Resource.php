@@ -4,10 +4,13 @@ namespace watoki\curir;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
 use watoki\curir\delivery\WebRouter;
-use watoki\curir\responder\Presenter;
+use watoki\curir\rendering\Locatable;
+use watoki\curir\rendering\ClassTemplateLocator;
+use watoki\curir\rendering\Renderer;
+use watoki\curir\responder\FormatResponder;
 use watoki\factory\Factory;
 
-class Resource {
+class Resource implements Locatable {
 
     /** @var Factory */
     protected $factory;
@@ -40,7 +43,7 @@ class Resource {
         } else if (is_array($return)) {
             return $this->createDefaultResponder($return)->createResponse($request);
         } else {
-            return $this->createResponseFromString((string) $return);
+            return $this->createResponse($return);
         }
     }
 
@@ -49,24 +52,29 @@ class Resource {
      * @return Responder
      */
     protected function createDefaultResponder($return) {
-        return new Presenter($return, $this, $this->factory);
+        $locator = new ClassTemplateLocator($this, $this->factory);
+        $renderer = $this->createDefaultRenderer();
+        return new FormatResponder($return, $locator, $renderer);
     }
 
     /**
-     * @param $return
+     * @return Renderer
+     */
+    protected function createDefaultRenderer() {
+        return $this->factory->getInstance(Renderer::RENDERER);
+    }
+
+    /**
+     * @param mixed $return
      * @return WebResponse
      */
-    protected function createResponseFromString($return) {
-        return new WebResponse($return);
+    protected function createResponse($return) {
+        return new WebResponse((string) $return);
     }
 
     public function getName() {
         $reflection = new \ReflectionClass($this);
         return lcfirst(substr(basename($reflection->getShortName()), 0, -strlen(WebRouter::SUFFIX)));
-    }
-
-    public function getTemplateName() {
-        return $this->getName();
     }
 
     public function getDirectory() {

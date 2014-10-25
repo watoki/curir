@@ -1,5 +1,5 @@
 <?php
-namespace watoki\curir\renderer;
+namespace watoki\curir\rendering;
 
 class CallbackRenderer implements Renderer {
 
