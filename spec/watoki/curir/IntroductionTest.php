@@ -71,22 +71,22 @@ class IntroductionTest extends Specification {
          * use a `DynamicRouter` to map incoming URLs to anything.
          */
         $router = new DynamicRouter();
-        $router->setPath('hello', CallbackTarget::factory(function () {
-            return "Hello stranger";
+        $router->addPath('hello', CallbackTarget::factory(function () {
+            return "Hello World";
         }));
 
         /**
          * You can also use placeholders which will the set as request arguments
          */
-        $router->setPath('hello/{name}', CallbackTarget::factory(function (WebRequest $request) {
-            return "Hello " . $request->getArguments()->get('name');
+        $router->addPath('hi/{name}', CallbackTarget::factory(function (WebRequest $request) {
+            return "Hi " . $request->getArguments()->get('name');
         }));
 
         /**
          * And you can route to objects as well
          */
         $respondingClass = 'MyResource';
-        $router->setPath('my', RespondingTarget::factory($this->factory, new $respondingClass));
+        $router->addPath('my', RespondingTarget::factory($this->factory, new $respondingClass));
 
         /**
          * To get the whole routing and delivering going just call
@@ -99,13 +99,13 @@ class IntroductionTest extends Specification {
 
         $this->givenTheTargetIs('hello');
         WebDelivery::quickRoute($router);
-        $this->thenTheResponseShouldBe('Hello stranger');
+        $this->thenTheResponseShouldBe('Hello World');
 
         // <hr/>
 
-        $this->givenTheTargetIs('hello/Joe');
+        $this->givenTheTargetIs('hi/Joe');
         WebDelivery::quickRoute($router);
-        $this->thenTheResponseShouldBe('Hello Joe');
+        $this->thenTheResponseShouldBe('Hi Joe');
 
         // <hr/>
 
