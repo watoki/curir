@@ -27,10 +27,10 @@ use watoki\factory\Factory;
 
 class WebDelivery extends Delivery {
 
-    public static function init(Factory $factory = null) {
+    public static function init(Renderer $defaultRenderer = null, Factory $factory = null) {
         $factory = $factory ? : new Factory();
 
-        $factory->setSingleton(Renderer::RENDERER, new PhpRenderer());
+        $factory->setSingleton(Renderer::RENDERER, $defaultRenderer ? : new PhpRenderer());
         $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
         $factory->getSingleton(CookieStore::$CLASS, array('source' => $_COOKIE));
 
