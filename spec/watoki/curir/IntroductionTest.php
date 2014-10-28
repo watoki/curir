@@ -121,7 +121,7 @@ class IntroductionTest extends Specification {
 
     private function disableActualDelivery() {
         WebDelivery::$factory = $this->factory;
-        WebDelivery::init($this->factory);
+        WebDelivery::init(null, $this->factory);
         WebDelivery::$test = new TestDelivererStub($this->request->whenIBuildTheRequest());
     }
 
