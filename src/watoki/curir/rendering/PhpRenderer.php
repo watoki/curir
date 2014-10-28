@@ -1,7 +1,7 @@
 <?php
 namespace watoki\curir\rendering;
 
-class VariableRenderer implements Renderer {
+class PhpRenderer implements Renderer {
 
     public static $CLASS = __CLASS__;
 
@@ -15,13 +15,17 @@ class VariableRenderer implements Renderer {
         foreach ($model as $key => $value) {
             $$key = $value;
         }
-        $eval = eval('return "' . str_replace('"', '\"', $template) . '";');
+        ob_start();
+        $template = str_replace('<?= ', '<?php echo ', $template);
+        $template = str_replace('<? ', '<?php ', $template);
+
+        $eval = eval('?>' . $template);
         if ($eval === false) {
             throw new \Exception("Could not parse template: "
                     . "\n--------------------------------\n"
                     . $template
                     . "\n--------------------------------\n");
         }
-        return $eval;
+        return ob_get_clean();
     }
 }

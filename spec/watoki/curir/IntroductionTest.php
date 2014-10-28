@@ -60,7 +60,7 @@ class IntroductionTest extends Specification {
         /**
          * with this line in your `index.php`
          */
-        WebDelivery::quickStart('MyResource');
+        WebDelivery::quickResponse('MyResource');
 
         $this->thenTheResponseShouldBe('Hello World');
 
@@ -148,8 +148,8 @@ class IntroductionTest_TestDelivery extends \watoki\curir\WebDelivery {
     /** @var TestDelivererStub */
     public static $test;
 
-    public static function quickStart($rootResourceClass, Factory $factory = null) {
-        $targetFactory = RespondingTarget::factory(self::$factory, self::$factory->getInstance($rootResourceClass));
+    public static function quickResponse($respondingClass, Factory $factory = null) {
+        $targetFactory = RespondingTarget::factory(self::$factory, self::$factory->getInstance($respondingClass));
         self::quickRoute(new NoneRouter($targetFactory));
     }
 

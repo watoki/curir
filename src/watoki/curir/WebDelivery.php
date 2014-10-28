@@ -12,7 +12,7 @@ use watoki\curir\error\HttpError;
 use watoki\curir\protocol\decoder\FormDecoder;
 use watoki\curir\protocol\decoder\ImageDecoder;
 use watoki\curir\protocol\decoder\JsonDecoder;
-use watoki\curir\rendering\VariableRenderer;
+use watoki\curir\rendering\PhpRenderer;
 use watoki\curir\rendering\Renderer;
 use watoki\deli\Delivery;
 use watoki\deli\filter\DefaultFilterRegistry;
@@ -30,17 +30,17 @@ class WebDelivery extends Delivery {
     public static function init(Factory $factory = null) {
         $factory = $factory ? : new Factory();
 
-        $factory->setSingleton(Renderer::RENDERER, new VariableRenderer());
+        $factory->setSingleton(Renderer::RENDERER, new PhpRenderer());
         $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
         $factory->getSingleton(CookieStore::$CLASS, array('source' => $_COOKIE));
 
         return $factory;
     }
 
-    public static function quickStart($rootResourceClass, Factory $factory = null) {
+    public static function quickResponse($respondingClass, Factory $factory = null) {
         $factory = $factory ? : self::init();
 
-        $root = $factory->getInstance($rootResourceClass);
+        $root = $factory->getInstance($respondingClass);
         $router = new NoneRouter(RespondingTarget::factory($factory, $root));
         self::quickRoute($router, $factory);
     }

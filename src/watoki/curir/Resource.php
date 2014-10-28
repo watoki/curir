@@ -66,9 +66,13 @@ class Resource implements Locatable {
 
     /**
      * @param mixed $return
+     * @throws \Exception if $return cannot be converted to string
      * @return WebResponse
      */
     protected function createResponse($return) {
+        if (is_object($return) && !method_exists($return, '__toString')) {
+            throw new \Exception("Cannot convert to string: " . get_class($return));
+        }
         return new WebResponse((string) $return);
     }
 

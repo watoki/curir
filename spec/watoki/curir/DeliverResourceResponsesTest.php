@@ -7,7 +7,7 @@ use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use spec\watoki\stores\FileStoreFixture;
 use watoki\curir\delivery\WebResponse;
 use watoki\curir\rendering\Renderer;
-use watoki\curir\rendering\VariableRenderer;
+use watoki\curir\rendering\PhpRenderer;
 use watoki\scrut\Specification;
 
 /**
@@ -143,7 +143,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testDefaultRenderer() {
-        $this->givenTheDefaultRendererIs(VariableRenderer::$CLASS);
+        $this->givenTheDefaultRendererIs(PhpRenderer::$CLASS);
         $this->file->givenAFile_WithContent('folder/default.html', '<h1>$message {$array[\'name\']}</h1>');
         $this->givenTheTargetResource_In_WithTheBody('DefaultResource', 'folder', '
             public function doThis() {
@@ -158,7 +158,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testDefaultJsonRenderer() {
-        $this->givenTheDefaultRendererIs(VariableRenderer::$CLASS);
+        $this->givenTheDefaultRendererIs(PhpRenderer::$CLASS);
         $this->givenTheTargetResource_In_WithTheBody('DefaultJsonRenderer', 'folder', '
             public function doThis() {
                 return array("foo" => array(42, 73));
@@ -185,7 +185,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testConvenienceWrappingModelIntoResponder() {
-        $this->givenTheDefaultRendererIs(VariableRenderer::$CLASS);
+        $this->givenTheDefaultRendererIs(PhpRenderer::$CLASS);
         $this->givenTheTargetResource_In_WithTheBody('WrappingModelIntoResponder', 'folder', '
             public function doReturnModel() {
                 return array("foo" => array(42, 73));
