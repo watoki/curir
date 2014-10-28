@@ -25,7 +25,7 @@ class WebDeliveryFixture extends Fixture {
 
     public function setUp() {
         parent::setUp();
-        Delivery::$errorReporting = E_ALL;
+        Delivery::errorReporting(E_ALL);
     }
 
     public function givenTheTargetRespondsWith($callback) {

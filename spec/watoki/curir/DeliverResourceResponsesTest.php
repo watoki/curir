@@ -25,7 +25,7 @@ class DeliverResourceResponsesTest extends Specification {
             public function __construct($viewModel, $resource, $factory) {
                 parent::__construct($viewModel,
                     new \watoki\curir\rendering\ClassTemplateLocator($resource, $factory),
-                    new \watoki\curir\rendering\VariableRenderer());
+                    new \watoki\curir\rendering\PhpRenderer());
             }
             public function renderBig() {
                 return strtoupper($this->getModel());
@@ -144,17 +144,17 @@ class DeliverResourceResponsesTest extends Specification {
 
     function testDefaultRenderer() {
         $this->givenTheDefaultRendererIs(PhpRenderer::$CLASS);
-        $this->file->givenAFile_WithContent('folder/default.html', '<h1>$message {$array[\'name\']}</h1>');
+        $this->file->givenAFile_WithContent('folder/default.html', '<h1><?= $message ?></h1>');
         $this->givenTheTargetResource_In_WithTheBody('DefaultResource', 'folder', '
             public function doThis() {
-                return array("message" => "Hello", "array" => array("name" => "John"));
+                return array("message" => "Hello World");
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
         $this->request->givenTheTargetPathIs('something.html');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseBodyShouldBe('<h1>Hello John</h1>');
+        $this->delivery->thenTheResponseBodyShouldBe('<h1>Hello World</h1>');
     }
 
     function testDefaultJsonRenderer() {
