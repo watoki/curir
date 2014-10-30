@@ -31,7 +31,7 @@ class ManageCookiesTest extends Specification {
 
         $this->thenACookie_ShouldBeSet('foo');
         $this->thenTheCookie_ShouldHaveTheValue('foo',
-                '{"payload":"Hello World","expire":null,"path":null,"domain":null,"secure":null,"httpOnly":null}');
+                '{"payload":"Hello World","expire":null,"path":"\/","domain":null,"secure":null,"httpOnly":null}');
     }
 
     function testCreateCookieWithAllParameters() {
