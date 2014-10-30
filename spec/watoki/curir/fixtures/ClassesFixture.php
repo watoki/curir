@@ -2,7 +2,9 @@
 namespace spec\watoki\curir\fixtures;
 
 use spec\watoki\stores\FileStoreFixture;
+use watoki\curir\Container;
 use watoki\scrut\Fixture;
+use watoki\stores\file\raw\RawFileStore;
 
 /**
  * @property FileStoreFixture file <-
@@ -14,8 +16,8 @@ class ClassesFixture extends Fixture {
     }
 
     public function givenTheContainer_In_WithTheBody($fullClassName, $folder, $body) {
-        $this->givenTheClass_Extending_In_WithTheBody($fullClassName, '\watoki\curir\Container', $folder, "
-            public function getDirectory() {
+        $this->givenTheClass_Extending_In_WithTheBody($fullClassName, '\spec\watoki\curir\fixtures\TestContainerStub', $folder, "
+            function getMockFolder() {
                 return '$folder';
             }
             $body
@@ -53,4 +55,23 @@ class ClassesFixture extends Fixture {
         $this->file->givenAFile_WithContent($file, '<?php ' . $code);
     }
 
-} 
+}
+
+abstract class TestContainerStub extends Container {
+
+    protected function createRouter() {
+        $router = parent::createRouter();
+
+        $reflection = new \ReflectionClass($router);
+        $store = $reflection->getProperty('store');
+        $store->setAccessible(true);
+        $store->setValue($router, $this->factory->getInstance(RawFileStore::$CLASS, array(
+            "rootDirectory" => $this->getMockFolder()
+        )));
+
+        return $router;
+    }
+
+    abstract protected function getMockFolder();
+
+}

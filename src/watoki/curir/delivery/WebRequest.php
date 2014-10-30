@@ -58,10 +58,16 @@ class WebRequest extends Request {
         $this->headers = $headers ? : new Map();
     }
 
+    /**
+     * @return Liste
+     */
     public function getFormats() {
         return $this->formats;
     }
 
+    /**
+     * @return Map
+     */
     public function getHeaders() {
         return $this->headers;
     }
@@ -85,6 +91,9 @@ class WebRequest extends Request {
         parent::setContext($context);
     }
 
+    /**
+     * @return WebRequest
+     */
     public function copy() {
         return new WebRequest(
                 $this->getContext()->copy(),
@@ -96,6 +105,9 @@ class WebRequest extends Request {
         );
     }
 
+    /**
+     * @return string
+     */
     public function toString() {
         $queryString = $this->getArguments()->isEmpty() ? '' : '?' . urldecode(http_build_query($this->getArguments()->toArray()));
         $targetString = $this->getTarget()->isEmpty() ? '' : '/' . $this->getTarget()->toString();

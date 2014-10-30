@@ -29,7 +29,7 @@ class Container extends Resource implements Responding {
     protected function createRouter() {
         $class = new \ReflectionClass($this);
         $namespace = $class->getNamespaceName();
-        $directory = $this->getDirectory();
+        $directory = dirname($class->getFileName());
 
         $router = new WebRouter($this->factory, $directory, $namespace);
         $router->setUseFirstIndex(false);

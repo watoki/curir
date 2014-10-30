@@ -3,14 +3,12 @@ namespace watoki\curir;
 
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
-use watoki\curir\delivery\WebRouter;
-use watoki\curir\rendering\Locatable;
-use watoki\curir\rendering\ClassTemplateLocator;
 use watoki\curir\rendering\Renderer;
+use watoki\curir\rendering\locating\ResourceTemplateLocator;
 use watoki\curir\responder\FormatResponder;
 use watoki\factory\Factory;
 
-class Resource implements Locatable {
+class Resource {
 
     /** @var Factory */
     protected $factory;
@@ -52,8 +50,9 @@ class Resource implements Locatable {
      * @return Responder
      */
     protected function createDefaultResponder($return) {
-        $locator = new ClassTemplateLocator($this, $this->factory);
+        $locator = new ResourceTemplateLocator($this);
         $renderer = $this->createDefaultRenderer();
+
         return new FormatResponder($return, $locator, $renderer);
     }
 
@@ -74,16 +73,6 @@ class Resource implements Locatable {
             throw new \Exception("Cannot convert to string: " . get_class($return));
         }
         return new WebResponse((string) $return);
-    }
-
-    public function getName() {
-        $reflection = new \ReflectionClass($this);
-        return lcfirst(substr(basename($reflection->getShortName()), 0, -strlen(WebRouter::SUFFIX)));
-    }
-
-    public function getDirectory() {
-        $reflection = new \ReflectionClass($this);
-        return dirname($reflection->getFileName());
     }
 
 }

@@ -73,10 +73,7 @@ class RedirectRequestsTest extends Specification {
     }
 
     private function givenTheTargetResource_In_WithTheBody($fullName, $folder, $body) {
-        $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, "
-            public function getDirectory() {
-                return '$folder';
-            }" . $body);
+        $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, "" . $body);
         $this->delivery->givenTheTargetIsTheClass($fullName);
     }
 

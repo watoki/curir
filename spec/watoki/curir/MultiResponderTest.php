@@ -21,10 +21,7 @@ use watoki\scrut\Specification;
 class MultiResponderTest extends Specification {
 
     public function background() {
-        $this->class->givenTheClass_Extending_In_WithTheBody('my\MultiResponderResource', '\watoki\curir\Resource', 'folder', "
-            public function getDirectory() {
-                return 'folder';
-            }");
+        $this->class->givenTheClass_Extending_In_WithTheBody('my\MultiResponderResource', '\watoki\curir\Resource', 'folder', "");
     }
 
     function testFallBackToDefault() {

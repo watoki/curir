@@ -4,7 +4,7 @@ namespace watoki\curir\responder;
 use watoki\curir\error\HttpError;
 use watoki\curir\protocol\MimeTypes;
 use watoki\curir\rendering\Renderer;
-use watoki\curir\rendering\TemplateLocator;
+use watoki\curir\rendering\locating\TemplateLocator;
 use watoki\curir\Responder;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
@@ -17,7 +17,7 @@ class FormatResponder implements Responder {
     /** @var mixed */
     private $model;
 
-    /** @var \watoki\curir\rendering\TemplateLocator */
+    /** @var \watoki\curir\rendering\locating\TemplateLocator */
     private $templateLocator;
 
     /** @var Renderer */

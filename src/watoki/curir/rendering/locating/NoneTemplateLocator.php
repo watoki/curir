@@ -1,5 +1,5 @@
 <?php
-namespace watoki\curir\rendering;
+namespace watoki\curir\rendering\locating;
 
 class NoneTemplateLocator implements TemplateLocator {
 

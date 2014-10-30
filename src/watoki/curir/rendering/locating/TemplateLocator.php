@@ -1,5 +1,5 @@
 <?php
-namespace watoki\curir\rendering;
+namespace watoki\curir\rendering\locating;
 
 interface TemplateLocator {
 
