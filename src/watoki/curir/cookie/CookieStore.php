@@ -50,6 +50,7 @@ class CookieStore extends Store {
             throw new \InvalidArgumentException('Cookie key cannot be empty.');
         }
         $this->serialized[$key] = $this->serialize($entity, $key);
+        $this->source[$key] = $this->serialized[$key][0];
     }
 
     /**

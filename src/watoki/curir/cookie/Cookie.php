@@ -32,9 +32,4 @@ class Cookie {
         $this->secure = $secure;
     }
 
-    function __toString() {
-        return $this->payload;
-    }
-
-
 }
