@@ -37,7 +37,7 @@ class RedirectRequestsTest extends Specification {
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
+        $this->request->givenTheContextIs('http://some.host/some/absolute/path');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION,
@@ -50,9 +50,8 @@ class RedirectRequestsTest extends Specification {
                 return \watoki\curir\responder\Redirecter::fromString("");
             }
         ');
-        $this->request->givenTheTargetPathIs('redirectSame');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
+        $this->request->givenTheContextIs('http://some.host/some/path/redirectSame');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/redirectSame');
@@ -64,9 +63,8 @@ class RedirectRequestsTest extends Specification {
                 return \watoki\curir\responder\Redirecter::fromString("?foo=bar");
             }
         ');
-        $this->request->givenTheTargetPathIs('onlyParams');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
+        $this->request->givenTheContextIs('http://some.host/some/path/onlyParams');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/onlyParams?foo=bar');
