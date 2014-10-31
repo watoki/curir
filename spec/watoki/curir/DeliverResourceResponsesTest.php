@@ -141,7 +141,7 @@ class DeliverResourceResponsesTest extends Specification {
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_SERVER_ERROR);
-        $this->delivery->thenTheResponseBodyShouldBe('Exception: Could not find template [noTemplate.foo] for [NoTemplateResource]');
+        $this->delivery->thenTheResponseBodyShouldBe('Exception: Could not find template of format [foo] for [NoTemplateResource]');
     }
 
     function testDefaultRenderer() {

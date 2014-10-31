@@ -5,8 +5,8 @@ use watoki\curir\delivery\WebRouter;
 
 class ResourceTemplateLocator extends ClassTemplateLocator {
 
-    protected function getName() {
-        return lcfirst(substr(basename(parent::getName()), 0, -strlen(WebRouter::SUFFIX)));
+    protected function getName($class) {
+        return lcfirst(substr(basename(parent::getName($class)), 0, -strlen(WebRouter::SUFFIX)));
     }
 
 } 
