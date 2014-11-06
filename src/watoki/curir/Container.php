@@ -4,9 +4,11 @@ namespace watoki\curir;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
 use watoki\curir\delivery\WebRouter;
+use watoki\curir\error\HttpError;
 use watoki\deli\Request;
 use watoki\deli\Responding;
 use watoki\deli\Router;
+use watoki\deli\router\TargetNotFoundException;
 use watoki\deli\target\ObjectTarget;
 use watoki\factory\Factory;
 
@@ -40,10 +42,16 @@ class Container extends Resource implements Responding {
 
     /**
      * @param Request|WebRequest $request
+     * @throws error\HttpError
      * @return WebResponse
      */
     public function respond(Request $request) {
-        return $this->router->route($request)->respond();
+        try {
+            return $this->router->route($request)->respond();
+        } catch (TargetNotFoundException $e) {
+            throw new HttpError(WebResponse::STATUS_NOT_FOUND, "Could not find [" . $request->getTarget()->toString()
+                . "] in [" . $request->getContext()->toString() . "].", "", 0, $e);
+        }
     }
 
 }
