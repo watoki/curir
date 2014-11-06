@@ -37,6 +37,10 @@ class FormatResponder implements Responder {
         return $this->renderer->render($this->getTemplate('html'), $this->getModel());
     }
 
+    public function renderNull() {
+        return $this->getModel();
+    }
+
     /**
      * @return mixed
      */
