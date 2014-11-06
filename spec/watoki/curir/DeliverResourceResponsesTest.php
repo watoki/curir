@@ -140,8 +140,8 @@ class DeliverResourceResponsesTest extends Specification {
         $this->request->givenTheTargetPathIs('something.foo');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_SERVER_ERROR);
-        $this->delivery->thenTheResponseBodyShouldBe('Exception: Could not find template of format [foo] for [NoTemplateResource]');
+        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_NOT_ACCEPTABLE);
+        $this->delivery->thenTheResponseBodyShouldBe("Could not render the resource in an accepted format.");
     }
 
     function testDefaultRenderer() {

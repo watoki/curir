@@ -18,7 +18,8 @@ class LocateTemplatesTest extends Specification {
             '<?php namespace template\space; class WithoutTemplate {}');
 
         $this->whenITryToLocateTheTemplateOf('template\space\WithoutTemplate');
-        $this->try->thenTheException_ShouldBeThrown('Could not find template of format [foo] for [template\space\WithoutTemplate]');
+        $this->try->thenTheException_ShouldBeThrown('Could not find template of format [foo] ' .
+            'for [template\space\WithoutTemplate]. Searched for ["WithoutTemplate.foo"]');
     }
 
     function testTemplateAtChildClass() {
@@ -38,6 +39,17 @@ class LocateTemplatesTest extends Specification {
         $this->givenTheFile_Containing('some/folder/ParentClass.foo', 'Hello Parent');
 
         $this->whenILocateTheTemplateOf('template\space\ChildClass');
+        $this->thenItShouldFindTheTemplate('Hello Parent');
+    }
+
+    function testTemplateAtParentClassInDifferentFolder() {
+        $this->givenTheFile_Containing('some/folder/ParentClass.php',
+            '<?php namespace template\here; class ParentClass {}');
+        $this->givenTheFile_Containing('other/folder/ChildClass.php',
+            '<?php namespace template\here; class ChildClass extends ParentClass {}');
+        $this->givenTheFile_Containing('some/folder/ParentClass.foo', 'Hello Parent');
+
+        $this->whenILocateTheTemplateOf('template\here\ChildClass');
         $this->thenItShouldFindTheTemplate('Hello Parent');
     }
 

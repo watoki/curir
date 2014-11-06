@@ -74,6 +74,11 @@ class FormatResponder implements Responder {
     }
 
     protected function getTemplate($format) {
-        return $this->templateLocator->find($format);
+        try {
+            return $this->templateLocator->find($format);
+        } catch (\Exception $e) {
+            throw new HttpError(WebResponse::STATUS_NOT_ACCEPTABLE,
+                "Could not render the resource in an accepted format.", "", 0, $e);
+        }
     }
 }
