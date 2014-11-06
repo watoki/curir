@@ -19,6 +19,8 @@ class WebResponse {
     const STATUS_NOT_ACCEPTABLE = '406 Not Acceptable';
     const STATUS_SERVER_ERROR = '500 Internal Server Error';
     const STATUS_NOT_IMPLEMENTED = '501 Not Implemented';
+    const UNSUPPORTED_MEDIA_TYPE = '415 Unsupported Media Type';
+	const REQUEST_ENTITY_TOO_LARGE = '413 Request Entity Too Large';
 
     /** @var string */
     private $body;
