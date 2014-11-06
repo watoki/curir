@@ -37,7 +37,7 @@ class RedirectRequestsTest extends Specification {
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
+        $this->request->givenTheContextIs('http://some.host/some/absolute/path');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION,
@@ -50,9 +50,8 @@ class RedirectRequestsTest extends Specification {
                 return \watoki\curir\responder\Redirecter::fromString("");
             }
         ');
-        $this->request->givenTheTargetPathIs('redirectSame');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
+        $this->request->givenTheContextIs('http://some.host/some/path/redirectSame');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/redirectSame');
@@ -64,19 +63,15 @@ class RedirectRequestsTest extends Specification {
                 return \watoki\curir\responder\Redirecter::fromString("?foo=bar");
             }
         ');
-        $this->request->givenTheTargetPathIs('onlyParams');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path');
+        $this->request->givenTheContextIs('http://some.host/some/path/onlyParams');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/onlyParams?foo=bar');
     }
 
     private function givenTheTargetResource_In_WithTheBody($fullName, $folder, $body) {
-        $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, "
-            public function getDirectory() {
-                return '$folder';
-            }" . $body);
+        $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, "" . $body);
         $this->delivery->givenTheTargetIsTheClass($fullName);
     }
 

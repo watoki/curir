@@ -23,7 +23,7 @@ class Cookie {
     /** @var null|bool */
     public $httpOnly;
 
-    function __construct($payload, \DateTime $expire = null, $path = null, $domain = null, $secure = null, $httpOnly = null) {
+    function __construct($payload, \DateTime $expire = null, $path = '/', $domain = null, $secure = null, $httpOnly = null) {
         $this->domain = $domain;
         $this->expire = $expire;
         $this->httpOnly = $httpOnly;
@@ -31,10 +31,5 @@ class Cookie {
         $this->payload = $payload;
         $this->secure = $secure;
     }
-
-    function __toString() {
-        return $this->payload;
-    }
-
 
 }

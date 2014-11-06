@@ -12,14 +12,11 @@ class PhpRenderer implements Renderer {
      * @return string
      */
     public function render($template, $model) {
-        foreach ($model as $key => $value) {
-            $$key = $value;
-        }
-        ob_start();
         $template = str_replace('<?= ', '<?php echo ', $template);
         $template = str_replace('<? ', '<?php ', $template);
 
-        $eval = eval('?>' . $template);
+        ob_start();
+        $eval = $this->evalWithVariables($model, $template);
         if ($eval === false) {
             throw new \Exception("Could not parse template: "
                     . "\n--------------------------------\n"
@@ -27,5 +24,12 @@ class PhpRenderer implements Renderer {
                     . "\n--------------------------------\n");
         }
         return ob_get_clean();
+    }
+
+    private function evalWithVariables($__model, $__template) {
+        foreach ($__model as $__key => $__value) {
+            $$__key = $__value;
+        }
+        return eval('?>' . $__template);
     }
 }

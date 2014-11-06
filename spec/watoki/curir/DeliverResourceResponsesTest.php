@@ -6,8 +6,8 @@ use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use spec\watoki\stores\FileStoreFixture;
 use watoki\curir\delivery\WebResponse;
-use watoki\curir\rendering\Renderer;
 use watoki\curir\rendering\PhpRenderer;
+use watoki\curir\rendering\Renderer;
 use watoki\scrut\Specification;
 
 /**
@@ -22,9 +22,9 @@ class DeliverResourceResponsesTest extends Specification {
 
     public function background() {
         $this->class->givenTheClass_Extending_In_WithTheBody('SomeResponder', '\watoki\curir\responder\FormatResponder', 'folder', '
-            public function __construct($viewModel, $resource, $factory) {
+            public function __construct($viewModel, $resource) {
                 parent::__construct($viewModel,
-                    new \watoki\curir\rendering\ClassTemplateLocator($resource, $factory),
+                    new \watoki\curir\rendering\locating\ResourceTemplateLocator($resource, $resource->getStore()),
                     new \watoki\curir\rendering\PhpRenderer());
             }
             public function renderBig() {
@@ -79,12 +79,13 @@ class DeliverResourceResponsesTest extends Specification {
     function testRespondInAcceptedFormat() {
         $this->givenTheTargetResource_In_WithTheBody('RespondInAcceptedFormat', 'folder', '
             public function doThis() {
-                return new SomeResponder("Hello World", $this, $this->factory);
+                return new SomeResponder("Hello World", $this);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
 
         $this->request->givenTheTargetPathIs('this.big');
+
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('HELLO WORLD');
 
@@ -95,6 +96,7 @@ class DeliverResourceResponsesTest extends Specification {
 
         $this->request->givenTheTargetPathIs('this.txt');
         $this->request->givenTheRequestMethodIs('this');
+
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello World!');
         $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_CONTENT_TYPE, 'text/plain');
@@ -103,7 +105,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testRenderMethodMissing() {
         $this->givenTheTargetResource_In_WithTheBody('RenderMethodMissing', 'folder', '
             public function doThis() {
-                return new SomeResponder("Hello World", $this, $this->factory);
+                return new SomeResponder("Hello World", $this);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -117,7 +119,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testRenderTemplate() {
         $this->givenTheTargetResource_In_WithTheBody('RenderTemplateResource', 'some/folder', '
             public function doThis() {
-                return new SomeResponder("", $this, $this->factory);
+                return new SomeResponder("", $this);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -131,7 +133,7 @@ class DeliverResourceResponsesTest extends Specification {
     function testTemplateFileDoesNotExist() {
         $this->givenTheTargetResource_In_WithTheBody('NoTemplateResource', 'that/folder', '
             public function doThis() {
-                return new SomeResponder("", $this, $this->factory);
+                return new SomeResponder("", $this);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -139,7 +141,7 @@ class DeliverResourceResponsesTest extends Specification {
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_SERVER_ERROR);
-        $this->delivery->thenTheResponseBodyShouldBe('Exception: Could not find template [noTemplate.foo] for [NoTemplateResource]');
+        $this->delivery->thenTheResponseBodyShouldBe('Exception: Could not find template of format [foo] for [NoTemplateResource]');
     }
 
     function testDefaultRenderer() {
@@ -147,7 +149,7 @@ class DeliverResourceResponsesTest extends Specification {
         $this->file->givenAFile_WithContent('folder/default.html', '<h1><?= $message ?></h1>');
         $this->givenTheTargetResource_In_WithTheBody('DefaultResource', 'folder', '
             public function doThis() {
-                return array("message" => "Hello World");
+                return new SomeResponder(array("message" => "Hello World"), $this);
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -198,11 +200,13 @@ class DeliverResourceResponsesTest extends Specification {
         $this->delivery->thenTheResponseBodyShouldBe('{"foo":[42,73]}');
     }
 
+    ######################################################################################################
+
     private function givenTheTargetResource_In_WithTheBody($fullName, $folder, $body) {
-        $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, "
-            public function getDirectory() {
-                return '$folder';
-            }" . $body);
+        $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, '
+            public function getStore() {
+                return $this->factory->getInstance(\'\watoki\stores\file\raw\RawFileStore\', array("rootDirectory" => "' . $folder . '"));
+            }' . $body);
         $this->delivery->givenTheTargetIsTheClass($fullName);
     }
 
@@ -215,4 +219,4 @@ class DeliverResourceResponsesTest extends Specification {
         $this->factory->setSingleton(Renderer::RENDERER, $this->factory->getInstance($class));
     }
 
-} 
+}
