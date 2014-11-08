@@ -26,13 +26,13 @@ class BasicDeliveryTest extends Specification {
     }
 
     function testTrailingSlashes() {
-        $this->delivery->givenTheTargetRespondsWith(function () {
-            return 'Slashed';
+        $this->delivery->givenTheTargetRespondsWith(function (WebRequest $request) {
+            return 'Arrived at ' . $request->getTarget()->toString();
         });
         $this->request->givenTheTargetPathIs('some/path/with/slash/');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Slashed');
+        $this->delivery->thenTheResponseShouldBe('Arrived at some/path/with/slash/index');
     }
 
     function testDoNotRedirectEmptyTarget() {

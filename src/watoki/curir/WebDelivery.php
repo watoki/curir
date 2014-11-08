@@ -72,6 +72,11 @@ class WebDelivery extends Delivery {
      * @return mixed
      */
     protected function getResponse(Request $request) {
+        if ($request->getTarget()->count() > 0 && $request->getTarget()->last() == '') {
+            $request->getTarget()->pop();
+            $request->getTarget()->append('index');
+        }
+
         try {
             return parent::getResponse($request);
         } catch (\BadMethodCallException $e) {
