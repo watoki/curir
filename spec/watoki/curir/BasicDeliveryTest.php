@@ -25,15 +25,14 @@ class BasicDeliveryTest extends Specification {
         $this->delivery->thenTheResponseShouldBe('Hello Moe');
     }
 
-    function testRedirectTrailingSlashes() {
+    function testTrailingSlashes() {
         $this->delivery->givenTheTargetRespondsWith(function () {
-            return 'Should not arrive here';
+            return 'Slashed';
         });
         $this->request->givenTheTargetPathIs('some/path/with/slash/');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_MOVED_PERMANENTLY);
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://example.com/some/path/with/slash');
+        $this->delivery->thenTheResponseShouldBe('Slashed');
     }
 
     function testDoNotRedirectEmptyTarget() {
