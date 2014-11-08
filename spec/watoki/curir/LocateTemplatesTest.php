@@ -85,7 +85,9 @@ class LocateTemplatesTest extends Specification {
             mkdir(dirname($path), 0777, true);
         }
         file_put_contents($path, $content);
+        ob_start();
         require($path);
+        ob_get_clean();
     }
 
     private function whenITryToLocateTheTemplateOf($class) {
