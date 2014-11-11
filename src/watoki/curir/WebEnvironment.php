@@ -30,12 +30,15 @@ class WebEnvironment {
 
     private $target;
 
-    function __construct($server, $request) {
+    private $files;
+
+    function __construct($server, $request, $files) {
         $this->headers = $this->determineHeaders($server);
         $this->arguments = $this->determineArguments($request);
         $this->method = $this->determineMethod($server);
         $this->target = $this->determineTarget($server);
         $this->context = $this->determineContext($server);
+        $this->files = $this->determineFiles($files);
     }
 
     /**
@@ -74,6 +77,13 @@ class WebEnvironment {
     }
 
     /**
+     * @return Map
+     */
+    public function getFiles() {
+        return $this->files;
+    }
+
+    /**
      * @return string
      */
     public function getBody() {
@@ -96,6 +106,30 @@ class WebEnvironment {
             $arguments->set($key, $value);
         }
         return $arguments;
+    }
+
+    protected function determineFiles($fileArrays) {
+        $files = new Map();
+
+        foreach ($fileArrays as $name => $array) {
+            if (!is_array($array['name'])) {
+                $sorted = $array;
+            } else {
+                $sorted = array();
+                $count = count($array['name']);
+                $keys = array_keys($array);
+
+                for ($i = 0; $i < $count; $i++) {
+                    foreach ($keys as $key) {
+                        $sorted[$i][$key] = $array[$key][$i];
+                    }
+                }
+            }
+
+            $files->set($name, $sorted);
+        }
+
+        return $files;
     }
 
     protected function determineMethod($server) {

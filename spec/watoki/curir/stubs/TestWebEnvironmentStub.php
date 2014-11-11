@@ -26,9 +26,13 @@ class TestWebEnvironmentStub extends WebEnvironment {
     /** @var string */
     public $body;
 
+    /** @var Map */
+    public $files;
+
     function __construct() {
         $this->headers = new Map();
         $this->arguments = new Map();
+        $this->files = new Map();
         $this->target = new Path();
         $this->context = Url::fromString('http://example.com');
     }
@@ -55,6 +59,10 @@ class TestWebEnvironmentStub extends WebEnvironment {
 
     public function getRequestMethod() {
         return $this->method;
+    }
+
+    public function getFiles() {
+        return $this->files;
     }
 
 }

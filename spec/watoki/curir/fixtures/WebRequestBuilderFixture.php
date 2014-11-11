@@ -17,7 +17,7 @@ use watoki\scrut\Fixture;
 class WebRequestBuilderFixture extends Fixture {
 
     /** @var WebRequest */
-    private $request;
+    public $request;
 
     /** @var array|\watoki\curir\protocol\ParameterDecoder[] */
     private $decoders = array();
@@ -44,6 +44,10 @@ class WebRequestBuilderFixture extends Fixture {
 
     public function givenTheQueryArgument_Is($key, $value) {
         $this->environment->arguments->set($key, $value);
+    }
+
+    public function givenTheFile_Is($key, $value) {
+        $this->environment->files->set($key, $value);
     }
 
     public function givenTheTargetPathIs($string) {

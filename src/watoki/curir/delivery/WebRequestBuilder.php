@@ -7,6 +7,7 @@ use watoki\collections\Map;
 use watoki\curir\error\HttpError;
 use watoki\curir\protocol\MimeTypes;
 use watoki\curir\protocol\ParameterDecoder;
+use watoki\curir\protocol\UploadedFile;
 use watoki\curir\WebEnvironment;
 use watoki\deli\Path;
 use watoki\deli\RequestBuilder;
@@ -75,7 +76,8 @@ class WebRequestBuilder implements RequestBuilder {
     private function getArguments($method) {
         return Collection::toCollections(array_merge(
                 $this->environment->getArguments()->toArray(),
-                $this->decodeBody($method)->toArray()
+                $this->decodeBody($method)->toArray(),
+                $this->inflateFiles($this->environment->getFiles())
         ));
     }
 
@@ -153,5 +155,25 @@ class WebRequestBuilder implements RequestBuilder {
             return $this->decoders[$this->environment->getHeaders()->get(WebRequest::HEADER_CONTENT_TYPE)];
         }
         return null;
+    }
+
+    private function inflateFiles(Map $files) {
+        $inflate = function ($file) {
+            return new UploadedFile(
+                $file['name'],
+                $file['type'],
+                $file['tmp_name'],
+                $file['error'],
+                $file['size']);
+        };
+
+        $inflated = array_map(function ($file) use ($inflate) {
+            if (!isset($file['name'])) {
+                return array_map($inflate, $file);
+            } else {
+                return $inflate($file);
+            }
+        }, $files->toArray());
+        return $inflated;
     }
 }

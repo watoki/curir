@@ -59,7 +59,7 @@ class WebDelivery extends Delivery {
     public static function quickRoute(Router $router, Factory $factory = null) {
         $factory = $factory ? : self::init();
 
-        $builder = new WebRequestBuilder(new WebEnvironment($_SERVER, $_REQUEST));
+        $builder = new WebRequestBuilder(new WebEnvironment($_SERVER, $_REQUEST, $_FILES));
         $deliverer = new WebResponseDeliverer($factory->getSingleton(CookieStore::$CLASS));
         $delivery = new WebDelivery($router, $builder, $deliverer);
         $delivery->run();
