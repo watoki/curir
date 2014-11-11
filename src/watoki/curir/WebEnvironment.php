@@ -112,12 +112,16 @@ class WebEnvironment {
 
     protected function determineContext($server) {
         $scheme = "http" . (!empty($server['HTTPS']) ? "s" : "");
-        $port = $server['SERVER_PORT'] != 80 ? ':' . $server['SERVER_PORT'] : '';
-        $host = $server['SERVER_NAME'];
+
+        if (isset($server['HTTP_HOST'])) {
+            $host = $server['HTTP_HOST'];
+        } else {
+            $host = $server['SERVER_NAME'] . ($server['SERVER_PORT'] != 80 ? ':' . $server['SERVER_PORT'] : '');
+        }
 
         list($context,) = $this->splitContextAndTarget($server);
 
-        return Url::fromString($scheme . "://" . $host . $port . rtrim($context,  '/'));
+        return Url::fromString($scheme . "://" . $host . rtrim($context,  '/'));
     }
 
     protected function splitContextAndTarget($server) {
