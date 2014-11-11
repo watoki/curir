@@ -76,206 +76,326 @@ class WebEnvironmentTest extends Specification {
 
     function environmentVariableCombinations() {
         return array(
-                'built-in with route script' => array(
-                        array(
-                                'out' => array(
-                                        'context' => '',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php',
-                                        )),
-                        array(
-                                'out' => array(
-                                        'context' => '',
-                                        'target' => 'hello/there'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/hello/there?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there',
-                                        'PATH_INFO' => '/hello/there')),
-                        array(
-                                'out' => array(
-                                        'context' => '',
-                                        'target' => 'hello/there.html'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/hello/there.html?you',
-                                        'SCRIPT_NAME' => '/hello/there.html',
-                                        'PHP_SELF' => '/hello/there.html',
-                                        )),
+
+                'dev server with route script' => array(
+                    'localhost/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/hello/world?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                    'localhost/hello/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/hello/?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/hello/',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => 'hello/'
+                        )
+                    ),
+                    'localhost/hello/world.html?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/hello/world.html?foo',
+                            'SCRIPT_NAME' => '/hello/world.html',
+                            'PHP_SELF' => '/hello/world.html',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => 'hello/world.html'
+                        )
+                    ),
                 ),
-                'built-in without route script' => array(
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php',
-                                        )),
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php/?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/',
-                                        'PATH_INFO' => '/')),
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => 'hello/there'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php/hello/there?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there',
-                                        'PATH_INFO' => '/hello/there')),
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => 'hello/there.html'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php/hello/there.html?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there.html',
-                                        'PATH_INFO' => '/hello/there.html')),
+
+                'dev server without route script' => array(
+                    'localhost/index.php/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/index.php/?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/',
+                        ),
+                        'out' => array(
+                            'context' => '/index.php',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/index.php/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/index.php/hello/world?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '/index.php',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                    'localhost/index.php/hello/world.html?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/index.php/hello/world.html?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/hello/world.html',
+                        ),
+                        'out' => array(
+                            'context' => '/index.php',
+                            'target' => 'hello/world.html'
+                        )
+                    ),
+                    'localhost/bar/index.php/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/bar/index.php/?foo',
+                            'SCRIPT_NAME' => '/bar/index.php',
+                            'PHP_SELF' => '/bar/index.php/',
+                        ),
+                        'out' => array(
+                            'context' => '/bar/index.php',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/bar/index.php/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/bar/index.php/hello/world?foo',
+                            'SCRIPT_NAME' => '/bar/index.php',
+                            'PHP_SELF' => '/bar/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '/bar/index.php',
+                            'target' => 'hello/world'
+                        )
+                    ),
                 ),
+
                 'apache alias with rewrite' => array(
-                        array(
-                                'out' => array(
-                                        'context' => '/xkdl',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/xkdl/?you',
-                                        'SCRIPT_NAME' => '/xkdl/index.php',
-                                        'PHP_SELF' => '/xkdl/index.php',
-                                        )),
-                        array(
-                                'out' => array(
-                                        'context' => '/xkdl',
-                                        'target' => 'hello/there'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/xkdl/hello/there?you',
-                                        'SCRIPT_NAME' => '/xkdl/index.php',
-                                        'PHP_SELF' => '/xkdl/index.php/hello/there',
-                                        'PATH_INFO' => '/hello/there')),
-                        array(
-                                'out' => array(
-                                        'context' => '/xkdl',
-                                        'target' => 'hello/there.html'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/xkdl/hello/there.html?you',
-                                        'SCRIPT_NAME' => '/xkdl/index.php',
-                                        'PHP_SELF' => '/xkdl/index.php/hello/there.html',
-                                        'PATH_INFO' => '/hello/there.html')),
+                    'localhost/xkdl/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/xkdl/?foo',
+                            'SCRIPT_NAME' => '/xkdl/index.php',
+                            'PHP_SELF' => '/xkdl/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '/xkdl',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/xkdl/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/xkdl/hello/world?foo',
+                            'SCRIPT_NAME' => '/xkdl/index.php',
+                            'PHP_SELF' => '/xkdl/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '/xkdl',
+                            'target' => 'hello/world'
+                        )
+                    ),
                 ),
-                'apache virtual host with rewrite' => array(
-                        array(
-                                'out' => array(
-                                        'context' => '',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php',
-                                        )),
-                        array(
-                                'out' => array(
-                                        'context' => '',
-                                        'target' => 'hello/there'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/hello/there?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there',
-                                        'PATH_INFO' => '/hello/there')),
-                        array(
-                                'out' => array(
-                                        'context' => '',
-                                        'target' => 'hello/there.html'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/hello/there.html?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there.html',
-                                        'PATH_INFO' => '/hello/there.html')),
-                ),
-                'apache virtual host without rewrite' => array(
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php',
-                                        )),
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php/?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there',
-                                        'PATH_INFO' => '/')),
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => 'hello/there'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php/hello/there?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there',
-                                        'PATH_INFO' => '/hello/there')),
-                        array(
-                                'out' => array(
-                                        'context' => '/index.php',
-                                        'target' => 'hello/there.html'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/index.php/hello/there.html?you',
-                                        'SCRIPT_NAME' => '/index.php',
-                                        'PHP_SELF' => '/index.php/hello/there.html',
-                                        'PATH_INFO' => '/hello/there.html')),
-                ),
+
                 'apache alias without rewrite' => array(
-                        array(
-                                'out' => array(
-                                        'context' => '/xkdl/index.php',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/xkdl/index.php?you',
-                                        'SCRIPT_NAME' => '/xkdl/index.php',
-                                        'PHP_SELF' => '/xkdl/index.php',
-                                        )),
-                        array(
-                                'out' => array(
-                                        'context' => '/xkdl/index.php',
-                                        'target' => ''),
-                                'in' => array(
-                                        'REQUEST_URI' => '/xkdl/index.php/?you',
-                                        'SCRIPT_NAME' => '/xkdl/index.php',
-                                        'PHP_SELF' => '/xkdl/index.php/ ',
-                                        'PATH_INFO' => '/')),
-                        array(
-                                'out' => array(
-                                        'context' => '/xkdl/index.php',
-                                        'target' => 'hello/there'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/xkdl/index.php/hello/there?you',
-                                        'SCRIPT_NAME' => '/xkdl/index.php',
-                                        'PHP_SELF' => '/xkdl/index.php/hello/there',
-                                        'PATH_INFO' => '/hello/there')),
-                        array(
-                                'out' => array(
-                                        'context' => '/xkdl/index.php',
-                                        'target' => 'hello/there.html'),
-                                'in' => array(
-                                        'REQUEST_URI' => '/xkdl/index.php/hello/there.html?you',
-                                        'SCRIPT_NAME' => '/xkdl/index.php',
-                                        'PHP_SELF' => '/xkdl/index.php/hello/there.html',
-                                        'PATH_INFO' => '/hello/there.html')),
+                    'localhost/xkdl/index.php/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/xkdl/index.php/?foo',
+                            'SCRIPT_NAME' => '/xkdl/index.php',
+                            'PHP_SELF' => '/xkdl/index.php/',
+                        ),
+                        'out' => array(
+                            'context' => '/xkdl/index.php',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/xkdl/index.php/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/xkdl/index.php/hello/world?foo',
+                            'SCRIPT_NAME' => '/xkdl/index.php',
+                            'PHP_SELF' => '/xkdl/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '/xkdl/index.php',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                ),
+
+                'apache virtual host with rewrite' => array(
+                    'test.localhost' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => ''
+                        )
+                    ),
+                    'test.localhost/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => ''
+                        )
+                    ),
+                    'test.localhost/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/hello/world?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                ),
+
+                'apache virtual host without rewrite' => array(
+                    'localhost/index.php/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/index.php/?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/',
+                        ),
+                        'out' => array(
+                            'context' => '/index.php',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/index.php/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/index.php/hello/world?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '/index.php',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                    'localhost/bar/index.php/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/bar/index.php/?foo',
+                            'SCRIPT_NAME' => '/bar/index.php',
+                            'PHP_SELF' => '/bar/index.php/',
+                        ),
+                        'out' => array(
+                            'context' => '/bar/index.php',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/bar/index.php/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/bar/index.php/hello/world?foo',
+                            'SCRIPT_NAME' => '/bar/index.php',
+                            'PHP_SELF' => '/bar/index.php/hello/world',
+                        ),
+                        'out' => array(
+                            'context' => '/bar/index.php',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                ),
+
+                'nginx with rewrite' => array(
+                    'localhost' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/hello/world?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                ),
+
+                'nginx without rewrite' => array(
+                    'localhost/index.php/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/index.php/?foo',
+                            'SCRIPT_NAME' => '/index.php/index.php',
+                            'PHP_SELF' => '/index.php/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '/index.php',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/index.php/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/index.php/hello/world?foo',
+                            'SCRIPT_NAME' => '/index.php',
+                            'PHP_SELF' => '/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '/index.php',
+                            'target' => 'hello/world'
+                        )
+                    ),
+                    'localhost/bar/index.php/?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/bar/index.php/?foo',
+                            'SCRIPT_NAME' => '/bar/index.php/index.php',
+                            'PHP_SELF' => '/bar/index.php/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '/bar/index.php',
+                            'target' => ''
+                        )
+                    ),
+                    'localhost/bar/index.php/hello/world?foo' => array(
+                        'in' => array (
+                            'REQUEST_URI' => '/bar/index.php/hello/world?foo',
+                            'SCRIPT_NAME' => '/bar/index.php',
+                            'PHP_SELF' => '/bar/index.php',
+                        ),
+                        'out' => array(
+                            'context' => '/bar/index.php',
+                            'target' => 'hello/world'
+                        )
+                    ),
                 ),
         );
     }

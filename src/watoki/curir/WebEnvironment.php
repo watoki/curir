@@ -34,8 +34,8 @@ class WebEnvironment {
         $this->headers = $this->determineHeaders($server);
         $this->arguments = $this->determineArguments($request);
         $this->method = $this->determineMethod($server);
-        $this->context = $this->determineContext($server);
         $this->target = $this->determineTarget($server);
+        $this->context = $this->determineContext($server);
     }
 
     /**
@@ -80,7 +80,7 @@ class WebEnvironment {
         return file_get_contents('php://input');
     }
 
-    private function determineHeaders($server) {
+    protected function determineHeaders($server) {
         $headers = new Map();
         foreach (self::$headerKeys as $headerKey => $serverKey) {
             if (array_key_exists($serverKey, $server)) {
@@ -90,7 +90,7 @@ class WebEnvironment {
         return $headers;
     }
 
-    private function determineArguments($request) {
+    protected function determineArguments($request) {
         $arguments = new Map();
         foreach ($request as $key => $value) {
             $arguments->set($key, $value);
@@ -98,64 +98,62 @@ class WebEnvironment {
         return $arguments;
     }
 
-    private function determineMethod($server) {
+    protected function determineMethod($server) {
         if (array_key_exists('REQUEST_METHOD', $server)) {
             return strtolower($server['REQUEST_METHOD']);
         }
         return null;
     }
 
-    private function determineTarget($server) {
-        if (isset($server['PATH_INFO'])) {
-            $target = $server['PATH_INFO'];
-        } else if ($this->isSpecialBuiltInWithRouteCase($server)) {
-            $target = $server['SCRIPT_NAME'];
-        } else {
-            $target = '';
-        }
-
+    protected function determineTarget($server) {
+        list(, $target) = $this->splitContextAndTarget($server);
         return Path::fromString(ltrim($target, '/'));
     }
 
-    private function determineContext($server) {
+    protected function determineContext($server) {
         $scheme = "http" . (!empty($server['HTTPS']) ? "s" : "");
         $port = $server['SERVER_PORT'] != 80 ? ':' . $server['SERVER_PORT'] : '';
         $host = $server['SERVER_NAME'];
-        $path = rtrim($this->determinePath($server), '/');
 
-        return Url::fromString($scheme . "://" . $host . $port . $path);
+        list($context,) = $this->splitContextAndTarget($server);
+
+        return Url::fromString($scheme . "://" . $host . $port . rtrim($context,  '/'));
     }
 
-    private function determinePath($server) {
-        $path = $server['SCRIPT_NAME'];
-
-        if (!$this->startsWith($this->determineRequestUrl($server), $path)) {
-            return substr($path, 0, -strlen(basename($server['SCRIPT_FILENAME'])));
-        } else if ($this->isSpecialBuiltInWithRouteCase($server)) {
-            return '';
+    protected function splitContextAndTarget($server) {
+        $uri = $server['REQUEST_URI'];
+        if (strpos($uri, '?') !== false) {
+            list($uri,) = explode('?', $uri);
         }
-        return $path;
-    }
 
-    private function determineRequestUrl($server) {
-        $requestUrl = $server['REQUEST_URI'];
-        if (strpos($requestUrl, '?') !== false) {
-            $requestUrl = substr($requestUrl, 0, strpos($requestUrl, '?'));
-            return $requestUrl;
+        $scriptName = $server['SCRIPT_NAME'];
+
+        $names = explode('/', $scriptName);
+        if (count($names) >= 2 && $names[count($names) - 1] == $names[count($names) - 2]) {
+            $scriptName = substr($scriptName, 0, -strlen($names[count($names) - 1]) - 1);
         }
-        return $requestUrl;
+
+        $context = '';
+        $target = $uri;
+
+        if ($this->endsWith($scriptName, '.php')) {
+            if ($this->startsWith($uri, $scriptName)) {
+                $context = substr($uri, 0, strlen($scriptName));
+            } else {
+                $context = substr($scriptName, 0, strrpos($scriptName, '/'));
+            }
+            $target = substr($uri, strlen($context));
+        }
+
+        return array($context, $target);
     }
 
     private function startsWith($abc, $a) {
         return substr($abc, 0, strlen($a)) == $a;
     }
 
-    private function contains($abc, $b) {
-        return strpos($abc, $b) !== false;
-    }
-
-    private function isSpecialBuiltInWithRouteCase($server) {
-        return !$this->contains($server['SCRIPT_NAME'], basename($server['SCRIPT_FILENAME']));
+    private function endsWith($abc, $c) {
+        return substr($abc, -strlen($c)) == $c;
     }
 
 } 

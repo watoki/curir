@@ -45,7 +45,7 @@ class DeliverStaticFilesTest extends Specification {
 
     function testIndexFile() {
         $this->file->givenAFile_WithContent('some/folder/some/static/index', 'Hello Index');
-        $this->request->givenTheTargetPathIs('static');
+        $this->request->givenTheTargetPathIs('static/');
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseBodyShouldBe('Hello Index');

@@ -32,7 +32,7 @@ class BasicDeliveryTest extends Specification {
         $this->request->givenTheTargetPathIs('some/path/with/slash/');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Arrived at some/path/with/slash/index');
+        $this->delivery->thenTheResponseShouldBe('Arrived at some/path/with/slash/');
     }
 
     function testDoNotRedirectEmptyTarget() {

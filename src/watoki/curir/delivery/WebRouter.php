@@ -86,11 +86,11 @@ class WebRouter extends StaticRouter {
 
     private function findExistingFile(WebRequest $request, $target, $format) {
         $suffix = $format ? '.' . $format : '';
+        if (substr($target, -1) == '/') {
+            $target .= $this->index;
+        }
         if ($this->store->exists($target . $suffix, $request)) {
             return $target . $suffix;
-        }
-        if ($this->store->exists($target . '/' . $this->index . $suffix, $request)) {
-            return $target . '/' . $this->index . $suffix;
         }
         return null;
     }
