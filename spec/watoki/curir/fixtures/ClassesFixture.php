@@ -1,13 +1,12 @@
 <?php
 namespace spec\watoki\curir\fixtures;
 
-use spec\watoki\stores\FileStoreFixture;
 use watoki\curir\Container;
 use watoki\scrut\Fixture;
 use watoki\stores\file\raw\RawFileStore;
 
 /**
- * @property FileStoreFixture file <-
+ * @property \spec\watoki\stores\fixtures\FileStoreFixture file <-
  */
 class ClassesFixture extends Fixture {
 

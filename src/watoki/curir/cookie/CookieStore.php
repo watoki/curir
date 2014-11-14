@@ -1,10 +1,11 @@
 <?php
 namespace watoki\curir\cookie;
 
-use watoki\stores\Serializer;
-use watoki\stores\Store;
+use watoki\stores\EntityNotFoundException;
+use watoki\stores\file\FileSerializerRegistry;
+use watoki\stores\GeneralStore;
 
-class CookieStore extends Store {
+class CookieStore extends GeneralStore {
 
     public static $CLASS = __CLASS__;
 
@@ -15,10 +16,10 @@ class CookieStore extends Store {
     private $serialized = array();
 
     /**
-     * @param SerializerRepository $serializers <-
+     * @param FileSerializerRegistry $serializers <-
      * @param array $source
      */
-    public function __construct(SerializerRepository $serializers, array $source) {
+    public function __construct(CookieSerializerRegistry $serializers, array $source) {
         parent::__construct(Cookie::$CLASS, $serializers);
         $this->source = $source;
     }
@@ -26,11 +27,11 @@ class CookieStore extends Store {
     /**
      * @param string $key
      * @return Cookie Entity belonging given key
-     * @throws \Exception If no entity with given key exists
+     * @throws EntityNotFoundException If no entity with given key exists
      */
-    public function read($key) {
+    protected function _read($key) {
         if (!array_key_exists($key, $this->source)) {
-            throw new \Exception("Cookie with name [$key] does not exist");
+            throw new EntityNotFoundException("Cookie with name [$key] does not exist");
         }
         $value = $this->source[$key];
         if (!json_decode($value)) {
@@ -45,22 +46,35 @@ class CookieStore extends Store {
      * @throws \InvalidArgumentException If no key is provided
      * @return null
      */
-    public function create($entity, $key = null) {
-        if (!$key) {
-            throw new \InvalidArgumentException('Cookie key cannot be empty.');
-        }
+    protected function _create($entity, $key) {
         $this->serialized[$key] = $this->serialize($entity, $key);
         $this->source[$key] = $this->serialized[$key][0];
     }
 
     /**
-     * @param Cookie $cookie
+     * @param Cookie $entity
+     * @throws \BadMethodCallException always
+     * @return null
+     */
+    protected function _update($entity) {
+        $this->create($entity, $this->getKey($entity));
+    }
+
+    /**
      * @param string $key
+     * @return null
+     */
+    protected function _delete($key) {
+        $this->serialized[$key] = array(null, time() - 3600, '/');
+    }
+
+    /**
+     * @param Cookie $cookie
      * @return array
      */
-    protected function serialize($cookie, $key) {
+    protected function serialize($cookie) {
         return array(
-                parent::serialize($cookie, $key),
+                parent::serialize($cookie),
                 $cookie->expire ? $cookie->expire->getTimestamp() : null,
                 $cookie->path,
                 $cookie->domain,
@@ -69,36 +83,10 @@ class CookieStore extends Store {
     }
 
     /**
-     * @param Cookie $entity
-     * @throws \BadMethodCallException always
-     * @return null
-     */
-    public function update($entity) {
-        $this->create($entity, $this->getKey($entity));
-    }
-
-    /**
-     * @param Cookie $entity
-     * @return null
-     */
-    public function delete($entity) {
-        $key = $this->getKey($entity);
-        $this->serialized[$key] = array(null, time() - 3600, $entity->path);
-        $this->removeKey($key);
-    }
-
-    /**
      * @return array|mixed[] All stored keys
      */
     public function keys() {
         return array_keys(array_merge($this->source, $this->serialized));
-    }
-
-    /**
-     * @return Serializer
-     */
-    protected function createEntitySerializer() {
-        return new CookieSerializer($this->getEntityClass(), $this->getSerializers());
     }
 
     /**

@@ -2,7 +2,7 @@
 namespace watoki\curir\rendering\locating;
 
 use watoki\stores\file\raw\RawFileStore;
-use watoki\stores\file\SerializerRepository;
+use watoki\stores\file\FileSerializerRegistry;
 
 class ClassTemplateLocator implements TemplateLocator {
 
@@ -18,7 +18,7 @@ class ClassTemplateLocator implements TemplateLocator {
      */
     public function __construct($class, RawFileStore $store = null) {
         $this->class = $class;
-        $this->store = $store ? : new RawFileStore(new SerializerRepository(), $this->getDirectory($class));
+        $this->store = $store ? : new RawFileStore(new FileSerializerRegistry(), $this->getDirectory($class));
     }
 
     public function find($format) {
@@ -38,7 +38,7 @@ class ClassTemplateLocator implements TemplateLocator {
             if (!$class || !class_exists($class)) {
                 break;
             }
-            $store = new RawFileStore(new SerializerRepository(), $this->getDirectory($class));
+            $store = new RawFileStore(new FileSerializerRegistry(), $this->getDirectory($class));
         }
 
         $class = is_object($this->class) ? get_class($this->class) : $this->class;

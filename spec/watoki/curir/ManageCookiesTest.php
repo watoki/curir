@@ -2,8 +2,8 @@
 namespace spec\watoki\curir;
 
 use watoki\curir\cookie\Cookie;
+use watoki\curir\cookie\CookieSerializerRegistry;
 use watoki\curir\cookie\CookieStore;
-use watoki\curir\cookie\SerializerRepository;
 use watoki\curir\WebDelivery;
 use watoki\scrut\ExceptionFixture;
 use watoki\scrut\Specification;
@@ -100,7 +100,7 @@ class ManageCookiesTest extends Specification {
     function testDeleteCookie() {
         $this->givenACookie_WithValue('foo', '{"payload":"Delete me"}');
         $this->whenIReadTheCookie('foo');
-        $this->whenIDeleteTheCookie();
+        $this->whenIDeleteTheCookie('foo');
 
         $this->thenTheCookie_ShouldHaveTheValue('foo', '');
     }
@@ -118,8 +118,9 @@ class ManageCookiesTest extends Specification {
     }
 
     function testCreateWithoutAKey() {
+        $this->givenACookieWithThePayload('foo', 'no key');
         $this->whenITryToCreateTheCookieWithoutAKey();
-        $this->try->thenTheException_ShouldBeThrown("Cookie key cannot be empty.");
+        $this->try->thenNoExceptionShouldBeThrown();
     }
 
     ###################################################################################
@@ -160,7 +161,7 @@ class ManageCookiesTest extends Specification {
 
     private function whenICreateTheCookieAs($key) {
         date_default_timezone_set('UTC');
-        $this->store = new CookieStore(new SerializerRepository(), $this->source);
+        $this->store = new CookieStore(new CookieSerializerRegistry(), $this->source);
         $this->store->create($this->cookie, $key);
         $this->apply($this->store);
     }
@@ -204,7 +205,7 @@ class ManageCookiesTest extends Specification {
     }
 
     private function whenIReadTheCookie($key) {
-        $this->store = new CookieStore(new SerializerRepository(), $this->source);
+        $this->store = new CookieStore(new CookieSerializerRegistry(), $this->source);
         $this->cookie = $this->store->read($key);
     }
 
@@ -214,8 +215,8 @@ class ManageCookiesTest extends Specification {
         });
     }
 
-    private function whenIDeleteTheCookie() {
-        $this->store->delete($this->cookie);
+    private function whenIDeleteTheCookie($name) {
+        $this->store->delete($name);
         $this->apply($this->store);
     }
 
