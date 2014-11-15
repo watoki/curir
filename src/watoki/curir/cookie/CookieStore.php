@@ -1,7 +1,7 @@
 <?php
 namespace watoki\curir\cookie;
 
-use watoki\stores\EntityNotFoundException;
+use watoki\stores\exception\EntityNotFoundException;
 use watoki\stores\file\FileSerializerRegistry;
 use watoki\stores\GeneralStore;
 
@@ -27,7 +27,7 @@ class CookieStore extends GeneralStore {
     /**
      * @param string $key
      * @return Cookie Entity belonging given key
-     * @throws EntityNotFoundException If no entity with given key exists
+     * @throws \watoki\stores\exception\EntityNotFoundException If no entity with given key exists
      */
     protected function _read($key) {
         if (!array_key_exists($key, $this->source)) {
