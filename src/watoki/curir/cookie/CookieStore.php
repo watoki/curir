@@ -2,7 +2,6 @@
 namespace watoki\curir\cookie;
 
 use watoki\stores\exception\EntityNotFoundException;
-use watoki\stores\file\FileSerializerRegistry;
 use watoki\stores\GeneralStore;
 
 class CookieStore extends GeneralStore {
@@ -16,11 +15,10 @@ class CookieStore extends GeneralStore {
     private $serialized = array();
 
     /**
-     * @param FileSerializerRegistry $serializers <-
      * @param array $source
      */
-    public function __construct(CookieSerializerRegistry $serializers, array $source) {
-        parent::__construct(Cookie::$CLASS, $serializers);
+    public function __construct(array $source) {
+        parent::__construct(new CookieSerializer());
         $this->source = $source;
     }
 

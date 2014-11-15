@@ -1,17 +1,13 @@
 <?php
 namespace watoki\curir\delivery;
 
-use watoki\curir\delivery\WebRequest;
-use watoki\curir\delivery\WebResponse;
 use watoki\curir\error\HttpError;
-use watoki\curir\protocol\MimeTypes;
 use watoki\deli\Path;
 use watoki\deli\Request;
 use watoki\deli\router\StaticRouter;
 use watoki\deli\router\TargetNotFoundException;
-use watoki\deli\target\CallbackTarget;
-use watoki\deli\target\TargetFactory;
 use watoki\deli\Target;
+use watoki\deli\target\TargetFactory;
 use watoki\factory\Factory;
 use watoki\stores\file\raw\RawFileStore;
 

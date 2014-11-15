@@ -2,7 +2,6 @@
 namespace spec\watoki\curir;
 
 use watoki\curir\cookie\Cookie;
-use watoki\curir\cookie\CookieSerializerRegistry;
 use watoki\curir\cookie\CookieStore;
 use watoki\curir\WebDelivery;
 use watoki\scrut\ExceptionFixture;
@@ -161,7 +160,7 @@ class ManageCookiesTest extends Specification {
 
     private function whenICreateTheCookieAs($key) {
         date_default_timezone_set('UTC');
-        $this->store = new CookieStore(new CookieSerializerRegistry(), $this->source);
+        $this->store = new CookieStore($this->source);
         $this->store->create($this->cookie, $key);
         $this->apply($this->store);
     }
@@ -205,7 +204,7 @@ class ManageCookiesTest extends Specification {
     }
 
     private function whenIReadTheCookie($key) {
-        $this->store = new CookieStore(new CookieSerializerRegistry(), $this->source);
+        $this->store = new CookieStore($this->source);
         $this->cookie = $this->store->read($key);
     }
 
