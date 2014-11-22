@@ -2,6 +2,7 @@
 namespace spec\watoki\curir;
 
 use watoki\curir\delivery\WebRequest;
+use watoki\curir\protocol\UploadedFile;
 use watoki\curir\WebEnvironment;
 use watoki\scrut\Specification;
 
@@ -68,63 +69,7 @@ class WebEnvironmentTest extends Specification {
         });
     }
 
-    public function testSortUploadedFiles() {
-        $this->givenTheFile_WithValue('foo', array(
-            'name' => array('foo.txt', 'bar.html'),
-            'type' => array('text/plain', 'text/html'),
-            'tmp_name' => array('/tmp/phpYzdqkD', '/tmp/phpeEwEWG'),
-            'error' => array(0, 0),
-            'size' => array(123, 456)
-        ));
-
-        $this->whenICreateTheEnvironment();
-        $this->thenTheFilesShouldBe(array('foo' => array(
-            array(
-                'name' => 'foo.txt',
-                'type' => 'text/plain',
-                'tmp_name' => '/tmp/phpYzdqkD',
-                'error' => 0,
-                'size' => 123
-            ),
-            array(
-                'name' => 'bar.html',
-                'type' => 'text/html',
-                'tmp_name' => '/tmp/phpeEwEWG',
-                'error' => 0,
-                'size' => 456
-            ),
-        )));
-    }
-
-    public function testSortNamedUploadedFiles() {
-        $this->givenTheFile_WithValue('foo', array(
-            'name' => array('one' => 'foo.txt', 'two' => 'bar.html'),
-            'type' => array('one' => 'text/plain', 'two' => 'text/html'),
-            'tmp_name' => array('one' => '/tmp/phpYzdqkD', 'two' => '/tmp/phpeEwEWG'),
-            'error' => array('one' => 0, 'two' => 0),
-            'size' => array('one' => 123, 'two' => 456)
-        ));
-
-        $this->whenICreateTheEnvironment();
-        $this->thenTheFilesShouldBe(array('foo' => array(
-            'one' => array(
-                'name' => 'foo.txt',
-                'type' => 'text/plain',
-                'tmp_name' => '/tmp/phpYzdqkD',
-                'error' => 0,
-                'size' => 123
-            ),
-            'two' => array(
-                'name' => 'bar.html',
-                'type' => 'text/html',
-                'tmp_name' => '/tmp/phpeEwEWG',
-                'error' => 0,
-                'size' => 456
-            ),
-        )));
-    }
-
-    public function testUploadedFile() {
+    public function testSingleUploadedFile() {
         $this->givenTheFile_WithValue('foo', array(
             'name' => 'foo.txt',
             'type' => 'text/plain',
@@ -134,14 +79,86 @@ class WebEnvironmentTest extends Specification {
         ));
 
         $this->whenICreateTheEnvironment();
-        $this->thenTheFilesShouldBe(array('foo' =>
-            array(
-                'name' => 'foo.txt',
-                'type' => 'text/plain',
-                'tmp_name' => '/tmp/phpYzdqkD',
-                'error' => 0,
-                'size' => 123
-            )
+        $this->thenTheArgument_ShouldBe('foo',
+            new UploadedFile('foo.txt', 'text/plain',
+                '/tmp/phpYzdqkD', 0, 123)
+        );
+    }
+
+    public function testArrayOfUploadedFiles() {
+        $this->givenTheFile_WithValue('foo', array(
+            'name' => array('foo.txt', 'bar.html'),
+            'type' => array('text/plain', 'text/html'),
+            'tmp_name' => array('/tmp/phpYzdqkD', '/tmp/phpeEwEWG'),
+            'error' => array(0, 0),
+            'size' => array(123, 456)
+        ));
+
+        $this->whenICreateTheEnvironment();
+        $this->thenTheArgument_ShouldBe('foo', array(
+            new UploadedFile('foo.txt', 'text/plain',
+                '/tmp/phpYzdqkD', 0, 123),
+            new UploadedFile('bar.html', 'text/html',
+                '/tmp/phpeEwEWG', 0, 456),
+        ));
+    }
+
+    public function testDeepArrayOfUploadedFiles() {
+        $this->givenTheFile_WithValue('one', array(
+            'name' =>
+                array(
+                    'two' =>
+                        array(
+                            'three' => 'two_three.jpg',
+                            'four' => 'two_four.jpg',
+                        ),
+                    'five' => 'five.jpg',
+                ),
+            'type' =>
+                array(
+                    'two' =>
+                        array(
+                            'three' => 'image/jpeg',
+                            'four' => 'image/jpeg',
+                        ),
+                    'five' => 'image/jpeg',
+                ),
+            'tmp_name' =>
+                array(
+                    'two' =>
+                        array(
+                            'three' => '/tmp/23',
+                            'four' => '/tmp/24',
+                        ),
+                    'five' => '/tmp/5',
+                ),
+            'error' =>
+                array(
+                    'two' =>
+                        array(
+                            'three' => 0,
+                            'four' => 0,
+                        ),
+                    'five' => 0,
+                ),
+            'size' =>
+                array(
+                    'two' =>
+                        array(
+                            'three' => 23,
+                            'four' => 24,
+                        ),
+                    'five' => 5,
+                ),
+        ));
+
+        $this->whenICreateTheEnvironment();
+        $this->thenTheArgument_ShouldBe('one', array(
+            'two' => array(
+                'three' => new UploadedFile('two_three.jpg', 'image/jpeg', '/tmp/23', 0, 23),
+                'four' => new UploadedFile('two_four.jpg', 'image/jpeg', '/tmp/24', 0, 24),
+            ),
+            'five' => new UploadedFile('five.jpg', 'image/jpeg', '/tmp/5', 0, 5)
         ));
     }
 
@@ -556,10 +573,6 @@ class WebEnvironmentTest extends Specification {
 
     private function thenTheTargetShouldBe($target) {
         $this->assertEquals($target, $this->env->getTarget()->toString());
-    }
-
-    private function thenTheFilesShouldBe($array) {
-        $this->assertEquals($array, $this->env->getFiles()->toArray());
     }
 
 } 

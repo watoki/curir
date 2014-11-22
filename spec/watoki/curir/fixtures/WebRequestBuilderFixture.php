@@ -46,10 +46,6 @@ class WebRequestBuilderFixture extends Fixture {
         $this->environment->arguments->set($key, $value);
     }
 
-    public function givenTheFile_Is($key, $value) {
-        $this->environment->files->set($key, $value);
-    }
-
     public function givenTheTargetPathIs($string) {
         $this->environment->target = Path::fromString($string);
     }

@@ -3,21 +3,22 @@ namespace watoki\curir;
 
 use watoki\collections\Map;
 use watoki\curir\delivery\WebRequest;
+use watoki\curir\protocol\UploadedFile;
 use watoki\curir\protocol\Url;
 use watoki\deli\Path;
 
 class WebEnvironment {
 
     private static $headerKeys = array(
-            WebRequest::HEADER_ACCEPT => 'HTTP_ACCEPT',
-            WebRequest::HEADER_ACCEPT_CHARSET => 'HTTP_ACCEPT_CHARSET',
-            WebRequest::HEADER_ACCEPT_ENCODING => 'HTTP_ACCEPT_ENCODING',
-            WebRequest::HEADER_ACCEPT_LANGUAGE => 'HTTP_ACCEPT_LANGUAGE',
-            WebRequest::HEADER_CACHE_CONTROL => 'HTTP_CACHE_CONTROL',
-            WebRequest::HEADER_CONNECTION => 'HTTP_CONNECTION',
-            WebRequest::HEADER_PRAGMA => 'HTTP_PRAGMA',
-            WebRequest::HEADER_USER_AGENT => 'HTTP_USER_AGENT',
-            WebRequest::HEADER_CONTENT_TYPE => 'CONTENT_TYPE'
+        WebRequest::HEADER_ACCEPT => 'HTTP_ACCEPT',
+        WebRequest::HEADER_ACCEPT_CHARSET => 'HTTP_ACCEPT_CHARSET',
+        WebRequest::HEADER_ACCEPT_ENCODING => 'HTTP_ACCEPT_ENCODING',
+        WebRequest::HEADER_ACCEPT_LANGUAGE => 'HTTP_ACCEPT_LANGUAGE',
+        WebRequest::HEADER_CACHE_CONTROL => 'HTTP_CACHE_CONTROL',
+        WebRequest::HEADER_CONNECTION => 'HTTP_CONNECTION',
+        WebRequest::HEADER_PRAGMA => 'HTTP_PRAGMA',
+        WebRequest::HEADER_USER_AGENT => 'HTTP_USER_AGENT',
+        WebRequest::HEADER_CONTENT_TYPE => 'CONTENT_TYPE'
     );
 
     private $headers;
@@ -30,15 +31,12 @@ class WebEnvironment {
 
     private $target;
 
-    private $files;
-
     function __construct($server, $request, $files) {
         $this->headers = $this->determineHeaders($server);
-        $this->arguments = $this->determineArguments($request);
+        $this->arguments = $this->determineArguments($request, $files);
         $this->method = $this->determineMethod($server);
         $this->target = $this->determineTarget($server);
         $this->context = $this->determineContext($server);
-        $this->files = $this->determineFiles($files);
     }
 
     /**
@@ -77,13 +75,6 @@ class WebEnvironment {
     }
 
     /**
-     * @return Map
-     */
-    public function getFiles() {
-        return $this->files;
-    }
-
-    /**
      * @return string
      */
     public function getBody() {
@@ -100,35 +91,71 @@ class WebEnvironment {
         return $headers;
     }
 
-    protected function determineArguments($request) {
-        $arguments = new Map();
+    protected function determineArguments($request, $files) {
+        $arguments = [];
         foreach ($request as $key => $value) {
-            $arguments->set($key, $value);
+            $arguments[$key] = $value;
         }
-        return $arguments;
+
+        $arguments = $this->mergeFiles($this->sortFiles($files), $arguments);
+
+        return new Map($arguments);
     }
 
-    protected function determineFiles($fileArrays) {
-        $files = new Map();
+    private function mergeFiles($files, $into) {
+        foreach ($files as $k => $v) {
+            if ($v instanceof UploadedFile) {
+                $into[$k] = $v;
+            } else if (is_array($v)) {
+                if (!isset($into[$k])) {
+                    $into[$k] = array();
+                }
+                $into[$k] = $this->mergeFiles($v, $into[$k]);
+            }
+        }
+        return $into;
+    }
+
+    protected function sortFiles($fileArrays) {
+        $files = [];
 
         foreach ($fileArrays as $name => $array) {
-            if (!is_array($array['name'])) {
-                $sorted = $array;
-            } else {
-                $sorted = array();
-                $keys = array_keys($array);
-
-                foreach (array_keys($array['name']) as $i) {
-                    foreach ($keys as $key) {
-                        $sorted[$i][$key] = $array[$key][$i];
-                    }
-                }
-            }
-
-            $files->set($name, $sorted);
+            $files[$name] = $this->sortFile($array);
         }
 
         return $files;
+    }
+
+    private function sortFile($array) {
+        if (!is_array($array['name'])) {
+            return $this->inflateFile($array);
+        } else {
+            $sorted = array();
+            $keys = array_keys($array);
+
+            foreach (array_keys($array['name']) as $i) {
+                foreach ($keys as $key) {
+                    $sorted[$i][$key] = $array[$key][$i];
+                }
+            }
+            foreach ($sorted as $i => $file) {
+                if (isset($file['name'])) {
+                    $sorted[$i] = $this->sortFile($file);
+                } else {
+                    $sorted[$i] = $this->inflateFile($file);
+                }
+            }
+            return $sorted;
+        }
+    }
+
+    private function inflateFile($file) {
+        return new UploadedFile(
+            $file['name'],
+            $file['type'],
+            $file['tmp_name'],
+            $file['error'],
+            $file['size']);
     }
 
     protected function determineMethod($server) {
@@ -154,7 +181,7 @@ class WebEnvironment {
 
         list($context,) = $this->splitContextAndTarget($server);
 
-        return Url::fromString($scheme . "://" . $host . rtrim($context,  '/'));
+        return Url::fromString($scheme . "://" . $host . rtrim($context, '/'));
     }
 
     protected function splitContextAndTarget($server) {
