@@ -28,7 +28,7 @@ class FileTarget extends Target {
      * @return mixed
      */
     function respond() {
-        $response = new WebResponse($this->file->content);
+        $response = new WebResponse($this->file->getContents());
 
         if (strpos($this->key, '.') !== false) {
             $parts = explode('.', $this->key);

@@ -30,7 +30,7 @@ class ClassTemplateLocator implements TemplateLocator {
             $tried[] = $templateFile;
 
             if ($store->exists($templateFile)) {
-                return $store->read($templateFile)->content;
+                return $store->read($templateFile)->getContents();
             }
 
             $class = get_parent_class($class);
