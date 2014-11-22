@@ -96,6 +96,34 @@ class WebEnvironmentTest extends Specification {
         )));
     }
 
+    public function testSortNamedUploadedFiles() {
+        $this->givenTheFile_WithValue('foo', array(
+            'name' => array('one' => 'foo.txt', 'two' => 'bar.html'),
+            'type' => array('one' => 'text/plain', 'two' => 'text/html'),
+            'tmp_name' => array('one' => '/tmp/phpYzdqkD', 'two' => '/tmp/phpeEwEWG'),
+            'error' => array('one' => 0, 'two' => 0),
+            'size' => array('one' => 123, 'two' => 456)
+        ));
+
+        $this->whenICreateTheEnvironment();
+        $this->thenTheFilesShouldBe(array('foo' => array(
+            'one' => array(
+                'name' => 'foo.txt',
+                'type' => 'text/plain',
+                'tmp_name' => '/tmp/phpYzdqkD',
+                'error' => 0,
+                'size' => 123
+            ),
+            'two' => array(
+                'name' => 'bar.html',
+                'type' => 'text/html',
+                'tmp_name' => '/tmp/phpeEwEWG',
+                'error' => 0,
+                'size' => 456
+            ),
+        )));
+    }
+
     public function testUploadedFile() {
         $this->givenTheFile_WithValue('foo', array(
             'name' => 'foo.txt',

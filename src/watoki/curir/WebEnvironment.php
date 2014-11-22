@@ -116,10 +116,9 @@ class WebEnvironment {
                 $sorted = $array;
             } else {
                 $sorted = array();
-                $count = count($array['name']);
                 $keys = array_keys($array);
 
-                for ($i = 0; $i < $count; $i++) {
+                foreach (array_keys($array['name']) as $i) {
                     foreach ($keys as $key) {
                         $sorted[$i][$key] = $array[$key][$i];
                     }
