@@ -29,7 +29,15 @@ class Container extends Resource implements Responding {
      * @return Router
      */
     protected function createRouter() {
-        $class = new \ReflectionClass($this);
+        return $this->createRouterFor($this);
+    }
+
+    /**
+     * @param object/string $class
+     * @return WebRouter
+     */
+    protected function createRouterFor($class) {
+        $class = new \ReflectionClass($class);
         $namespace = $class->getNamespaceName();
         $directory = dirname($class->getFileName());
 
@@ -49,9 +57,22 @@ class Container extends Resource implements Responding {
         try {
             return $this->router->route($request)->respond();
         } catch (TargetNotFoundException $e) {
-            throw new HttpError(WebResponse::STATUS_NOT_FOUND, "Could not find [" . $request->getTarget()->toString()
-                . "] in [" . $request->getContext()->toString() . "].", "", 0, $e);
+            return $this->tryToRouteInParentClass($request, $e);
         }
+    }
+
+    private function tryToRouteInParentClass(Request $request, TargetNotFoundException $tnfe) {
+        $parent = get_parent_class($this);
+        while ($parent) {
+            try {
+                return $this->createRouterFor($parent)->route($request)->respond();
+            } catch (TargetNotFoundException $e) {
+            }
+            $parent = get_parent_class($parent);
+        }
+
+        throw new HttpError(WebResponse::STATUS_NOT_FOUND, "Could not find [" . $request->getTarget()->toString()
+            . "] in [" . $request->getContext()->toString() . "].", "", 0, $tnfe);
     }
 
 }

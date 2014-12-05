@@ -1,7 +1,6 @@
 <?php
 namespace watoki\curir\delivery;
 
-use watoki\curir\error\HttpError;
 use watoki\deli\Path;
 use watoki\deli\Request;
 use watoki\deli\router\StaticRouter;
@@ -45,17 +44,10 @@ class WebRouter extends StaticRouter {
         try {
             return parent::route($request);
         } catch (TargetNotFoundException $e) {
-
-            if ($request instanceof WebRequest) {
-                $found = $this->findFile($request);
-                if ($found) {
-                    return $this->createTargetFromFile($request, $found);
-                }
+            if ($request instanceof WebRequest && $found = $this->findFile($request)) {
+                return $this->createTargetFromFile($request, $found);
             }
-
-            throw new HttpError(WebResponse::STATUS_NOT_FOUND,
-                    "The resource [{$request->getTarget()}] does not exist in [{$request->getContext()}]",
-                    null, 0, $e);
+            throw $e;
         }
     }
 

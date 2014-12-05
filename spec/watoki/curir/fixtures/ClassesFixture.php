@@ -58,8 +58,8 @@ class ClassesFixture extends Fixture {
 
 abstract class TestContainerStub extends Container {
 
-    protected function createRouter() {
-        $router = parent::createRouter();
+    protected function createRouterFor($class) {
+        $router = parent::createRouterFor($class);
 
         $reflection = new \ReflectionClass($router);
         $store = $reflection->getProperty('store');

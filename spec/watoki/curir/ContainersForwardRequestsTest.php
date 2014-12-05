@@ -59,7 +59,27 @@ class ContainersForwardRequestsTest extends Specification {
 
         $this->delivery->whenIRunTheDelivery();
         $this->delivery->thenTheResponseStatusShouldBe(WebResponse::STATUS_NOT_FOUND);
-        $this->delivery->thenTheResponseBodyShouldContain('The resource [no/existing/child] does not exist in [http://cur.ir]');
+        $this->delivery->thenTheResponseBodyShouldContain('Could not find [no/existing/child] in [http://cur.ir].');
+    }
+
+    function testForwardsToChildOfBaseClass(){
+        $this->class->givenTheContainer_In_WithTheBody('extending\base\IndexResource', 'other/folder', '');
+        $this->class->givenTheClass_In_WithTheBody('extending\base\ChildResource', 'other/folder', '
+            /** @param $request <- */
+            public function doThis(\watoki\curir\delivery\WebRequest $request) {
+                return "Found me @" . $request->getContext();
+            }
+        ');
+        $this->class->givenTheClass_Extending_In_WithTheBody('extending\sub\IndexResource', '\extending\base\IndexResource', 'some/folder', '');
+
+        $this->delivery->givenTheTargetIsTheRespondingClass('extending\sub\IndexResource');
+
+        $this->request->givenTheTargetPathIs('child');
+        $this->request->givenTheContextIs('cur.ir');
+        $this->request->givenTheRequestMethodIs('this');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseShouldBe('Found me @cur.ir/child');
     }
 
 }
