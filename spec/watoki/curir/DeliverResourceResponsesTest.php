@@ -216,7 +216,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     private function givenTheDefaultRendererIs($class) {
-        $this->factory->setSingleton(Renderer::RENDERER, $this->factory->getInstance($class));
+        $this->factory->setSingleton($this->factory->getInstance($class), Renderer::RENDERER);
     }
 
 }

@@ -30,9 +30,9 @@ class WebDelivery extends Delivery {
     public static function init(Renderer $defaultRenderer = null, Factory $factory = null) {
         $factory = $factory ? : new Factory();
 
-        $factory->setSingleton(Renderer::RENDERER, $defaultRenderer ? : new PhpRenderer());
-        $factory->setSingleton(FilterRegistry::$CLASS, new DefaultFilterRegistry());
-        $factory->getSingleton(CookieStore::$CLASS, array('source' => $_COOKIE));
+        $factory->setSingleton($defaultRenderer ?: new PhpRenderer(), Renderer::RENDERER);
+        $factory->setSingleton(new DefaultFilterRegistry(), FilterRegistry::$CLASS);
+        $factory->setSingleton($factory->getInstance(CookieStore::$CLASS, array('source' => $_COOKIE)), CookieStore::$CLASS);
 
         return $factory;
     }
@@ -60,7 +60,7 @@ class WebDelivery extends Delivery {
         $factory = $factory ? : self::init();
 
         $builder = new WebRequestBuilder(new WebEnvironment($_SERVER, $_REQUEST, $_FILES));
-        $deliverer = new WebResponseDeliverer($factory->getSingleton(CookieStore::$CLASS));
+        $deliverer = new WebResponseDeliverer($factory->getInstance(CookieStore::$CLASS));
         $delivery = new WebDelivery($router, $builder, $deliverer);
         $delivery->run();
     }

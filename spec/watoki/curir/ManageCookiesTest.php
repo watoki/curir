@@ -19,7 +19,7 @@ class ManageCookiesTest extends Specification {
      */
     function testStoreIsInitializedAsSingleton() {
         $factory = WebDelivery::init();
-        $store = $factory->getSingleton(CookieStore::$CLASS);
+        $store = $factory->getInstance(CookieStore::$CLASS);
         $this->assertInstanceOf(CookieStore::$CLASS, $store);
     }
 
