@@ -14,19 +14,18 @@
     ],
     "require": {
         "php": ">=5.4",
-        "watoki/collections": "*",
-		"watoki/factory": "*",
-		"watoki/stores": "*",
-		"watoki/deli": "*"
+        "watoki/collections": "1.0",
+		"watoki/factory": "0.5",
+		"watoki/stores": "0.3",
+		"watoki/deli": "0.2"
     },
     "require-dev": {
-        "watoki/scrut": "*"
+        "watoki/scrut": "0.3"
     },
     "autoload": {
         "psr-0": {
             "watoki\\curir": "src/",
             "spec\\watoki\\curir": ""
         }
-    },
-    "minimum-stability": "dev"
+    }
 }
