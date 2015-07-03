@@ -17,7 +17,7 @@
         "watoki/collections": "1.0",
 		"watoki/factory": "0.5",
 		"watoki/stores": "0.3",
-		"watoki/deli": "0.2"
+		"watoki/deli": "dev-master"
     },
     "require-dev": {
         "watoki/scrut": "0.3"
@@ -27,5 +27,6 @@
             "watoki\\curir": "src/",
             "spec\\watoki\\curir": ""
         }
-    }
+    },
+    "minimum-stability": "dev"
 }
