@@ -54,12 +54,14 @@ class WebRequestBuilder implements RequestBuilder {
      * @return WebRequest
      */
     public function build() {
+        list($target, $extension) = $this->parseExtension($this->environment->getTarget());
+
         return new WebRequest(
                 $this->environment->getContext(),
-                $this->environment->getTarget(),
+                $target,
                 $this->getMethod(),
                 $this->getArguments($this->getMethod()),
-                $this->getFormats($this->environment->getTarget()),
+                $this->getFormats($extension),
                 $this->getHeaders()
         );
     }
@@ -79,11 +81,14 @@ class WebRequestBuilder implements RequestBuilder {
         ));
     }
 
-    private function getFormats($target) {
-        return new Liste(array_unique(array_merge(
-                $this->getFormatFromTarget($target),
-                $this->getFormatsFromHeaders()
-        )));
+    private function getFormats($extension) {
+        $formats = $this->getFormatsFromHeaders();
+
+        if ($extension) {
+            $formats = array_unique(array_merge(array($extension), $formats));
+        }
+
+        return new Liste($formats);
     }
 
     private function getHeaders() {
@@ -112,12 +117,17 @@ class WebRequestBuilder implements RequestBuilder {
         }
     }
 
-    private function getFormatFromTarget($target) {
-        $extension = $this->popExtensions($target);
-        if ($extension) {
-            return array($extension);
+    private function parseExtension(Path $target) {
+        $extension = null;
+        $elements = $target->getElements();
+
+        if (count($elements) && strpos($elements[count($elements) - 1], '.')) {
+            $parts = explode('.', array_pop($elements));
+            $extension = array_pop($parts);
+            $elements[] = implode('.', $parts);
         }
-        return array();
+
+        return array(new Path($elements), $extension);
     }
 
     private function getFormatsFromHeaders() {
@@ -133,17 +143,6 @@ class WebRequestBuilder implements RequestBuilder {
             }
         }
         return $formats;
-    }
-
-    private function popExtensions(Path $target) {
-        $extension = null;
-        if (!$target->isEmpty() && strpos($target->last(), '.')) {
-            $parts = explode('.', $target->pop());
-            $extension = array_pop($parts);
-            $target->append(implode('.', $parts));
-            return $extension;
-        }
-        return $extension;
     }
 
     private function getDecoder() {

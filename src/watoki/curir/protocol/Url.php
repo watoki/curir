@@ -1,22 +1,15 @@
 <?php
 namespace watoki\curir\protocol;
 
-use watoki\collections\Collection;
 use watoki\collections\Map;
 use watoki\deli\Path;
 
 class Url extends Path {
 
-    public static $CLASS = __CLASS__;
-
     const HOST_PREFIX = '//';
-
     const PORT_SEPARATOR = ':';
-
     const SCHEME_SEPARATOR = ':';
-
     const QUERY_STRING_SEPARATOR = '?';
-
     const FRAGMENT_SEPARATOR = '#';
 
     /** @var null|string */
@@ -42,12 +35,12 @@ class Url extends Path {
      * @param Map $parameters
      * @param string|null $fragment
      */
-    function __construct($scheme, $host, $port, Path $path, Map $parameters = null, $fragment = null) {
-        parent::__construct($path);
+    function __construct($scheme, $host, $port = 80, Path $path = null, Map $parameters = null, $fragment = null) {
+        parent::__construct($path ?: new Path());
         $this->scheme = $scheme;
         $this->host = $host;
         $this->port = $port;
-        $this->parameters = $parameters ? : new Map();
+        $this->parameters = $parameters ?: new Map();
         $this->fragment = $fragment;
     }
 
@@ -59,24 +52,10 @@ class Url extends Path {
     }
 
     /**
-     * @param null|string $scheme
-     */
-    public function setScheme($scheme) {
-        $this->scheme = $scheme;
-    }
-
-    /**
      * @return null|string
      */
     public function getHost() {
         return $this->host;
-    }
-
-    /**
-     * @param null|string $host
-     */
-    public function setHost($host) {
-        $this->host = $host;
     }
 
     /**
@@ -87,17 +66,31 @@ class Url extends Path {
     }
 
     /**
-     * @param int|null $port
-     */
-    public function setPort($port) {
-        $this->port = $port;
-    }
-
-    /**
      * @return \watoki\collections\Map
      */
     public function getParameters() {
-        return $this->parameters;
+        return $this->parameters->copy();
+    }
+
+    /**
+     * @param Map $parameters
+     * @return static
+     */
+    public function withParameters(Map $parameters) {
+        $newUrl = $this->copy();
+        $newUrl->parameters = $parameters;
+        return $newUrl;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return static
+     */
+    public function withParameter($key, $value) {
+        $newUrl = $this->copy();
+        $newUrl->parameters->set($key, $value);
+        return $newUrl;
     }
 
     /**
@@ -107,20 +100,19 @@ class Url extends Path {
         return $this->fragment;
     }
 
-    public function setFragment($fragment) {
-        $this->fragment = $fragment;
-    }
-
+    /**
+     * @return Path
+     */
     public function getPath() {
         return new Path($this);
     }
 
-    public function setPath(Collection $path) {
-        $elements = array_values($path->elements);
-        if ($this->isAbsolute()) {
-            array_unshift($elements, '');
-        }
-        $this->elements = $elements;
+    /**
+     * @param Path $path
+     * @return static
+     */
+    public function withPath(Path $path) {
+        return $this->with($path);
     }
 
     static public function fromString($string) {
@@ -157,7 +149,7 @@ class Url extends Path {
         $port = null;
         if (substr($string, 0, 2) == self::HOST_PREFIX) {
             $string = substr($string, 2);
-            $hostPos = strpos($string, self::SEPARATOR) ? : strlen($string);
+            $hostPos = strpos($string, Path::SEPARATOR) ?: strlen($string);
             $host = substr($string, 0, $hostPos);
             $string = substr($string, $hostPos);
 
@@ -172,9 +164,8 @@ class Url extends Path {
             $path = new Path();
         } else {
             $path = Path::fromString($string);
-
             if ($path->isEmpty()) {
-                $path->append('');
+                $path = new Path(array(''));
             }
         }
 
@@ -225,10 +216,12 @@ class Url extends Path {
         $port = $this->port ? self::PORT_SEPARATOR . $this->port : '';
         $scheme = $this->scheme ? $this->scheme . self::SCHEME_SEPARATOR : '';
 
-        return ($this->host && $this->isAbsolute() ? $scheme . self::HOST_PREFIX . $this->host . $port : '')
-        . parent::toString()
-        . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
-        . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
+        $server = $this->host && $this->isAbsolute() ? $scheme . self::HOST_PREFIX . $this->host . $port : '';
+        return
+            $server
+            . parent::toString()
+            . ($queries ? self::QUERY_STRING_SEPARATOR . implode('&', $queries) : '')
+            . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
     }
 
     private function flattenParams(Map $parameters, $i = 0) {
@@ -249,7 +242,7 @@ class Url extends Path {
     /**
      * @return static
      */
-    public function copy() {
+    protected function copy() {
         return new Url($this->scheme, $this->host, $this->port, new Path($this->elements), $this->parameters->deepCopy(), $this->fragment);
     }
 

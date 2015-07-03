@@ -5,6 +5,7 @@ use watoki\curir\Responder;
 use watoki\curir\protocol\Url;
 use watoki\curir\delivery\WebRequest;
 use watoki\curir\delivery\WebResponse;
+use watoki\deli\Path;
 
 class Redirecter implements Responder {
 
@@ -48,9 +49,11 @@ class Redirecter implements Responder {
         if ($target->isAbsolute()) {
             return $target;
         }
-        $absoluteTarget = $request->getContext()->copy();
+        $absoluteTarget = $request->getContext();
         if (!$target->isEmpty()) {
-            $absoluteTarget->pop();
+            $elements = $absoluteTarget->getElements();
+            array_pop($elements);
+            $absoluteTarget = $request->getContext()->with(new Path($elements));
         }
 
         return Url::fromString($absoluteTarget . ($target->isEmpty() ? '' : '/') . $target);

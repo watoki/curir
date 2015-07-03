@@ -16,7 +16,6 @@ class ParseUrlsTest extends Specification {
         $this->assertEquals('http', $url->getScheme());
         $this->assertEquals('example.com', $url->getHost());
         $this->assertEquals(8080, $url->getPort());
-        $this->assertEquals(array('', 'my', 'path.html'), $url->toArray());
         $this->assertEquals('/my/path.html', $url->getPath()->toString());
         $this->assertEquals('value1', $url->getParameters()->get('key1'));
         $this->assertEquals('value2', $url->getParameters()->get('key2'));
@@ -41,7 +40,7 @@ class ParseUrlsTest extends Specification {
 
     function testNoPath() {
         $url = $this->parseAndCheck('http://example.com');
-        $this->assertEquals(array(''), $url->getPath()->toArray());
+        $this->assertEquals(array(''), $url->getPath()->getElements());
     }
 
     function testTrailingSlash() {
@@ -61,12 +60,12 @@ class ParseUrlsTest extends Specification {
 
         $this->assertNull($url->getScheme());
         $this->assertNull($url->getHost());
-        $this->assertEquals(array('', 'my', 'path'), $url->getPath()->toArray());
+        $this->assertEquals(array('', 'my', 'path'), $url->getPath()->getElements());
     }
 
     function testRelativePath() {
         $url = $this->parseAndCheck('my/relative/path');
-        $this->assertEquals(array('my', 'relative', 'path'), $url->getPath()->toArray());
+        $this->assertEquals(array('my', 'relative', 'path'), $url->getPath()->getElements());
     }
 
     function testConsolidatePath() {
@@ -83,22 +82,20 @@ class ParseUrlsTest extends Specification {
         $url = $this->parseAndCheck('example.com/my/path');
 
         $this->assertNull($url->getHost());
-        $this->assertEquals(array('example.com', 'my', 'path'), $url->getPath()->toArray());
+        $this->assertEquals(array('example.com', 'my', 'path'), $url->getPath()->getElements());
         $this->assertEquals(null, $url->getHost());
     }
 
     function testParseEmptyString() {
         $url = Url::fromString('');
 
-        $this->assertFalse($url->isAbsolute());
-        $this->assertEquals(array(), $url->getPath()->toArray());
+        $this->assertEquals(array(), $url->getPath()->getElements());
     }
 
     function testParseParameters() {
         $url = Url::fromString('?foo=bar');
 
-        $this->assertFalse($url->isAbsolute());
-        $this->assertEquals(array(), $url->getPath()->toArray());
+        $this->assertEquals(array(), $url->getPath()->getElements());
     }
 
     function testHostAndRelativePath() {
@@ -109,6 +106,21 @@ class ParseUrlsTest extends Specification {
     function testHostAndAbsolutePath() {
         $url = new Url('http', 'example.com', 80, Path::fromString('/my/absolute/path'));
         $this->assertEquals('http://example.com:80/my/absolute/path', $url->toString());
+    }
+
+    function testAppendToPath() {
+        $url = Url::fromString('http://test.domain/foo')->appended('bar');
+        $this->assertEquals('http://test.domain/foo/bar', $url->toString());
+    }
+
+    function testChangeToAbsolutePath() {
+        $url = Url::fromString('http://test.domain/foo')->with('', 'bar', 'bas');
+        $this->assertEquals('http://test.domain/bar/bas', $url->toString());
+    }
+
+    function testDoNotChangeToRelativePath() {
+        $url = Url::fromString('http://test.domain/foo')->with('bar', 'bas');
+        $this->assertEquals('http://test.domain/bar/bas', $url->toString());
     }
 
     private function parseAndCheck($string) {

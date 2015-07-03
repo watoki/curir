@@ -84,9 +84,7 @@ class WebRouter extends StaticRouter {
     }
 
     private function createTargetFromFile(WebRequest $request, $file) {
-        $nextRequest = $request->copy();
-        $nextRequest->setContext($request->getTarget()->copy());
-        $nextRequest->setTarget(new Path());
+        $nextRequest = $request->withContext($request->getTarget())->withTarget(new Path());
 
         return new FileTarget($nextRequest, $this->store->read($file), $file);
     }
