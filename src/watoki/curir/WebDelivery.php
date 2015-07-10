@@ -50,8 +50,7 @@ class WebDelivery extends Delivery {
 
         $router = new WebRouter($factory, $rootDirectory, $namespace);
         $router->setDefaultTarget(CallbackTarget::factory(function (WebRequest $request) use ($router, $defaultPath) {
-            $request->setTarget(Path::fromString($defaultPath));
-            return $router->route($request)->respond();
+            return $router->route($request->withTarget(Path::fromString($defaultPath)))->respond();
         }));
         self::quickRoute($router, $factory);
     }

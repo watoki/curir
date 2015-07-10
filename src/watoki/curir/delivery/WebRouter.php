@@ -25,7 +25,6 @@ class WebRouter extends StaticRouter {
      * @param string $directory
      * @param string $namespace
      * @param string $suffix
-     * @internal param $root
      */
     function __construct(Factory $factory, $directory, $namespace, $suffix = self::SUFFIX) {
         $store = $factory->getInstance(RawFileStore::$CLASS, array('rootDirectory' => $directory));
