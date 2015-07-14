@@ -50,7 +50,7 @@ class Container extends Resource implements Responding {
      * @return WebResponse
      */
     public function respond(Request $request) {
-        if (in_array($request->getTarget()->getElements(), [[], [''], ['index']])) {
+        if ($this->isContainerTarget($request)) {
             return ObjectTarget::factory($this->factory, $this)->create($request)->respond();
         }
 
@@ -73,6 +73,10 @@ class Container extends Resource implements Responding {
 
         throw new HttpError(WebResponse::STATUS_NOT_FOUND, "Could not find [" . $request->getTarget()->toString()
             . "] in [" . $request->getContext()->toString() . "].", "", 0, $tnfe);
+    }
+
+    protected function isContainerTarget(Request $request) {
+        return in_array($request->getTarget()->getElements(), [[], [''], ['index']]);
     }
 
 }
