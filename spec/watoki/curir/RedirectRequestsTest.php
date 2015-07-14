@@ -33,7 +33,7 @@ class RedirectRequestsTest extends Specification {
     function testRedirectToRelativeUrl() {
         $this->givenTheTargetResource_In_WithTheBody('RedirectRelative', 'folder', '
             public function doThis() {
-                return \watoki\curir\responder\Redirecter::fromString("../relative/path?with=query#andFragmet");
+                return \watoki\curir\responder\Redirecter::fromString("../../relative/path?with=query#andFragmet");
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
@@ -51,10 +51,10 @@ class RedirectRequestsTest extends Specification {
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path/redirectSame');
+        $this->request->givenTheContextIs('http://some.host/some/path');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/redirectSame');
+        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/');
     }
 
     function testRedirectWithParametersOnly() {
@@ -64,10 +64,10 @@ class RedirectRequestsTest extends Specification {
             }
         ');
         $this->request->givenTheRequestMethodIs('this');
-        $this->request->givenTheContextIs('http://some.host/some/path/onlyParams');
+        $this->request->givenTheContextIs('http://some.host/some/path');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/onlyParams?foo=bar');
+        $this->delivery->thenTheResponseHeader_ShouldBe(WebResponse::HEADER_LOCATION, 'http://some.host/some/path/?foo=bar');
     }
 
     private function givenTheTargetResource_In_WithTheBody($fullName, $folder, $body) {
