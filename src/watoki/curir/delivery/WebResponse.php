@@ -72,7 +72,7 @@ class WebResponse {
     }
 
     function __toString() {
-        return $this->getBody();
+        return (string)$this->getBody();
     }
 
 } 
