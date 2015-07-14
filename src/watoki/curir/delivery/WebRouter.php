@@ -17,9 +17,6 @@ class WebRouter extends StaticRouter {
     /** @var TargetFactory|null */
     private $default;
 
-    /** @var bool */
-    private $useFirstIndex = true;
-
     /**
      * @param Factory $factory <-
      * @param string $directory
@@ -50,12 +47,8 @@ class WebRouter extends StaticRouter {
         }
     }
 
-    public function setUseFirstIndex($to) {
-        $this->useFirstIndex = $to;
-    }
-
     protected function findIndexNode(Request $request, Path $currentContext) {
-        if (!$this->useFirstIndex && $currentContext->isEmpty()) {
+        if ($currentContext->isEmpty()) {
             return null;
         }
         return parent::findIndexNode($request, $currentContext);
@@ -83,7 +76,9 @@ class WebRouter extends StaticRouter {
     }
 
     private function createTargetFromFile(WebRequest $request, $file) {
-        $nextRequest = $request->withContext($request->getTarget())->withTarget(new Path());
+        $nextRequest = $request
+            ->withContext($request->getTarget())
+            ->withTarget(new Path());
 
         return new FileTarget($nextRequest, $this->store->read($file), $file);
     }

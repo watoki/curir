@@ -41,11 +41,7 @@ class Container extends Resource implements Responding {
         $namespace = $class->getNamespaceName();
         $directory = dirname($class->getFileName());
 
-        $router = new WebRouter($this->factory, $directory, $namespace);
-        $router->setUseFirstIndex(false);
-        $router->setDefaultTarget(ObjectTarget::factory($this->factory, $this));
-
-        return $router;
+        return new WebRouter($this->factory, $directory, $namespace);
     }
 
     /**
@@ -54,6 +50,10 @@ class Container extends Resource implements Responding {
      * @return WebResponse
      */
     public function respond(Request $request) {
+        if (in_array($request->getTarget()->getElements(), [[], [''], ['index']])) {
+            return ObjectTarget::factory($this->factory, $this)->create($request)->respond();
+        }
+
         try {
             return $this->router->route($request)->respond();
         } catch (TargetNotFoundException $e) {

@@ -20,7 +20,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->class->givenTheContainer_In_WithTheBody('itself\MyResource', 'some/folder', '
             /** @param $request <- */
             public function doThat(\watoki\curir\delivery\WebRequest $request) {
-                return "Hello " . $request->getContext();
+                return "Hello " . $request->getContext() . ":" . $request->getTarget();
             }
         ');
         $this->delivery->givenTheTargetIsTheRespondingClass('itself\MyResource');
@@ -30,7 +30,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->request->givenTheRequestMethodIs('that');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseBodyShouldBe('Hello foo');
+        $this->delivery->thenTheResponseBodyShouldBe('Hello foo:');
     }
 
     function testChildResponds() {
@@ -38,7 +38,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->class->givenTheClass_In_WithTheBody('name\space\some\TargetResource', 'some/folder/some', '
             /** @param $request <- */
             public function doThis(\watoki\curir\delivery\WebRequest $request) {
-                return "Hello " . $request->getContext();
+                return "Hello " . $request->getContext() . ":" . $request->getTarget();
             }
         ');
         $this->request->givenTheContextIs('/here');
@@ -48,7 +48,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->request->givenTheRequestMethodIs('this');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Hello /here/some/target');
+        $this->delivery->thenTheResponseShouldBe('Hello /here/some:target');
     }
 
     function testNotExistingChild() {
@@ -62,12 +62,46 @@ class ContainersForwardRequestsTest extends Specification {
         $this->delivery->thenTheResponseBodyShouldContain('Could not find [no/existing/child] in [http://cur.ir].');
     }
 
+    function testExplicitRequestForIndex() {
+        $this->class->givenTheContainer_In_WithTheBody('explicit\space\IndexResource', 'some/folder', '
+            /** @param $request <- */
+            public function doThis(\watoki\curir\delivery\WebRequest $request) {
+                return "Hello " . $request->getContext() . ":" . $request->getTarget();
+            }
+        ');
+        $this->request->givenTheContextIs('my/context');
+        $this->delivery->givenTheTargetIsTheRespondingClass('explicit\space\IndexResource');
+
+        $this->request->givenTheTargetPathIs('index');
+        $this->request->givenTheRequestMethodIs('this');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('Hello my/context:index');
+    }
+
+    function testImplicitRequestForIndex() {
+        $this->class->givenTheContainer_In_WithTheBody('explicit\space\IndexResource', 'some/folder', '
+            /** @param $request <- */
+            public function doThis(\watoki\curir\delivery\WebRequest $request) {
+                return "Hello " . $request->getContext() . ":" . $request->getTarget();
+            }
+        ');
+        $this->request->givenTheContextIs('my/context');
+        $this->delivery->givenTheTargetIsTheRespondingClass('explicit\space\IndexResource');
+
+        $this->request->givenTheTargetPathIs('');
+        $this->request->givenTheRequestMethodIs('this');
+
+        $this->delivery->whenIRunTheDelivery();
+        $this->delivery->thenTheResponseBodyShouldBe('Hello my/context:');
+    }
+
     function testForwardsToChildOfBaseClass(){
         $this->class->givenTheContainer_In_WithTheBody('extending\base\IndexResource', 'other/folder', '');
         $this->class->givenTheClass_In_WithTheBody('extending\base\ChildResource', 'other/folder', '
             /** @param $request <- */
             public function doThis(\watoki\curir\delivery\WebRequest $request) {
-                return "Found me @" . $request->getContext();
+                return "Found " . $request->getTarget() . "@" . $request->getContext();
             }
         ');
         $this->class->givenTheClass_Extending_In_WithTheBody('extending\sub\IndexResource', '\extending\base\IndexResource', 'some/folder', '');
@@ -79,7 +113,7 @@ class ContainersForwardRequestsTest extends Specification {
         $this->request->givenTheRequestMethodIs('this');
 
         $this->delivery->whenIRunTheDelivery();
-        $this->delivery->thenTheResponseShouldBe('Found me @cur.ir/child');
+        $this->delivery->thenTheResponseShouldBe('Found child@cur.ir');
     }
 
 }

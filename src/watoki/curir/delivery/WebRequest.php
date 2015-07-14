@@ -66,7 +66,7 @@ class WebRequest extends Request {
 
     /**
      * @param Path|Url $context
-     * @return WebRequest
+     * @return static
      */
     public function withContext(Path $context) {
         if (!($context instanceof Url)) {
