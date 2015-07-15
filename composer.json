@@ -15,8 +15,8 @@
     "require": {
         "php": ">=5.4",
         "watoki/collections": "1.0",
-		"watoki/factory": "0.5",
-		"watoki/stores": "0.3",
+		"watoki/factory": "dev-master",
+		"watoki/stores": "dev-master",
 		"watoki/deli": "dev-master"
     },
     "require-dev": {
