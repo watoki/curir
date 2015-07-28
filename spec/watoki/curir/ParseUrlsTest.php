@@ -1,6 +1,8 @@
 <?php
 namespace spec\watoki\curir;
 
+use watoki\collections\Liste;
+use watoki\collections\Map;
 use watoki\curir\protocol\Url;
 use watoki\deli\Path;
 use watoki\scrut\Specification;
@@ -28,6 +30,14 @@ class ParseUrlsTest extends Specification {
             'the' => 'rainbow',
             'my' => 'body'
         ), $url->getParameters()->get('over')->toArray());
+    }
+
+    function testListParameter() {
+        $url = Url::fromString('some/url')->withParameters(new Map([
+            'one' => new Liste(['uno', 'un'])
+        ]));
+
+        $this->assertEquals('some/url?one[0]=uno&one[1]=un', $url->toString());
     }
 
     function testSameScheme() {

@@ -1,6 +1,7 @@
 <?php
 namespace watoki\curir\protocol;
 
+use watoki\collections\Collection;
 use watoki\collections\Map;
 use watoki\deli\Path;
 
@@ -224,10 +225,10 @@ class Url extends Path {
             . ($this->fragment ? self::FRAGMENT_SEPARATOR . $this->fragment : '');
     }
 
-    private function flattenParams(Map $parameters, $i = 0) {
+    private function flattenParams($parameters, $i = 0) {
         $flat = new Map();
         foreach ($parameters as $key => $value) {
-            if ($value instanceof Map) {
+            if ($value instanceof Collection) {
                 foreach ($this->flattenParams($value, $i + 1) as $subKey => $subValue) {
                     $flatKey = $i ? "{$key}][{$subKey}" : "{$key}[{$subKey}]";
                     $flat->set($flatKey, $subValue);
