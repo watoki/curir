@@ -40,6 +40,22 @@ class ParseUrlsTest extends Specification {
         $this->assertEquals('some/url?one[0]=uno&one[1]=un', $url->toString());
     }
 
+    function testObjectParameters() {
+        $url = Url::fromString('some/url')->withParameters(new Map([
+            'one' => new \StdClass()
+        ]));
+
+        $this->assertEquals('some/url', $url->toString());
+    }
+
+    function testOverSizedParameters() {
+        $url = Url::fromString('some/url')->withParameters(new Map([
+            'one' => str_repeat('a', Url::MAX_PARAM_LENGTH + 1)
+        ]));
+
+        $this->assertEquals('some/url', $url->toString());
+    }
+
     function testSameScheme() {
         $url = $this->parseAndCheck('//example.com:8080/my/path.html');
 

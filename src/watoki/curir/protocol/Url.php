@@ -12,6 +12,7 @@ class Url extends Path {
     const SCHEME_SEPARATOR = ':';
     const QUERY_STRING_SEPARATOR = '?';
     const FRAGMENT_SEPARATOR = '#';
+    const MAX_PARAM_LENGTH = 512;
 
     /** @var null|string */
     private $scheme;
@@ -231,13 +232,21 @@ class Url extends Path {
             if ($value instanceof Collection) {
                 foreach ($this->flattenParams($value, $i + 1) as $subKey => $subValue) {
                     $flatKey = $i ? "{$key}][{$subKey}" : "{$key}[{$subKey}]";
-                    $flat->set($flatKey, $subValue);
+                    $this->set($flat, $flatKey, $subValue);
                 }
             } else {
-                $flat->set($key, $value);
+                $this->set($flat, $key, $value);
             }
         }
         return $flat;
+    }
+
+    private function set(Map $map, $key, $value) {
+        $cabBeCasted = !is_object($value) || method_exists($value, '__toString');
+
+        if ($cabBeCasted && strlen((string)$value) <= self::MAX_PARAM_LENGTH) {
+            $map->set($key, $value);
+        }
     }
 
     /**
