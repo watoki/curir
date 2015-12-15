@@ -61,6 +61,7 @@ class WebDelivery extends Delivery {
         $builder = new WebRequestBuilder(new WebEnvironment($_SERVER, $_REQUEST, $_FILES));
         $deliverer = new WebResponseDeliverer($factory->getInstance(CookieStore::$CLASS));
         $delivery = new WebDelivery($router, $builder, $deliverer);
+        $delivery->registerDecoders($builder);
         $delivery->run();
     }
 
