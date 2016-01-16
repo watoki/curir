@@ -136,7 +136,7 @@ class MimeTypes {
      */
     public static function getType($extension) {
         foreach (self::$map as $mime => $exts) {
-            if (in_array($extension, $exts)) {
+            if (in_array(strtolower($extension), $exts)) {
                 return $mime;
             }
         }

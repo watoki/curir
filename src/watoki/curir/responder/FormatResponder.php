@@ -69,7 +69,7 @@ class FormatResponder implements Responder {
     }
 
     private function render($format) {
-        $method = new \ReflectionMethod($this, 'render' . ucfirst($format));
+        $method = new \ReflectionMethod($this, 'render' . ucfirst(strtolower($format)));
         return $method->invoke($this);
     }
 

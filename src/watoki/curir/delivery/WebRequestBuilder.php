@@ -85,7 +85,7 @@ class WebRequestBuilder implements RequestBuilder {
         $formats = $this->getFormatsFromHeaders();
 
         if ($extension) {
-            $formats = array_unique(array_merge(array(strtolower($extension)), $formats));
+            $formats = array_unique(array_merge(array($extension), $formats));
         }
 
         return new Liste($formats);
