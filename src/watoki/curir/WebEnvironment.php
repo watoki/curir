@@ -167,7 +167,7 @@ class WebEnvironment {
 
     protected function determineTarget($server) {
         list(, $target) = $this->splitContextAndTarget($server);
-        return Path::fromString(ltrim($target, '/'));
+        return Path::fromString(ltrim(urldecode($target), '/'));
     }
 
     protected function determineContext($server) {
