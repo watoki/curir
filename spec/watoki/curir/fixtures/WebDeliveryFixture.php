@@ -5,7 +5,6 @@ use spec\watoki\deli\fixtures\TestDelivererStub;
 use watoki\curir\delivery\WebResponse;
 use watoki\curir\error\ErrorResponse;
 use watoki\curir\WebDelivery;
-use watoki\deli\Delivery;
 use watoki\deli\router\NoneRouter;
 use watoki\deli\target\CallbackTarget;
 use watoki\deli\target\ObjectTarget;
@@ -22,11 +21,6 @@ class WebDeliveryFixture extends Fixture {
 
     /** @var NoneRouter */
     public $router;
-
-    public function setUp() {
-        parent::setUp();
-        Delivery::errorReporting(E_ALL);
-    }
 
     public function givenTheTargetRespondsWith($callback) {
         $this->router = new NoneRouter(CallbackTarget::factory($callback));
