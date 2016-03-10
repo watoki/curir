@@ -3,12 +3,11 @@ namespace watoki\curir\delivery;
 
 use watoki\curir\protocol\MimeTypes;
 use watoki\deli\Target;
-use watoki\stores\file\raw\File;
 
 class FileTarget extends Target {
 
-    /** @var File */
-    private $file;
+    /** @var string */
+    private $content;
 
     /** @var string */
     private $key;
@@ -16,11 +15,11 @@ class FileTarget extends Target {
     /** @var WebRequest */
     private $webRequest;
 
-    function __construct(WebRequest $request, File $file, $key) {
+    function __construct(WebRequest $request, $content, $key) {
         parent::__construct($request);
 
         $this->webRequest = $request;
-        $this->file = $file;
+        $this->content = $content;
         $this->key = $key;
     }
 
@@ -28,7 +27,7 @@ class FileTarget extends Target {
      * @return mixed
      */
     function respond() {
-        $response = new WebResponse($this->file->getContents());
+        $response = new WebResponse($this->content);
 
         if (strpos($this->key, '.') !== false) {
             $parts = explode('.', $this->key);

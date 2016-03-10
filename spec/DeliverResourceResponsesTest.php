@@ -2,13 +2,14 @@
 namespace spec\watoki\curir;
 
 use spec\watoki\curir\fixtures\ClassesFixture;
+use spec\watoki\curir\fixtures\FileStoreFixture;
 use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
-use spec\watoki\stores\fixtures\FileStoreFixture;
 use watoki\curir\delivery\WebResponse;
 use watoki\curir\rendering\PhpRenderer;
 use watoki\curir\rendering\Renderer;
 use watoki\scrut\Specification;
+use watoki\stores\stores\FlatFileStore;
 
 /**
  * The WebResponse of a Resource is created by a Responder, which might render it using a template or set different headers.
@@ -145,7 +146,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testDefaultRenderer() {
-        $this->givenTheDefaultRendererIs(PhpRenderer::$CLASS);
+        $this->givenTheDefaultRendererIs(PhpRenderer::class);
         $this->file->givenAFile_WithContent('folder/default.html', '<h1><?= $message ?></h1>');
         $this->givenTheTargetResource_In_WithTheBody('DefaultResource', 'folder', '
             public function doThis() {
@@ -160,7 +161,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testDefaultJsonRenderer() {
-        $this->givenTheDefaultRendererIs(PhpRenderer::$CLASS);
+        $this->givenTheDefaultRendererIs(PhpRenderer::class);
         $this->givenTheTargetResource_In_WithTheBody('DefaultJsonRenderer', 'folder', '
             public function doThis() {
                 return array("foo" => array(42, 73));
@@ -187,7 +188,7 @@ class DeliverResourceResponsesTest extends Specification {
     }
 
     function testConvenienceWrappingModelIntoResponder() {
-        $this->givenTheDefaultRendererIs(PhpRenderer::$CLASS);
+        $this->givenTheDefaultRendererIs(PhpRenderer::class);
         $this->givenTheTargetResource_In_WithTheBody('WrappingModelIntoResponder', 'folder', '
             public function doReturnModel() {
                 return array("foo" => array(42, 73));
@@ -205,7 +206,7 @@ class DeliverResourceResponsesTest extends Specification {
     private function givenTheTargetResource_In_WithTheBody($fullName, $folder, $body) {
         $this->class->givenTheClass_Extending_In_WithTheBody($fullName, '\watoki\curir\Resource', $folder, '
             public function getStore() {
-                return $this->factory->getInstance(\'\watoki\stores\file\raw\RawFileStore\', array("rootDirectory" => "' . $folder . '"));
+                return $this->factory->getInstance("' . FlatFileStore::class . '", array("basePath" => "' . $folder . '"));
             }' . $body);
         $this->delivery->givenTheTargetIsTheClass($fullName);
     }

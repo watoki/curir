@@ -65,7 +65,7 @@ class WebRequestBuilderFixture extends Fixture {
             $builder->registerDecoder($contentType, $decoder);
         }
 
-        $this->request = $builder->build(new Path());
+        $this->request = $builder->build();
         return $this->request;
     }
 
@@ -90,7 +90,7 @@ class WebRequestBuilderFixture extends Fixture {
     }
 
     public function thenAnErrorWithStatus_AndUserMessage_ShouldBeThrown($status, $message) {
-        $this->try->thenA_ShouldBeThrown(HttpError::$CLASS);
+        $this->try->thenA_ShouldBeThrown(HttpError::class);
         /** @var \watoki\curir\error\HttpError $error */
         $error = $this->try->getCaughtException();
         $this->spec->assertEquals($status, $error->getStatus());

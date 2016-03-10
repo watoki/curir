@@ -2,7 +2,6 @@ language: php
 php:
   - 5.6
   - 5.5
-  - 5.4
 before_script: composer install --dev
 script: php vendor/phpunit/phpunit/phpunit.php --log-tap report.tap
 after_script: curl -X POST --data-binary @report.tap http://dox.rtens.org/projects/watoki-curir/reports

@@ -4,7 +4,6 @@ namespace spec\watoki\curir;
 use spec\watoki\curir\fixtures\WebDeliveryFixture;
 use spec\watoki\curir\fixtures\WebRequestBuilderFixture;
 use watoki\curir\delivery\WebRequest;
-use watoki\curir\delivery\WebResponse;
 use watoki\scrut\Specification;
 
 /**

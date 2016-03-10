@@ -40,7 +40,7 @@ class MultiResponderTest extends Specification {
         $this->givenTheAcceptedFormatsAre(array('not', 'neither'));
 
         $this->whenITryToCreateTheResponse();
-        $this->try->thenA_ShouldBeThrown(HttpError::$CLASS);
+        $this->try->thenA_ShouldBeThrown(HttpError::class);
         $this->try->thenTheException_ShouldBeThrown(
             'Invalid accepted types: [not, neither] not supported by [foo, bar]');
     }

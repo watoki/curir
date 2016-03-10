@@ -19,8 +19,8 @@ class ManageCookiesTest extends Specification {
      */
     function testStoreIsInitializedAsSingleton() {
         $factory = WebDelivery::init();
-        $store = $factory->getInstance(CookieStore::$CLASS);
-        $this->assertInstanceOf(CookieStore::$CLASS, $store);
+        $store = $factory->getInstance(CookieStore::class);
+        $this->assertInstanceOf(CookieStore::class, $store);
     }
 
     function testCreateCookieWithOnlyPayload() {
@@ -30,7 +30,7 @@ class ManageCookiesTest extends Specification {
 
         $this->thenACookie_ShouldBeSet('foo');
         $this->thenTheCookie_ShouldHaveTheValue('foo',
-                '{"payload":"Hello World","expire":null,"path":"\/","domain":null,"secure":null,"httpOnly":null}');
+            '{"payload":"Hello World","expire":null,"path":"\/","domain":null,"secure":null,"httpOnly":null}');
     }
 
     function testCreateCookieWithAllParameters() {
@@ -44,7 +44,7 @@ class ManageCookiesTest extends Specification {
         $this->whenICreateTheCookieAs('bar');
 
         $this->thenTheCookie_ShouldHaveTheValue('bar',
-                '{"payload":"Hello All","expire":"2011-12-13T14:15:00+00:00","path":"\/some\/path","domain":"foo.me","secure":true,"httpOnly":true}');
+            '{"payload":"Hello All","expire":"2011-12-13T14:15:00+00:00","path":"\/some\/path","domain":"foo.me","secure":true,"httpOnly":true}');
         $this->thenTheCookie_ShouldExpire('bar', "2011-12-13 14:15");
         $this->thenTheCookie_ShouldHaveThePath('bar', "/some/path");
         $this->thenTheCookie_ShouldHaveTheDomain('bar', "foo.me");
@@ -67,7 +67,7 @@ class ManageCookiesTest extends Specification {
 
     function testReadCookieWithAllParameters() {
         $this->givenACookie_WithValue('bar',
-                '{"payload":"Hello All","expire":"2011-12-13T14:15:00+00:00","path":"\/some\/path","domain":"foo.me","secure":true,"httpOnly":true}');
+            '{"payload":"Hello All","expire":"2011-12-13T14:15:00+00:00","path":"\/some\/path","domain":"foo.me","secure":true,"httpOnly":true}');
 
         $this->whenIReadTheCookie('bar');
 
@@ -91,9 +91,9 @@ class ManageCookiesTest extends Specification {
         $this->whenIReadTheCookie('foo');
         $this->givenTheCookieHasThePath('/there');
 
-        $this->whenIUpdateTheCookie();
+        $this->whenIUpdateTheCookie('foo');
         $this->thenTheCookie_ShouldHaveTheValue('foo',
-                '{"payload":"Hello There","expire":null,"path":"\/there","domain":null,"secure":null,"httpOnly":null}');
+            '{"payload":"Hello There","expire":null,"path":"\/there","domain":null,"secure":null,"httpOnly":null}');
     }
 
     function testDeleteCookie() {
@@ -113,11 +113,11 @@ class ManageCookiesTest extends Specification {
 
     function testReadNonExistingCookie() {
         $this->whenITryToReadTheCookie('foo');
-        $this->try->thenTheException_ShouldBeThrown("Cookie with name [foo] does not exist");
+        $this->try->thenTheException_ShouldBeThrown("Could not find [foo]");
     }
 
     function testCreateWithoutAKey() {
-        $this->givenACookieWithThePayload('foo', 'no key');
+        $this->givenACookieWithThePayload('foo');
         $this->whenITryToCreateTheCookieWithoutAKey();
         $this->try->thenNoExceptionShouldBeThrown();
     }
@@ -161,7 +161,7 @@ class ManageCookiesTest extends Specification {
     private function whenICreateTheCookieAs($key) {
         date_default_timezone_set('UTC');
         $this->store = new CookieStore($this->source);
-        $this->store->create($this->cookie, $key);
+        $this->store->write($this->cookie, $key);
         $this->apply($this->store);
     }
 
@@ -215,12 +215,12 @@ class ManageCookiesTest extends Specification {
     }
 
     private function whenIDeleteTheCookie($name) {
-        $this->store->delete($name);
+        $this->store->remove($name);
         $this->apply($this->store);
     }
 
-    private function whenIUpdateTheCookie() {
-        $this->store->update($this->cookie);
+    private function whenIUpdateTheCookie($name) {
+        $this->store->write($this->cookie, $name);
         $this->apply($this->store);
     }
 
@@ -270,4 +270,4 @@ class ManageCookiesTest extends Specification {
         $this->assertEquals($array, $this->store->keys());
     }
 
-} 
+}

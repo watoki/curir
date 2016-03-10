@@ -8,7 +8,7 @@ use watoki\deli\router\TargetNotFoundException;
 use watoki\deli\Target;
 use watoki\deli\target\TargetFactory;
 use watoki\factory\Factory;
-use watoki\stores\file\raw\RawFileStore;
+use watoki\stores\stores\FlatFileStore;
 
 class WebRouter extends StaticRouter {
 
@@ -24,7 +24,7 @@ class WebRouter extends StaticRouter {
      * @param string $suffix
      */
     function __construct(Factory $factory, $directory, $namespace, $suffix = self::SUFFIX) {
-        $store = $factory->getInstance(RawFileStore::$CLASS, array('rootDirectory' => $directory));
+        $store = $factory->getInstance(FlatFileStore::class, array('basePath' => $directory));
         parent::__construct($factory, $store, $namespace, $suffix);
     }
 
@@ -56,20 +56,20 @@ class WebRouter extends StaticRouter {
 
     private function findFile(WebRequest $request) {
         foreach ($request->getFormats() as $format) {
-            $found = $this->findExistingFile($request, $request->getTarget()->toString(), $format);
+            $found = $this->findExistingFile($request->getTarget()->toString(), $format);
             if ($found) {
                 return $found;
             }
         }
-        return $this->findExistingFile($request, $request->getTarget()->toString(), null);
+        return $this->findExistingFile($request->getTarget()->toString(), null);
     }
 
-    private function findExistingFile(WebRequest $request, $target, $format) {
+    private function findExistingFile($target, $format) {
         $suffix = $format ? '.' . $format : '';
         if (substr($target, -1) == '/') {
             $target .= $this->index;
         }
-        if ($this->store->exists($target . $suffix, $request)) {
+        if ($this->store->has($target . $suffix)) {
             return $target . $suffix;
         }
         return null;

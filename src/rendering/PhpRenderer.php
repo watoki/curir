@@ -3,8 +3,6 @@ namespace watoki\curir\rendering;
 
 class PhpRenderer implements Renderer {
 
-    public static $CLASS = __CLASS__;
-
     /**
      * @param string $template
      * @param mixed $model

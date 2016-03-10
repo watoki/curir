@@ -1,23 +1,24 @@
 <?php
 namespace watoki\curir\rendering\locating;
 
-use watoki\stores\file\raw\RawFileStore;
+use watoki\stores\Store;
+use watoki\stores\stores\FlatFileStore;
 
 class ClassTemplateLocator implements TemplateLocator {
 
     /** @var string */
     private $class;
 
-    /** @var \watoki\stores\file\raw\RawFileStore */
+    /** @var Store */
     private $store;
 
     /**
      * @param string|object $class Class reference or instance or class
-     * @param null|\watoki\stores\file\raw\RawFileStore $store
+     * @param null|Store $store
      */
-    public function __construct($class, RawFileStore $store = null) {
+    public function __construct($class, Store $store = null) {
         $this->class = $class;
-        $this->store = $store ? : new RawFileStore($this->getDirectory($class));
+        $this->store = $store ? : new FlatFileStore($this->getDirectory($class));
     }
 
     public function find($format) {
@@ -29,15 +30,15 @@ class ClassTemplateLocator implements TemplateLocator {
             $templateFile = $this->getName($class) . '.' . $format;
             $tried[] = $templateFile;
 
-            if ($store->exists($templateFile)) {
-                return $store->read($templateFile)->getContents();
+            if ($store->has($templateFile)) {
+                return $store->read($templateFile);
             }
 
             $class = get_parent_class($class);
             if (!$class || !class_exists($class)) {
                 break;
             }
-            $store = new RawFileStore($this->getDirectory($class));
+            $store = new FlatFileStore($this->getDirectory($class));
         }
 
         $class = is_object($this->class) ? get_class($this->class) : $this->class;

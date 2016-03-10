@@ -3,8 +3,6 @@ namespace watoki\curir\cookie;
 
 class Cookie {
 
-    public static $CLASS = __CLASS__;
-
     /** @var string|array */
     public $payload;
 

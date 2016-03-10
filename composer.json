@@ -1,32 +1,38 @@
 {
-    "name": "watoki/curir",
-    "description": "Web delivery system for PHP applications",
-    "keywords": ["MVC", "routing", "router", "watoki"],
-    "homepage": "http://github.com/watoki/curir",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Nikolas Martens",
-            "email": "Nikolas.M@rtens.org",
-            "homepage": "http://rtens.org"
-        }
-    ],
-    "require": {
-        "php": ">=5.4",
-        "watoki/collections": "*",
-	"watoki/factory": "*",
-	"watoki/stores": "*",
-	"watoki/deli": "dev-master"
-    },
-    "require-dev": {
-        "watoki/scrut": "*"
-    },
-    "autoload": {
-        "psr-0": {
-            "watoki\\curir": "src/",
-            "spec\\watoki\\curir": ""
-        }
-    },
-    "minimum-stability": "dev"
+  "name": "watoki/curir",
+  "description": "Web delivery system for PHP applications",
+  "keywords": [
+    "MVC",
+    "routing",
+    "router",
+    "watoki"
+  ],
+  "homepage": "http://github.com/watoki/curir",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nikolas Martens",
+      "email": "Nikolas.M@rtens.org",
+      "homepage": "http://rtens.org"
+    }
+  ],
+  "require": {
+    "php": ">=5.4",
+    "watoki/collections": "*",
+    "watoki/factory": "*",
+    "watoki/stores": "*",
+    "watoki/deli": "*"
+  },
+  "require-dev": {
+    "watoki/scrut": "*",
+    "phpunit/phpunit": "3.7.*@stable"
+  },
+  "autoload": {
+    "psr-4": {
+      "watoki\\curir\\": "src/",
+      "spec\\watoki\\curir\\": "spec/"
+    }
+  },
+  "minimum-stability": "dev"
 }

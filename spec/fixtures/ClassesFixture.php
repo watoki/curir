@@ -3,10 +3,10 @@ namespace spec\watoki\curir\fixtures;
 
 use watoki\curir\Container;
 use watoki\scrut\Fixture;
-use watoki\stores\file\raw\RawFileStore;
+use watoki\stores\stores\FlatFileStore;
 
 /**
- * @property \spec\watoki\stores\fixtures\FileStoreFixture file <-
+ * @property FileStoreFixture file <-
  */
 class ClassesFixture extends Fixture {
 
@@ -15,7 +15,7 @@ class ClassesFixture extends Fixture {
     }
 
     public function givenTheContainer_In_WithTheBody($fullClassName, $folder, $body) {
-        $this->givenTheClass_Extending_In_WithTheBody($fullClassName, '\spec\watoki\curir\fixtures\TestContainerStub', $folder, "
+        $this->givenTheClass_Extending_In_WithTheBody($fullClassName, TestContainerStub::class, $folder, "
             function getMockFolder() {
                 return '$folder';
             }
@@ -41,7 +41,7 @@ class ClassesFixture extends Fixture {
         $namespace = implode('\\', $nameParts);
         $file = $folder . '/' . $className . '.php';
 
-        $extends = $superClass ? 'extends ' . $superClass : '';
+        $extends = $superClass ? 'extends \\' . ltrim($superClass, '\\') : '';
         $namespaceString = $namespace ? "namespace $namespace;" : '';
 
         $code = "$namespaceString class $className $extends {
@@ -61,12 +61,14 @@ abstract class TestContainerStub extends Container {
     protected function createRouterFor($class) {
         $router = parent::createRouterFor($class);
 
+        $fileStore = $this->factory->getInstance(FlatFileStore::class, array(
+            "basePath" => $this->getMockFolder()
+        ));
+
         $reflection = new \ReflectionClass($router);
         $store = $reflection->getProperty('store');
         $store->setAccessible(true);
-        $store->setValue($router, $this->factory->getInstance(RawFileStore::$CLASS, array(
-            "rootDirectory" => $this->getMockFolder()
-        )));
+        $store->setValue($router, $fileStore);
 
         return $router;
     }

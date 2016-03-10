@@ -5,8 +5,6 @@ use watoki\curir\delivery\WebResponse;
 
 class HttpError extends \Exception {
 
-    public static $CLASS = __CLASS__;
-
     private $status;
 
     private $userMessage;
